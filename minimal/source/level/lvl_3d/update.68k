@@ -1,0 +1,179 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------------------;
+; UpdateLevel_3D                                ;
+;                                               ;
+; Updates stuff specific to the 3D-themed level ;
+;-----------------------------------------------;
+; BREAKS: all                                   ;
+;-----------------------------------------------;
+
+UpdateLevel_3D:
+
+;----------------------------------------------;
+; Stephany's palette can change with power-ups ;
+; Make sure to keep updated the mirror palette ;
+;----------------------------------------------;
+
+    move.l  (RAM_PalBuffer+$04), d0
+    lsr.l   #1, d0
+    move.l  d0, (RAM_PalBuffer+$24)
+
+;-----------------------;
+; Update HScroll buffer ;
+;-----------------------;
+
+    moveq   #0, d0
+    move.w  (RAM_Scroll), d0
+    neg.w   d0
+    move.w  d0, d1
+    asr.w   #4, d1
+
+    lea     (RAM_HScrBuffer), a0
+
+    move.w  #(16*8)-1, d7
+@HScrollBlank:
+    move.w  d0, (a0)+
+    move.w  d1, (a0)+
+    dbf     d7, @HScrollBlank
+
+;------------------------------;
+; 3D field parallax... fun! =/ ;
+;------------------------------;
+
+    moveq   #0, d1
+    move.w  d0, d1
+    neg.w   d1
+    and.w   #$1F, d1
+    swap    d1
+    lsr.l   #2, d1
+
+    move.l  d1, d2
+    lsr.l   #5, d2
+    move.l  d2, d7
+    lsr.l   #1, d7
+    add.l   d7, d2
+
+    neg.l   d1
+    neg.l   d2
+    move.w  #(12*8)-1, d7
+@HScrollField:
+    move.w  d0, (a0)+
+    swap    d1
+    move.w  d1, (a0)+
+    swap    d1
+    add.l   d2, d1
+    dbf     d7, @HScrollField
+
+;----------------;
+; Update HScroll ;
+;----------------;
+
+    FixedDMA RAM_HScrBuffer, $F800, 2*224*2
+
+;------------------;
+; Perform blinking ;
+;------------------;
+
+    moveq   #0, d0
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @BlinkFrame1
+    move.w  #224, d0
+@BlinkFrame1:
+    move.w  d0, (RAM_VScrBuffer)
+    move.w  #0, (RAM_VScrBuffer+2)
+
+;--------------------;
+; Animate the robots ;
+;--------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+
+    moveq   #0, d7
+    move.w  d0, d7
+    and.w   #$7<<1, d7
+    lsl.l   #8, d7
+    add.l   #Gfx_RobotWalk, d7
+    VarSrcDMA VRAM_TrollWalk*$20, 16*$20
+
+    moveq   #0, d7
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @FlyBlink
+    move.w  #16*$20, d7
+    and.w   #2, d0
+    lsl.w   #4+4, d0
+    add.w   d0, d7
+@FlyBlink:
+    add.l   #Gfx_FlyRobotFly, d7
+    VarSrcDMA VRAM_DblCircleFly*$20, 16*$20
+
+;-----------------------------;
+; Add trees in the background ;
+;-----------------------------;
+
+    move.w  (RAM_Scroll), d0
+    neg.w   d0
+    asr.w   #1, d0
+    move.w  d0, d1
+    asr.w   #4-1, d1
+    sub.w   d1, d0
+
+    moveq   #2-1, d4
+@TreeLoop:
+    and.w   #$1FF, d0
+    cmp.w   #128-32, d0
+    blt.s   @SkipTree
+    cmp.w   #128+320, d0
+    bgt.s   @SkipTree
+
+    move.w  #144-48+128, d1
+    move.w  #$4000|VRAM_LevelSpec, d2
+    moveq   #%1111, d3
+    bsr     AddSprite
+
+    add.w   #32+16+16, d1
+    move.w  #$7000|VRAM_LevelSpec, d2
+    bsr     AddSprite
+
+    addq.w  #4, d0
+    sub.w   #16, d1
+    move.w  #$7000|(VRAM_LevelSpec+$10), d2
+    moveq   #%1001, d3
+    bsr     AddSprite
+
+    sub.w   #16, d1
+    move.w  #$4000|(VRAM_LevelSpec+$10), d2
+    bsr     AddSprite
+
+    subq.w  #4, d0
+@SkipTree:
+    add.w   #$100, d0
+    dbf     d4, @TreeLoop
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

@@ -1,0 +1,51 @@
+openout graphics/lvl_mobo/gfx.tmp
+
+palette 000 444 666 040 006 044 066 008 00A 060 080 020 ??? ??? ??? ???
+
+openin concept/lvl_mobo/_background.bmp
+scroll 0 0 1 1
+scroll 0 1 1 4
+scroll 1 1 2 4
+scroll 3 1 2 4
+closein
+
+palette ??? EEE ??? ??? 8AE 68E 000 0EE EA6 E60 08E 00E 00A ??? ??? ???
+setmask
+
+openin concept/lvl_mobo/_tilemap_pal1.bmp
+scroll 0 0 4 1
+closein
+
+palette ??? 2A4 080 060 AAA 888 666 444 000 0CC 0AC 08E 66E 00E 00C 00A
+setmask
+
+openin concept/lvl_mobo/_tilemap_pal2.bmp
+scroll 0 0 16 3
+scroll 0 3 15 1
+closein
+
+palette ??? 0EE 0CE 0AC 08A 04A 028 000 ??? ??? ??? ??? 0E8 0A2 080 060
+setmask
+
+openin concept/lvl_mobo/_tilemap_pal3.bmp
+scroll 0 0 16 1
+scroll 0 1 6 1
+closein
+
+palette ??? ??? ??? ??? ??? ??? ??? ??? ??? ??? ??? ??? E86 E00 C00 A00
+setmask
+
+openin concept/lvl_mobo/_tilemap_pal4.bmp
+scroll 0 0 10 1
+closein
+
+closeout
+
+palette ??? 2A4 080 060 AAA 888 666 444 000 0CC 0AC 08E 66E 00E 00C 00A
+setmask
+
+openout graphics/lvl_mobo/platform.bin
+openin concept/lvl_mobo/platform.bmp
+sprite 0 0 4 2
+closein
+closeout

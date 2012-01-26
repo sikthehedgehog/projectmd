@@ -1,0 +1,106 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;---------------------------------------------;
+; RunCapacitorTop                             ;
+;                                             ;
+; Game logic code for capacitors that go boom ;
+;---------------------------------------------;
+
+RunCapacitorTop:
+
+;-------------------;
+; Are we outbounds? ;
+;-------------------;
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+    cmp.w   #0-$40, d0
+    blt.s   @Outbounds
+    cmp.w   #320+$40, d0
+    ble.s   @KeepGoing
+
+@Outbounds:
+    bra     DeleteObject
+
+;---------------------;
+; Should we just die? ;
+;---------------------;
+
+@KeepGoing:
+    tst.w   Object_Misc(a0)
+    beq.s   @StillAlive
+    bra     DeleteObjectPermanent
+@StillAlive:
+
+;-----------------------------------;
+; Are we colliding with the player? ;
+;-----------------------------------;
+
+@CheckCol:
+    move.w  Object_X(a0), d0
+    move.w  Player_X(a3), d1
+    addq.w  #4, d0
+    addq.w  #3, d1
+    cmp.w   d0, d1
+    blt.s   @End
+
+    add.w   #23, d0
+    subq.w  #7, d1
+    cmp.w   d0, d1
+    bgt.s   @End
+
+    move.w  Object_Y(a0), d0
+    move.w  Player_Y(a3), d1
+    add.w   #29, d0
+    cmp.w   d0, d1
+    blt.s   @End
+
+    addq.w  #2, d0
+    sub.w   #31, d1
+    cmp.w   d0, d1
+    bgt.s   @End
+
+;------------------;
+; Hurt the player! ;
+;------------------;
+
+    cmp.b   #PlayerPow_Ray, Player_Power(a3)
+    beq.s   @CantHurt
+    bsr     HurtPlayer
+@CantHurt:
+    move.b  #SFX_Capacitor, (RAM_SFXToPlay)
+
+;----------;
+; Explode! ;
+;----------;
+
+    move.w  #1, Object_Misc(a0)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

@@ -1,0 +1,215 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------;
+; DrawPlayer                                               ;
+;                                                          ;
+; Draws the player on screen                               ;
+; Puts the player sprite into the sprite buffer, basically ;
+;----------------------------------------------------------;
+; BREAKS: all                                              ;
+;----------------------------------------------------------;
+
+DrawPlayer:
+    lea     (RAM_Player), a0
+
+;----------------;
+; Invincibility? ;
+;----------------;
+
+    tst.w   Player_Invinc(a0)
+    beq     @NotInvincible
+
+;----------------------------;
+; Calculate axis coordinates ;
+;----------------------------;
+
+    move.w  Player_X(a0), d4
+    move.w  Player_Y(a0), d5
+    add.w   #128-7, d4
+    add.w   #128-24, d5
+    sub.w   (RAM_Scroll), d4
+
+;----------------------------------------;
+; Get base address of sine values to use ;
+;----------------------------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+    lsl.w   #4, d0
+    and.w   #$7F<<1, d0
+    lea     (Sines), a1
+    lea     (a1,d0.w), a1
+
+;------------;
+; Draw stars ;
+;------------;
+
+    move.w  (RAM_StarsGfx), d2
+    moveq   #%0101, d3
+
+    move.w  (a1), d0
+    move.w  $80(a1), d1
+    asr.w   #8, d0
+    asr.w   #8, d1
+    add.w   d4, d0
+    add.w   d5, d1
+    bsr     AddSprite
+
+    move.w  $100(a1), d0
+    move.w  $180(a1), d1
+    asr.w   #8, d0
+    asr.w   #8, d1
+    add.w   d4, d0
+    add.w   d5, d1
+    bsr     AddSprite
+
+    move.w  $80(a1), d0
+    move.w  $100(a1), d1
+    asr.w   #8, d0
+    asr.w   #8, d1
+    add.w   d4, d0
+    add.w   d5, d1
+    bsr     AddSprite
+
+    move.w  $180(a1), d0
+    move.w  (a1), d1
+    asr.w   #8, d0
+    asr.w   #8, d1
+    add.w   d4, d0
+    add.w   d5, d1
+    bsr     AddSprite
+
+;------------------;
+; Electric shield? ;
+;------------------;
+
+@NotInvincible:
+    btst.b  #PlayerStat_Shock, Player_Status+1(a0)
+    beq.s   @NoShield
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    bne.s   @NoShield
+
+    move.w  Player_X(a0), d0
+    move.w  Player_Y(a0), d1
+    add.w   #128-24, d0
+    add.w   #128-31, d1
+    sub.w   (RAM_Scroll), d0
+
+    move.w  #$8000|VRAM_ElectricShield, d2
+    move.w  #$8000|(VRAM_ElectricShield+12), d4
+    move.w  (RAM_GlobalAnim), d3
+    and.w   #$4, d3
+    beq.s   @NoAltShield
+    move.w  #$8800|(VRAM_ElectricShield+12), d2
+    move.w  #$8800|VRAM_ElectricShield, d4
+@NoAltShield:
+    cmp.b   #Level_Light, (RAM_Level)
+    bne.s   @LightLevelElec
+    bclr.l  #15, d2
+    bclr.l  #15, d4
+@LightLevelElec:
+
+    moveq   #%1011, d3
+    bsr     AddSprite
+    add.w   #24, d0
+    move.w  d4, d2
+    bsr     AddSprite
+@NoShield:
+
+;-----------------------------;
+; Do blinking if invulnerable ;
+;-----------------------------;
+
+    move.w  Player_Status(a0), d0
+
+    tst.b   Player_Energy(a0)
+    ble.s   @ForceBlink
+
+    btst.l  #PlayerStat_Hurt, d0
+    bne.s   @DontBlink
+    tst.b   Player_Flash(a0)
+    beq.s   @DontBlink
+
+@ForceBlink:
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @End
+@DontBlink:
+
+;---------------------------;
+; Determine sprite flipping ;
+;---------------------------;
+
+    move.w  #VRAM_Player, d2
+    cmp.b   #Level_Light, (RAM_Level)
+    beq.s   @LightLevel
+    bset.l  #15, d2
+@LightLevel:
+    btst.l  #PlayerStat_Dir, d0
+    beq.s   @NoFlip
+    bset.l  #11, d2
+@NoFlip:
+
+;------------------------------;
+; Calculate sprite coordinates ;
+;------------------------------;
+
+    move.w  Player_X(a0), d0
+    move.w  Player_Y(a0), d1
+    add.w   #128-16, d0
+    add.w   #128-31, d1
+    sub.w   (RAM_Scroll), d0
+
+;------------;
+; Add sprite ;
+;------------;
+
+    moveq   #%1111, d3
+    bsr     AddSprite
+
+;--------------------------------;
+; Draw mirror in 3D-themed level ;
+;--------------------------------;
+
+    move.b  (RAM_Level), d7
+    cmp.b   #Level_3D, d7
+    bne.s   @NoMirror
+
+    move.w  Player_Y(a0), d1
+    sub.w   #192-1, d1
+    neg.w   d1
+    add.w   #192+128, d1
+
+    cmp.w   #128+224, d1
+    bge.s   @NoMirror
+
+    eor.w   #$B000, d2
+    bsr     AddSprite
+@NoMirror:
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

@@ -1,0 +1,272 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------------;
+; UpdateLevel_VDP                                ;
+;                                                ;
+; Updates stuff specific to the VDP-themed level ;
+;------------------------------------------------;
+; BREAKS: all                                    ;
+;------------------------------------------------;
+
+UpdateLevel_VDP:
+
+    rsset VRAM_Level
+    rs.b (4*4)+1+(2*2)+(3*3)+(4*4)
+@T2 rs.b (16*2)+5
+@T3 rs.b 8
+@T4 rs.b 5
+@N  rs.b 0
+
+;-----------------------;
+; Update HScroll buffer ;
+;-----------------------;
+
+    moveq   #0, d0
+    move.w  (RAM_Scroll), d0
+    neg.w   d0
+
+    lea     (RandomTable), a0
+    move.w  (RAM_GlobalAnim), d1
+    and.w   #$3FF, d1
+    move.b  (a0,d1.w), d1
+    and.w   #$1F, d1
+
+    lea     (RAM_HScrBuffer), a0
+    move.w  d0, (a0)+
+    move.w  d1, (a0)+
+
+;----------------;
+; Update HScroll ;
+;----------------;
+
+    FixedDMA RAM_HScrBuffer, $F800, 2*2
+
+;------------------;
+; Perform blinking ;
+;------------------;
+
+    moveq   #0, d0
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @BlinkFrame1
+    move.w  #224, d0
+@BlinkFrame1:
+    move.w  d0, (RAM_VScrBuffer)
+
+;-----------------------------------------------;
+; Used to increase randomness in the background ;
+; (I wonder if it even works...)                ;
+;-----------------------------------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+
+    move.w  d0, d1
+    and.w   #$3FE, d1
+    lea     (RandomTable), a0
+    move.w  (a0,d1.w), d1
+    and.w   #$1E, d1
+    move.w  d1, (RAM_VScrBuffer+2)
+
+;----------------------------------;
+; Animate lights in the background ;
+;----------------------------------;
+
+    move.w  d0, d1
+    lsr.w   #4-2, d1
+    and.w   #$3<<2, d1
+    lea     (@LightPal), a0
+    lea     (a0,d1.w), a0
+    lea     (RAM_PalBuffer+$64), a1
+    move.l  (a0), (a1)+
+
+;----------------;
+; Animate arrows ;
+;----------------;
+
+    move.w  d0, d1
+    lsr.w   #4-2, d1
+    and.w   #$3<<2, d1
+    lea     (@ArrowPal), a0
+    lea     (a0,d1.w), a0
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+
+;--------------------;
+; Animate the robots ;
+;--------------------;
+
+    moveq   #0, d7
+    move.w  d0, d7
+    and.w   #$3<<2, d7
+    lsl.l   #7, d7
+    add.l   #Gfx_PixRobotWalk, d7
+    VarSrcDMA VRAM_TrollWalk*$20, 16*$20
+
+    move.l  #Gfx_PixFlyRobotFly, d7
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @FlyBlink
+    add.l   #16*$20, d7
+@FlyBlink:
+    VarSrcDMA VRAM_DblCircleFly*$20, 16*$20
+
+;---------------------------------------;
+; Determine what kind of lights to show ;
+;---------------------------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+    btst.l  #3, d0
+    beq     @SkipLights
+    btst.l  #4, d0
+    bne.s   @LightTime2
+
+@LightTime1:
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @LightSet3
+    bra.s   @LightSet1
+
+@LightTime2:
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @LightSet4
+    bra.s   @LightSet2
+
+@LightSet1:
+    move.w  #$6000|(VRAM_Level+$10), d2
+    moveq   #%0000, d3
+    move.w  #8, d4
+    move.w  #128+160-4, d6
+    move.w  #128+112-4, d7
+    bra.s   @DrawLights
+
+@LightSet2:
+    move.w  #$6000|(VRAM_Level+$11), d2
+    moveq   #%0101, d3
+    move.w  #7, d4
+    move.w  #128+160-8, d6
+    move.w  #128+112-8, d7
+    bra.s   @DrawLights
+
+@LightSet3:
+    move.w  #$6000|(VRAM_Level+$15), d2
+    moveq   #%1010, d3
+    move.w  #6, d4
+    move.w  #128+160-12, d6
+    move.w  #128+112-12, d7
+    bra.s   @DrawLights
+
+@LightSet4:
+    move.w  #$6000|(VRAM_Level+$1E), d2
+    moveq   #%1111, d3
+    move.w  #5, d4
+    move.w  #128+160-16, d6
+    move.w  #128+112-16, d7
+
+;------------------------------;
+; Add lights in the background ;
+;------------------------------;
+
+@DrawLights:
+    move.w  (RAM_GlobalAnim), d5
+    add.w   d5, d5
+    add.w   d5, d5
+    add.w   d5, d5
+    and.w   #$1F<<1, d5
+    lea     (Sines), a0
+
+@LightLoop:
+    move.w  (a0,d5.w), d0
+    move.w  d5, d1
+    add.w   #$40*2, d1
+    move.w  (a0,d1.w), d1
+    asr.w   d4, d0
+    asr.w   d4, d1
+    add.w   d6, d0
+    add.w   d7, d1
+
+    movem.l d6-d7, -(sp)
+    ;bsr     AddSprite
+    movem.l (sp)+, d6-d7
+
+    add.w   #$20<<1, d5
+    cmp.w   #$100<<1, d5
+    blt.s   @LightLoop
+@SkipLights:
+
+;----------------------------;
+; Animate noise              ;
+; Real-time rendering! w00t! ;
+;----------------------------;
+
+    btst.b  #IngameStat_Pause, (RAM_IngameStatus+1)
+    bne.s   @NoNoiseAnim
+
+    lea     (RAM_LevelStuff), a0
+    moveq   #(16*4)-1, d2
+@NoiseLoop:
+    moveq   #4-1, d1
+    bsr     Random
+@NoiseLoopi:
+    btst.l  #7, d0
+    beq.s   @BlankSpot
+    move.b  #$EE, 4(a0)
+    move.b  #$FF, (a0)+
+    bra.s   @SpotWritten
+@BlankSpot:
+    move.b  #$00, 4(a0)
+    move.b  #$00, (a0)+
+@SpotWritten:
+    add.b   d0, d0
+    dbf     d1, @NoiseLoopi
+    addq.l  #4, a0
+    dbf     d2, @NoiseLoop
+
+    FixedDMA RAM_LevelStuff, @N*$20, 16*$20
+@NoNoiseAnim:
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;----------------------------;
+; Palette used by the lights ;
+;----------------------------;
+
+@LightPal:
+    dc.w    $00E, $EE0
+    dc.w    $0E0, $E0E
+    dc.w    $EA0, $A8E
+    dc.w    $E00, $0EE
+
+;----------------------------;
+; Palette used by the arrows ;
+;----------------------------;
+
+@ArrowPal:
+    dc.w    $CAE, $86A, $0EE, $0AA, $8E8, $4A4, $EC8, $A86
+    dc.w    $CAE, $86A, $0EE, $0AA, $8E8, $4A4, $EC8
+
+;----------------------------------------------------------------------------

@@ -1,0 +1,82 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;---------------------------;
+; DrawLightBulb             ;
+;                           ;
+; Draws a light bulb object ;
+;---------------------------;
+
+DrawLightBulb:
+
+;-------------------------------------;
+; Check if we're visible for starters ;
+;-------------------------------------;
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+
+    cmp.w   #-32, d0
+    ble.s   @End
+    cmp.w   #320, d0
+    bge.s   @End
+
+;------------------------------;
+; Calculate sprite coordinates ;
+;------------------------------;
+
+    move.w  Object_X(a0), d0
+    move.w  Object_Y(a0), d1
+    add.w   #128, d0
+    add.w   #128+8, d1
+    sub.w   (RAM_Scroll), d0
+
+;-------------------------;
+; Determine sprite to use ;
+;-------------------------;
+
+    move.w  #$C000|VRAM_LightBulb, d2
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @NoBlink
+    bset.l  #11, d2
+@NoBlink:
+
+;----------------------;
+; Put sprite on screen ;
+;----------------------;
+
+    moveq   #%1110, d3
+    bsr     AddSprite
+
+    add.w   #24, d1
+    bchg.l  #11, d2
+    bchg.l  #12, d2
+    bsr     AddSprite
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

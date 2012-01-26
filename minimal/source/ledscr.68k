@@ -1,0 +1,235 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------------;
+; LEDScreen                                 ;
+;                                           ;
+; Shows the cool LED screen texts on screen ;
+; Used for title cards and "GAME OVER"      ;
+;-------------------------------------------;
+; BREAKS: all                               ;
+;-------------------------------------------;
+
+LEDScreen:
+
+;------------------------;
+; Initialize game status ;
+;------------------------;
+
+    move.w  #%000, (RAM_GameStatus)
+    move.l  #0, (RAM_GlobalAnim)
+
+;-------------------;
+; Initialize fading ;
+;-------------------;
+
+    move.l  #7<<16, (RAM_FadeStage)
+    move.l  (RAM_GlobalAnimSpd), d0
+    asr.l   #1, d0
+    move.l  d0, (RAM_FadeSpeed)
+
+;----------------------;
+; Set up VDP registers ;
+;----------------------;
+
+    lea     ($C00004), a4
+    lea     ($C00000), a5
+
+    move.w  #$8238, (a4)    ; Tilemap A: $E000
+    move.w  #$8407, (a4)    ; Tilemap B: $E000
+    move.w  #$8500, (a4)    ; Sprite table: $0000
+    move.w  #$8B00, (a4)    ; No IRQ2, full VScroll, full HScroll
+    move.w  #$8D00, (a4)    ; HScroll table: $0000 (no HScroll!)
+    move.w  #$9001, (a4)    ; Tilemap size: 64x32
+    move.w  #$9200, (a4)    ; >:(
+    move.w  #$9300, (a4)    ; >:(
+
+;--------------------;
+; Clear sprite cache ;
+;--------------------;
+
+    move.l  #$40000000, (a4)
+    move.l  #$00000000, (a5)
+    move.l  #$00000000, (a5)
+
+;--------------;
+; Set up VSRAM ;
+;--------------;
+
+    move.l  #-76<<16, (RAM_VScrBuffer)
+
+;------------;
+; Clear CRAM ;
+;------------;
+
+    move.l  #$C0000000, (a4)
+    moveq   #0, d0
+    moveq   #($40/8)-1, d1
+@ClearCRAM:
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    dbf     d1, @ClearCRAM
+
+;----------------------------------------;
+; Load palette into palette buffer (...) ;
+; Also calculate how long it lasts       ;
+;----------------------------------------;
+
+    move.l  #(3*60)<<16, d0
+    lea     (RAM_PalBuffer), a2
+    move.l  #$00000020, (a2)+
+    move.l  #$004000E0, (a2)+
+
+    tst.b   (RAM_Lives)
+    bne.s   @NotRed
+    move.l  #(10*60)<<16, d0
+    lea     (RAM_PalBuffer), a2
+    move.l  #$00000002, (a2)+
+    move.l  #$0004000E, (a2)+
+@NotRed:
+
+    move.l  d0, (RAM_GlobalAnim)
+
+;---------------;
+; Clear tilemap ;
+;---------------;
+
+    move.l  #$60000003, (a4)
+    move.l  #$00010001, d0
+    moveq   #((64/16)*32)-1, d1
+@ClearTilemap:
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    dbf     d1, @ClearTilemap
+
+;------------;
+; Write text ;
+;------------;
+
+    move.l  #$60040003, d0
+    bsr     LEDScreenWrite
+
+    move.l  #$62840003, d0
+    move.l  a1, a0
+    bsr     LEDScreenWrite
+
+;-------------------;
+; Load LED graphics ;
+;-------------------;
+
+    FixedDMA Gfx_LEDScreen, $20, 16*$20
+
+;----------------;
+; Enable display ;
+;----------------;
+
+    bsr     FlushVDPBuffer
+    ;move.w  #$8154, ($C00004)
+
+;----------------------------------------------------------------------------
+
+;-----------;
+; Main loop ;
+;-----------;
+
+@MainLoop:
+
+;-------;
+; Quit? ;
+;-------;
+
+    bsr     ReadJoypad
+    move.b  (RAM_JoypadPress), d0
+    and.b   #$F0, d0
+    bne.s   @Quit
+
+;-----------;
+; Countdown ;
+;-----------;
+
+    move.l  (RAM_GlobalAnim), d0
+    sub.l   (RAM_GlobalAnimSpd), d0
+    ble.s   @Quit
+    move.l  d0, (RAM_GlobalAnim)
+
+;-----------------;
+; Do fading, etc. ;
+;-----------------;
+
+    bsr     Fade
+
+;------------;
+; Next frame ;
+;------------;
+
+    jsr     (UpdateSound).w
+    bsr     VSync
+    bsr     FlushVDPBuffer
+    bra.s   @MainLoop
+
+;----------------------------------------------------------------------------
+
+;-------;
+; Quit! ;
+;-------;
+
+@Quit:
+
+;-------------------;
+; Initialize fading ;
+;-------------------;
+
+    move.l  #7<<16, (RAM_FadeStage)
+    move.w  #%10, (RAM_GameStatus)
+
+;----------;
+; Fade out ;
+;----------;
+
+@FadeOut:
+    bsr     Fade
+    bsr     VSync
+    bsr     FlushVDPBuffer
+    move.w  (RAM_FadeStage), d0
+    bne.s   @FadeOut
+
+;-----------------;
+; Disable display ;
+;-----------------;
+
+    move.w  #$8114, ($C00004)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

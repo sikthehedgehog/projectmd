@@ -1,0 +1,108 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------------------;
+; Decompress                     ;
+;                                ;
+; Decompresses data into RAM     ;
+;--------------------------------;
+; INPUT                          ;
+;   a0.l ... Pointer to data     ;
+;   a1.l ... Where to decompress ;
+;--------------------------------;
+; BREAKS: d0-d5, a0-a1           ;
+;--------------------------------;
+
+Decompress:
+
+;---------------------------;
+; Loop through all the data ;
+;---------------------------;
+
+    move.w  (a0)+, d0
+    moveq   #1, d1
+@MainLoop:
+    tst.w   d0
+    beq.s   @End
+
+;-----------------------------;
+; Do we need more token info? ;
+;-----------------------------;
+
+    subq.w  #1, d1
+    bne.s   @HasTokenInfo
+    move.b  (a0)+, d2
+    moveq   #8, d1
+@HasTokenInfo:
+
+;---------------------------;
+; Determine next token type ;
+;---------------------------;
+
+    add.b   d2, d2
+    bcs.s   @Compressed
+
+;-------------------;
+; Uncompressed byte ;
+;-------------------;
+
+    move.b  (a0)+, (a1)+
+    subq.w  #1, d0
+    bra.s   @MainLoop
+
+;-----------------;
+; Compressed byte ;
+;-----------------;
+
+@Compressed:
+    move.b  (a0)+, d3
+    lsl.w   #8, d3
+    move.b  (a0)+, d3
+    move.b  d3, d4
+    lsr.w   #4, d3
+    and.w   #$000F, d4
+
+    addq.w  #3, d3
+    addq.w  #3, d4
+
+;-------------;
+; Copy string ;
+;-------------;
+
+    neg.w   d3
+    move.w  d4, d5
+    subq.w  #1, d5
+@CopyLoop:
+    move.b  (a1,d3.w), (a1)+
+    dbf     d5, @CopyLoop
+
+    sub.w   d4, d0
+    bra.s   @MainLoop
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

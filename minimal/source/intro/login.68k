@@ -1,0 +1,182 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------;
+; Log-in scene from the game intro       ;
+;----------------------------------------;
+; OUTPUT                                 ;
+;   d0.w ... 0 if cutscene must continue ;
+;            1 if cutscene should stop   ;
+;----------------------------------------;
+; BREAKS: all                            ;
+;----------------------------------------;
+
+IntroLogin:
+
+;--------------------;
+; Initialize console ;
+;--------------------;
+
+    bsr     InitIntroConsole
+
+;------------------------;
+; Load palette into CRAM ;
+;------------------------;
+
+    lea     (Pal_TextMode), a2
+    move.l  #$C0000000, (a0)
+    move.l  (a2)+, (a1)
+    move.l  (a2)+, (a1)
+    move.w  (a2)+, (a1)
+
+;-----------------------------;
+; Set up initial VSRAM values ;
+;-----------------------------;
+
+    move.l  #-(26*8)<<16, (RAM_VScrBuffer)
+
+;----------------------------------------------------------------------------
+
+;------------------------;
+; Simulate boot up delay ;
+;------------------------;
+
+    move.b  #2, (RAM_ConCursorX)
+    bsr     WaitConsole
+    bne     @Quit
+
+;-----------------------;
+; Show "log-in" message ;
+;-----------------------;
+
+    moveq   #2, d0
+    moveq   #0, d1
+    lea     (@Str_Login), a0
+    bsr     WriteConsoleDirect
+
+    move.b  #14, (RAM_ConCursorX)
+    bsr     WaitConsole
+    bne     @Quit
+
+    moveq   #14, d0
+    moveq   #0, d1
+    lea     (@Str_Stephany), a0
+    bsr     WriteConsoleTyped
+    bne     @Quit
+
+;-------------------------;
+; Show "password" message ;
+;-------------------------;
+
+    move.w  #-(25*8), (RAM_VScrBuffer)
+
+    moveq   #2, d0
+    moveq   #1, d1
+    lea     (@Str_Password), a0
+    bsr     WriteConsoleDirect
+
+    move.b  #12, (RAM_ConCursorX)
+    bsr     WaitConsole
+    bne     @Quit
+
+    moveq   #12, d0
+    moveq   #1, d1
+    lea     (@Str_Asterisks), a0
+    bsr     WriteConsoleTyped
+    bne     @Quit
+
+;---------------------;
+; Simulate load delay ;
+;---------------------;
+
+    move.w  #-(24*8), (RAM_VScrBuffer)
+
+    move.b  #2, (RAM_ConCursorX)
+    bsr     WaitConsole
+    bne     @Quit
+
+;-------------;
+; Show prompt ;
+;-------------;
+
+    move.w  #-(23*8), (RAM_VScrBuffer)
+
+    moveq   #2, d0
+    moveq   #3, d1
+    lea     (@Str_Prompt), a0
+    bsr     WriteConsoleDirect
+
+    move.b  #5, (RAM_ConCursorX)
+    bsr     WaitConsole
+    bne     @Quit
+    bsr     WaitConsole
+    bne     @Quit
+
+    moveq   #5, d0
+    moveq   #3, d1
+    lea     (@Str_ProjectMD), a0
+    bsr     WriteConsoleTyped
+    bne     @Quit
+
+;-----------------------;
+; Simulate loading time ;
+;-----------------------;
+
+    move.w  #-(22*8), (RAM_VScrBuffer)
+
+    move.b  #2, (RAM_ConCursorX)
+    bsr     WaitConsole
+    bne     @Quit
+
+;----------------------------------------------------------------------------
+
+;---------------------------------------;
+; End of subroutine, cutscene continues ;
+;---------------------------------------;
+
+    moveq   #0, d0
+    rts
+
+;---------------------------------------;
+; End of subroutine, cutscene ends here ;
+;---------------------------------------;
+
+@Quit:
+    moveq   #1, d0
+    rts
+
+;----------------------------------------------------------------------------
+
+;-------------------------;
+; Strings shown on screen ;
+;-------------------------;
+
+@Str_Login:         dc.b 'USER LOGIN:',0
+@Str_Stephany:      dc.b 'STEPHANY',0
+@Str_Password:      dc.b 'PASSWORD:', 0
+@Str_Asterisks:     dc.b '*********', 0
+@Str_Prompt:        dc.b '~$',0
+@Str_ProjectMD:     dc.b 'PROJECT-MD',0
+
+    even
+
+;----------------------------------------------------------------------------

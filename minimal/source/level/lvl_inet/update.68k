@@ -1,0 +1,377 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------------------------;
+; UpdateLevel_Internet                                ;
+;                                                     ;
+; Updates stuff specific to the Internet-themed level ;
+;-----------------------------------------------------;
+; BREAKS: all                                         ;
+;-----------------------------------------------------;
+
+UpdateLevel_Internet:
+
+;-----------------------------;
+; Gotta reduce text length :P ;
+;-----------------------------;
+
+    rsreset
+    rs.b 16
+@T2 rs.b (16*3)+4
+@T3 rs.b 16+5
+@Bin rs.b 4
+@Disp4 rs.b 8
+@Disp3 rs.b 8
+@Disp2 rs.b 8
+@Disp1 rs.b 8
+@Pr rs.b 7
+@Bl rs.b 0
+
+@Addr_Binary equ @Bin*$20
+@Addr_Display1 equ @Disp4*$20
+@Addr_Display2 equ @Disp3*$20
+@Addr_Display3 equ @Disp2*$20
+@Addr_Display4 equ @Disp1*$20
+@Addr_Prism equ @Pr*$20
+@Addr_Blocks equ @Bl*$20
+
+;-------------------------------------------;
+; The level-specific stuff variables we use ;
+;-------------------------------------------;
+
+    rsreset
+@Var_OldCountBinary     rs.w 1      ; Used to animate binary numbers
+@Var_DisplayLoading     rs.b 1      ; Used to animate LED displays
+@Var_DisplayIndex       rs.b 1
+
+;------------------------------;
+; Get global animation counter ;
+;------------------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+
+;--------------------------------------------;
+; Get pointer to level-specific stuff memory ;
+;--------------------------------------------;
+
+    lea     (RAM_LevelStuff), a0
+
+;------------------------;
+; Animate binary numbers ;
+;------------------------;
+
+    move.w  d0, d7
+    move.w  @Var_OldCountBinary(a0), d1
+    andi.w  #$FFF8, d7
+    andi.w  #$FFF8, d1
+    cmp.w   d1, d7
+    beq.s   @DontUpdateBinary
+
+    move.w  d0, d7
+    andi.l  #$0008, d7
+    lsl.w   #4, d7
+    add.l   #Gfx_LevelInternet_Binary, d7
+    VarSrcDMA (VRAM_Level*$20)+@Addr_Binary, 4*$20
+    move.w  d0, @Var_OldCountBinary(a0)
+@DontUpdateBinary:
+
+;--------------------------------------------;
+; Load letters for the LED display if needed ;
+;--------------------------------------------;
+
+    moveq   #0, d7
+    move.b  @Var_DisplayLoading(a0), d7
+    ble.s   @DontUpdateDisplay
+    subq.w  #1, d7
+    move.b  d7, @Var_DisplayLoading(a0)
+
+    lsl.w   #8, d7
+    add.w   #(VRAM_Level*$20)+@Addr_Display1, d7
+
+    moveq   #0, d1
+    move.b  @Var_DisplayIndex(a0), d1
+    lea     (@DisplayIndices), a1
+    moveq   #0, d6
+    move.w  (a1,d1.w), d6
+    add.l   #Gfx_LevelInternet_Display, d6
+
+    VarSrcDestDMA 8*$20
+
+    addq.b  #1<<1, d1
+    andi.b  #$F<<1, d1
+    move.b  d1, @Var_DisplayIndex(a0)
+@DontUpdateDisplay:
+
+;------------------------------------------------------------------------;
+; Cause the colored blocks to flicker so it looks like real transparency ;
+;------------------------------------------------------------------------;
+
+    move.l  #Gfx_LevelInternet_Square, d7
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @BlocksFrame1
+    move.l  #Gfx_LevelInternet_Square+(12*$20), d7
+@BlocksFrame1:
+    VarSrcDMA (VRAM_Level*$20)+@Addr_Blocks, 12*$20
+
+;---------------------------------------------------------------;
+; Cause the prism to flicker so it looks like real transparency ;
+;---------------------------------------------------------------;
+
+    move.l  #Gfx_LevelInternet_Prism, d7
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @PrismFrame1
+    move.l  #Gfx_LevelInternet_Prism+(7*$20), d7
+@PrismFrame1:
+    VarSrcDMA (VRAM_Level*$20)+@Addr_Prism, 7*$20
+
+;----------------------------;
+; Animate the tricolor floor ;
+;----------------------------;
+
+    move.w  d0, d1
+    andi.w  #$7<<3, d1
+    add.w   d1, d1
+    lea     (@TricolorPatterns), a1
+    lea     (a1,d1.w), a1
+    lea     (RAM_PalBuffer+$22), a2
+    move.l  (a1)+, (a2)+
+    move.w  (a1)+, (a2)+
+    lea     (RAM_PalBuffer+$42), a2
+    move.l  (a1)+, (a2)+
+    move.w  (a1)+, (a2)+
+
+;-------------------------------------;
+; Animate the arrows and the big "MD" ;
+;-------------------------------------;
+
+    move.w  d0, d1
+    andi.w  #$1<<4, d1
+    lsr.w   #1, d1
+    lea     (@ArrowPatterns), a1
+    lea     (a1,d1.w), a1
+    lea     (RAM_PalBuffer+$28), a2
+    move.l  (a1)+, (a2)+
+    move.l  (a1)+, (a2)+
+
+;------------------------;
+; Animate the "BAN" text ;
+;------------------------;
+
+    move.w  d0, d1
+    andi.w  #$F<<1, d1
+    lea     (@BanPatterns), a1
+    move.w  (a1,d1.w), (RAM_PalBuffer+$32)
+
+;-------------------------------------------------------------------------;
+; Make the LED displays blink (we take advantage of this so we don't have ;
+; to load all tiles in a single frame, and thereby we get extra VDP       ;
+; bandwidth per frame).                                                   ;
+;-------------------------------------------------------------------------;
+
+    lea     (RAM_PalBuffer+$48), a2
+    move.w  d0, d1
+    andi.w  #$3<<4, d1
+    beq.s   @DisplayIsOff
+    move.l  #$000E000C, (a2)+
+    move.w  #$000A, (a2)+
+    move.b  #-1, @Var_DisplayLoading(a0)
+    bra.s   @DisplayBlinkEnd
+@DisplayIsOff:
+    move.l  #$00060004, (a2)+
+    move.w  #$0002, (a2)+
+    tst.b   @Var_DisplayLoading(a0)
+    bge.s   @DisplayBlinkEnd
+    move.b  #4, @Var_DisplayLoading(a0)
+@DisplayBlinkEnd:
+
+;---------------------------------------;
+; Make a look-up table for the parallax ;
+;---------------------------------------;
+
+    move.l  (RAM_GlobalAnim), d0
+    lsr.l   #2, d0
+    neg.l   d0
+
+    move.l  d0, d1
+    swap    d1
+    move.w  d1, d4
+    swap    d1
+
+    add.l   d0, d1
+    swap    d1
+    move.w  d1, d7
+    swap    d1
+
+    add.l   d0, d1
+    swap    d1
+    move.w  d1, d5
+    swap    d1
+
+    add.l   d0, d1
+    swap    d1
+    swap    d4
+    move.w  d1, d4
+    swap    d1
+
+    add.l   d0, d1
+    swap    d1
+    swap    d5
+    move.w  d1, d5
+    swap    d1
+
+    add.l   d0, d1
+    swap    d1
+    move.w  d1, d6
+    swap    d1
+
+    add.l   d0, d1
+    swap    d1
+    swap    d6
+    move.w  d1, d6
+    swap    d1
+
+    add.l   d0, d1
+    swap    d1
+    swap    d7
+    move.w  d1, d7
+
+    lsl.l   #4, d0
+    swap    d0
+    move.w  (RAM_Scroll), d1
+    asr.w   #1, d1
+    sub.w   d1, d0
+
+    add.w   d0, d4
+    add.w   d0, d5
+    add.w   d0, d6
+    add.w   d0, d7
+    swap    d4
+    swap    d5
+    swap    d6
+    swap    d7
+    add.w   d0, d4
+    add.w   d0, d5
+    add.w   d0, d6
+    add.w   d0, d7
+
+;-----------------------;
+; Update HScroll buffer ;
+;-----------------------;
+
+    moveq   #0, d0
+    move.w  (RAM_Scroll), d0
+    neg.w   d0
+    lea     (RAM_HScrBuffer), a0
+    moveq   #(224/16)-1, d1
+@UpdateScroll:
+    rept    4
+    move.w  d0, (a0)+
+    move.w  d4, (a0)+
+    endr
+    rept    4
+    move.w  d0, (a0)+
+    move.w  d5, (a0)+
+    endr
+    rept    4
+    move.w  d0, (a0)+
+    move.w  d6, (a0)+
+    endr
+    rept    4
+    move.w  d0, (a0)+
+    move.w  d7, (a0)+
+    endr
+    swap    d4
+    swap    d5
+    swap    d6
+    swap    d7
+    dbf     d1, @UpdateScroll
+
+;----------------;
+; Update HScroll ;
+;----------------;
+
+    FixedDMA RAM_HScrBuffer, $F800, 2*224*2
+
+;--------------------------------;
+; Animate the trolls             ;
+; TO-DO: upload only when needed ;
+;--------------------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+
+    moveq   #0, d7
+    move.w  d0, d7
+    and.w   #$F<<1, d7
+    lsl.l   #8, d7
+    add.l   #Gfx_TrollWalk, d7
+    VarSrcDMA VRAM_TrollWalk*$20, 16*$20
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;---------------------------------------;
+; Color patterns for the tricolor floor ;
+;---------------------------------------;
+
+@TricolorPatterns:
+    dc.w    $EA8, $0E0, $AAE,   $008, $406, $604,   $000, $000
+    dc.w    $AAE, $0E0, $EA8,   $604, $406, $008,   $000, $000
+    dc.w    $EA8, $AAE, $0E0,   $008, $604, $406,   $000, $000
+    dc.w    $0E0, $EA8, $AAE,   $406, $008, $604,   $000, $000
+    dc.w    $0E0, $AAE, $EA8,   $406, $604, $008,   $000, $000
+    dc.w    $AAE, $EA8, $0E0,   $604, $008, $406,   $000, $000
+    dc.w    $EA8, $AAE, $0E0,   $008, $604, $406,   $000, $000
+    dc.w    $0E0, $AAE, $EA8,   $406, $604, $008,   $000, $000
+
+;------------------------------------------------;
+; Color patterns for the arrows and the big "MD" ;
+;------------------------------------------------;
+
+@ArrowPatterns:
+    dc.w    $00E, $08E, $00E, $0E0
+    dc.w    $08E, $00E, $E0E, $EE0
+
+;------------------------------------------------;
+; Color patterns used for the "BAN" text (OSHI-) ;
+;------------------------------------------------;
+
+@BanPatterns:
+    dc.w    $0EE,$0CE,$0AE,$08E,$06E,$04E,$00E,$00C
+    dc.w    $00A,$00C,$00E,$04E,$06E,$08E,$0AE,$0CE
+
+;-------------------------------------------------------------------;
+; Look-up table used to determine which letters to load for the LED ;
+; displays (lol Internet slang words)                               ;
+;-------------------------------------------------------------------;
+
+@DisplayIndices:
+    dc.w    0*8*$20, 1*8*$20, 2*8*$20, 3*8*$20      ; ZOMG
+    dc.w    1*8*$20, 4*8*$20, 5*8*$20, 6*8*$20      ; ORLY
+    dc.w    7*8*$20, 1*8*$20, 1*8*$20, 8*8*$20      ; WOOT
+    dc.w    9*8*$20, 10*8*$20, 11*8*$20, 11*8*$20   ; HAXX
+
+;----------------------------------------------------------------------------

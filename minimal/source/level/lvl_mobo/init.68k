@@ -1,0 +1,69 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------------------------;
+; InitLevel_Motherboard                                      ;
+;                                                            ;
+; Initializes stuff specific to the Motherboard-themed level ;
+;------------------------------------------------------------;
+; BREAKS: d6, d7, a5, a6                                     ;
+;------------------------------------------------------------;
+
+InitLevel_Motherboard:
+
+;------------------------------;
+; Load level-specific graphics ;
+;------------------------------;
+
+    FixedDMA Gfx_RobotWalk, VRAM_TrollWalk*$20, 16*$20
+    FixedDMA Gfx_RobotDead, VRAM_TrollDead*$20, 16*$20
+    FixedDMA Gfx_CapacitorTop, VRAM_CapacitorTop*$20, (3+16)*$20
+    FixedDMA Gfx_HangingCable, VRAM_HangingCable*$20, (5+4)*$20
+
+;--------------------------------;
+; Draw the background in plane B ;
+;--------------------------------;
+
+    move.l  #$60000003, ($C00004)
+    lea     (Gfx_LevelMotherboard_BGPattern), a6
+    lea     ($C00000), a5
+    move.w  #(64*28)-1, d7
+@DrawBG:
+    moveq   #0, d6
+    move.b  (a6)+, d6
+    add.w   #$6000|VRAM_Level, d6
+    move.w  d6, (a5)
+    dbf     d7, @DrawBG
+
+;------------------------;
+; Load platform graphics ;
+;------------------------;
+
+    FixedDMA Gfx_LevelMotherboard_Platform, VRAM_Platform*$20, 8*$20
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

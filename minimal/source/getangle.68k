@@ -1,0 +1,107 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------;
+; GetAngle                          ;
+; Gets the angle between two points ;
+; (accuracy is pretty low though)   ;
+;-----------------------------------;
+; INPUT                             ;
+;   d0.w ... X distance             ;
+;   d1.w ... Y distance             ;
+;-----------------------------------;
+; OUTPUT                            ;
+;   d0.w ... Angle                  ;
+;-----------------------------------;
+; BREAKS: d6, d7, a6                ;
+;-----------------------------------;
+
+GetAngle:
+    move.w  d1, -(sp)
+
+;-------------------------------------------------------------;
+; The table only contains angles for the lower right quadrant ;
+; Swap coordinates as needed and keep track of that           ;
+;-------------------------------------------------------------;
+
+    moveq   #0, d6
+    
+    tst.w   d0
+    bge.s   @NotLeft
+    bset.l  #0, d6
+    neg.w   d0
+@NotLeft:
+    
+    tst.w   d1
+    bge.s   @NotUp
+    bset.l  #1, d6
+    neg.w   d1
+@NotUp:
+
+;------------------------------------------------------;
+; Fix coordinates so they're in the range of the table ;
+;------------------------------------------------------;
+
+@FixCoords:
+    move.w  d0, d7
+    or.w    d1, d7
+    cmp.w   #$10, d7
+    blt.s   @CoordsOK
+    lsr.w   #1, d0
+    lsr.w   #1, d1
+    bra.s   @FixCoords
+@CoordsOK:
+
+;-----------;
+; Get angle ;
+;-----------;
+
+    lsl.w   #4, d1
+    lea     (GetAngleTable), a6
+    lea     (a6,d0.w), a6
+    moveq   #0, d0
+    move.b  (a6,d1.w), d0
+
+;---------------------------------------;
+; Get the angle in the correct quadrant ;
+;---------------------------------------;
+
+    btst.l  #0, d6
+    beq.s   @NoSwapX
+    sub.b   #$40, d0
+    neg.b   d0
+    add.b   #$40, d0
+@NoSwapX:
+
+    btst.l  #1, d6
+    beq.s   @NoSwapY
+    neg.b   d0
+@NoSwapY:
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+    
+    move.w  (sp)+, d1
+    rts
+
+;----------------------------------------------------------------------------

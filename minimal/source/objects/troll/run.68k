@@ -1,0 +1,331 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------;
+; RunTroll                   ;
+;                            ;
+; Game logic code for trolls ;
+;----------------------------;
+
+RunTroll:
+
+;-------------------;
+; Are we outbounds? ;
+;-------------------;
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+    cmp.w   #0-$100, d0
+    blt.s   @Outbounds
+    cmp.w   #320+$C0, d0
+    ble.s   @NotOutbounds
+
+@Outbounds:
+    bra     DeleteObject
+
+;-------;
+; Dead? ;
+;-------;
+
+@NotOutbounds:
+    move.b  Object_Misc(a0), d0
+    btst.l  #4, d0
+    bne     @Dead
+
+;---------------------------------;
+; Caught by Stephany's explosion? ;
+;---------------------------------;
+
+    move.w  Object_X(a0), d2
+    move.w  Player_ExplRight(a3), d1
+    cmp.w   d2, d1
+    blt.s   @NotCaught
+
+    add.w   #32, d2
+    move.w  Player_ExplLeft(a3), d1
+    cmp.w   d2, d1
+    bgt.s   @NotCaught
+
+    move.w  Object_Y(a0), d2
+    move.w  Player_ExplBottom(a3), d1
+    cmp.w   d2, d1
+    blt.s   @NotCaught
+
+    add.w   #32, d2
+    move.w  Player_ExplTop(a3), d1
+    cmp.w   d2, d1
+    ble     @Caught
+
+;------------;
+; Move left? ;
+;------------;
+
+@NotCaught:
+    tst.b   d0
+    bne.s   @DontMoveLeft
+
+    move.w  Object_X(a0), d0
+    and.w   #$FFE0, d0
+    lsr.w   #2, d0
+    move.w  Object_Y(a0), d1
+    lsr.w   #5, d1
+    add.w   d1, d0
+
+    move.l  (RAM_CollAddr), a6
+    move.b  (a6,d0.w), d1
+    btst.l  #0, d1
+    bne.s   @StopMovingLeft
+    btst.l  #2, d1
+    bne.s   @StopMovingLeft
+    addq.w  #1, d0
+    move.b  (a6,d0.w), d1
+    bne.s   @KeepMovingLeft
+
+@StopMovingLeft:
+    move.b  #$800>>8, Object_Misc(a0)
+    bra.s   @Moved
+
+@KeepMovingLeft:
+    move.l  Object_X(a0), d0
+    sub.l   (RAM_GlobalAnimSpd), d0
+    move.l  d0, Object_X(a0)
+    bra.s   @Moved
+
+;-------------;
+; Move right? ;
+;-------------;
+
+@DontMoveLeft:
+    move.w  Object_X(a0), d0
+    and.w   #$FFE0, d0
+    lsr.w   #2, d0
+    addq.w  #8, d0
+    move.w  Object_Y(a0), d1
+    lsr.w   #5, d1
+    add.w   d1, d0
+
+    move.l  (RAM_CollAddr), a6
+    move.b  (a6,d0.w), d1
+    btst.l  #0, d1
+    bne.s   @StopMovingRight
+    btst.l  #2, d1
+    bne.s   @StopMovingRight
+    addq.w  #1, d0
+    move.b  (a6,d0.w), d1
+    bne.s   @KeepMovingRight
+
+@StopMovingRight:
+    move.b  #0, Object_Misc(a0)
+    bra.s   @Moved
+
+@KeepMovingRight:
+    move.l  Object_X(a0), d0
+    add.l   (RAM_GlobalAnimSpd), d0
+    move.l  d0, Object_X(a0)
+
+@Moved:
+
+;-----------------------------------;
+; Are we colliding with the player? ;
+;-----------------------------------;
+
+    move.w  Object_X(a0), d0
+    move.w  Player_X(a3), d1
+    add.w   #10, d0
+    addq.w  #3, d1
+    cmp.w   d0, d1
+    blt     @End
+
+    add.w   #11, d0
+    subq.w  #7, d1
+    cmp.w   d0, d1
+    bgt     @End
+
+    move.w  Object_Y(a0), d0
+    move.w  Player_Y(a3), d1
+    addq.w  #2, d0
+    cmp.w   d0, d1
+    blt     @End
+
+    add.w   #23, d0
+    sub.w   #31, d1
+    cmp.w   d0, d1
+    bgt     @End
+
+;-------------------------------;
+; Is the player stamping on us? ;
+;-------------------------------;
+
+    btst.b  #PlayerStat_Hurt, Player_Status+1(a3)
+    bne     @Hurt
+    move.l  Player_Gravity(a3), d0
+    ble     @Hurt
+
+;--------------------;
+; Make player bounce ;
+;--------------------;
+
+@Attacked:
+    move.b  #SFX_Attack, (RAM_SFXToPlay)
+    neg.l   d0
+    ;asr.l   #1, d0
+    move.l  d0, Player_Gravity(a3)
+
+;----------------;
+; Award score :) ;
+;----------------;
+
+@Caught:
+    bsr     AddEnemyScore
+
+;--------------------;
+; Play SFX if needed ;
+;--------------------;
+
+    tst.b   (RAM_SFXToPlay)
+    bne.s   @NoSFXNeeded
+    move.b  #SFX_Attack, (RAM_SFXToPlay)
+@NoSFXNeeded:
+
+;----------------------------------------------;
+; If in Frozen Memories, break apart in pieces ;
+; Same with the water world in Waterlava       ;
+;----------------------------------------------;
+
+    move.b  (RAM_Level), d0
+    cmp.b   #Level_Internet, d0
+    beq     @DontBreak
+    cmp.b   #Level_Waterlava, d0
+    bne.s   @DoBreak
+    move.w  (RAM_IngameStatus), d4
+    btst.l  #IngameStat_World, d4
+    beq     @DontBreak
+@DoBreak:
+
+    move.w  #$8000|(VRAM_TrollDead), d3
+    cmp.b   #Level_Light, d0
+    bne.s   @NoSHPalette
+    move.w  #$6000|(VRAM_TrollDead), d3
+@NoSHPalette:
+    
+    cmp.b   #Level_Memory, d0
+    beq.s   @ReuseFlyDeath
+    cmp.b   #Level_Waterlava, d0
+    bne.s   @NotReuseFlyDeath
+@ReuseFlyDeath:
+    add.w   #VRAM_DblCircleDead-VRAM_TrollDead, d3
+@NotReuseFlyDeath:
+
+    move.l  Object_X(a0), d0
+    move.l  Object_Y(a0), d1
+    move.l  Player_AccelGrav(a3), d2
+    add.l   d2, d2
+    add.l   d2, d2
+    add.l   d2, d2
+    neg.l   d2
+
+    move.w  #Obj_FallingPiece, Object_Type(a1)
+    move.w  d3, Object_MapPos(a1)
+    move.l  d0, Object_X(a1)
+    move.l  d1, Object_Y(a1)
+    move.l  d2, Object_Misc(a1)
+    adda.w  #Object_Size, a1
+
+    addq.w  #4, d3
+    bset.l  #11, d3
+    add.l   #$10<<16, d0
+    move.w  #Obj_FallingPiece, Object_Type(a1)
+    move.w  d3, Object_MapPos(a1)
+    move.l  d0, Object_X(a1)
+    move.l  d1, Object_Y(a1)
+    move.l  d2, Object_Misc(a1)
+    adda.w  #Object_Size, a1
+
+    addq.w  #8, d3
+    add.l   #$10<<16, d1
+    move.w  #Obj_FallingPiece, Object_Type(a1)
+    move.w  d3, Object_MapPos(a1)
+    move.l  d0, Object_X(a1)
+    move.l  d1, Object_Y(a1)
+    move.l  #0, Object_Misc(a1)
+    adda.w  #Object_Size, a1
+
+    subq.w  #4, d3
+    bclr.l  #11, d3
+    sub.l   #$10<<16, d0
+    move.w  #Obj_FallingPiece, Object_Type(a1)
+    move.w  d3, Object_MapPos(a1)
+    move.l  d0, Object_X(a1)
+    move.l  d1, Object_Y(a1)
+    move.l  #0, Object_Misc(a1)
+    adda.w  #Object_Size, a1
+
+    move.l  a1, (RAM_LastObject)
+    bra     DeleteObjectPermanent
+
+;---------------;
+; We're dead :S ;
+;---------------;
+
+@DontBreak:
+    move.w  Object_Misc(a0), d0
+    bset.l  #12, d0
+    move.w  d0, Object_Misc(a0)
+    bra     @End
+
+;----------------;
+; Hurt player :( ;
+;----------------;
+
+@Hurt:
+    bsr     HurtPlayer
+
+    tst.b   d6
+    bge.s   @End
+    bra     @Caught
+
+;--------------;
+; Fall if dead ;
+;--------------;
+
+@Dead:
+    move.l  Object_Misc(a0), d0
+    add.l   Player_AccelGrav(a3), d0
+    move.l  d0, Object_Misc(a0)
+
+    and.l   #$FFFFFF, d0
+    move.l  Object_Y(a0), d1
+    add.l   d0, d1
+    move.l  d1, Object_Y(a0)
+
+    cmp.l   #224<<16, d1
+    blt.s   @End
+    bra     DeleteObjectPermanent
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

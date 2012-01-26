@@ -1,0 +1,8 @@
+palette ??? EEE ??? ??? 8AE 68E 000 0EE EA6 E60 08E 00E 00A 0E0 0A0 060
+setmask
+
+openout graphics/crysbat/fly1.bin openin concept/crysbat/fly1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/crysbat/fly2.bin openin concept/crysbat/fly2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/crysbat/fly3.bin openin concept/crysbat/fly3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/crysbat/fly4.bin openin concept/crysbat/fly4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/crysbat/fly5.bin openin concept/crysbat/fly5.bmp sprite 0 0 4 4 closein closeout

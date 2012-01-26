@@ -1,0 +1,52 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;---------------------------------------------------------------------------;
+; VarSrcLenDMA                                                              ;
+;                                                                           ;
+; Performs a DMA transfer operation from ROM/RAM to VRAM                    ;
+; The operation is stored in the VDP command buffer                         ;
+; This macro is meant to be used when destination has a constant value, but ;
+; source and length may change                                              ;
+;---------------------------------------------------------------------------;
+; INPUT                                                                     ;
+;   d6.l ... Source address (ROM/RAM)                                       ;
+;   dest ... Destination address (VRAM)                                     ;
+;   d7.w ... Length (in bytes)                                              ;
+;---------------------------------------------------------------------------;
+; BREAKS: d6, d7, a6                                                        ;
+;---------------------------------------------------------------------------;
+
+VarSrcLenDMA macro dest
+    lsr.l   #1, d6
+    lsr.w   #1, d7
+    move.l  (RAM_VDPBufPos), a6
+    move.l  #$94009300, (a6)+
+    move.l  #$97009600, (a6)+
+    move.w  #$9500, (a6)+
+    movep.l d6, -7(a6)
+    movep.w d7, -9(a6)
+    move.l  #$40000080|(((dest)&$3FFF)<<16)|((dest)>>14), (a6)+
+    move.l  a6, (RAM_VDPBufPos)
+    endm
+
+;----------------------------------------------------------------------------

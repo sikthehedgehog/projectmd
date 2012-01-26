@@ -1,0 +1,121 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------;
+; RunHeartBullet                           ;
+;                                          ;
+; Game logic code for heart bullet objects ;
+;------------------------------------------;
+
+RunHeartBullet:
+
+;--------;
+; Delay? ;
+;--------;
+
+    move.l  Object_Misc(a0), d0
+    ble.s   @NoDelay
+    sub.l   (RAM_GlobalAnimSpd), d0
+    move.l  d0, Object_Misc(a0)
+
+;-----------;
+; Bummer =| ;
+;-----------;
+
+    move.w  Player_Status(a3), d0
+    btst.l  #PlayerStat_Hurt, d0
+    beq.s   @NoVanish
+    bra     DeleteObjectPermanent
+@NoVanish:
+
+;---------------------------;
+; Keep resetting properties ;
+;---------------------------;
+
+    move.w  Player_X(a3), d0
+    subq.w  #4, d0
+    move.w  d0, Object_X(a0)
+    move.w  Player_Y(a3), d0
+    sub.w   #13, d0
+    move.w  d0, Object_Y(a0)
+    rts
+
+;-----------------;
+; Determine speed ;
+;-----------------;
+
+@NoDelay:
+    move.l  Player_MaxSpeed(a3), d0
+    move.l  d0, d1
+    asr.l   #1, d1
+    add.l   d1, d0
+    tst.w   Object_MapPos(a0)
+    beq.s   @NotRight
+    neg.l   d0
+@NotRight:
+    add.l   d0, Object_X(a0)
+
+;-------------------;
+; Are we outbounds? ;
+;-------------------;
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+    cmp.w   #0-$40, d0
+    blt.s   @Outbounds
+    cmp.w   #320+$40, d0
+    ble.s   @NotOutbounds
+
+;-------------------------------------------;
+; Vanish, but also clean up explosion stuff ;
+;-------------------------------------------;
+
+@Outbounds:
+    move.w  #-$8000, d0
+    move.w  d0, Player_ExplLeft(a3)
+    move.w  d0, Player_ExplRight(a3)
+    move.w  d0, Player_ExplTop(a3)
+    move.w  d0, Player_ExplBottom(a3)
+    bra     DeleteObject
+
+;-------------------------------------;
+; Set area where enemies can get hurt ;
+;-------------------------------------;
+
+@NotOutbounds:
+    move.w  Object_X(a0), d0
+    move.w  Object_Y(a0), d1
+    move.w  d0, Player_ExplLeft(a3)
+    move.w  d1, Player_ExplTop(a3)
+    addq.w  #7, d0
+    addq.w  #7, d1
+    move.w  d0, Player_ExplRight(a3)
+    move.w  d1, Player_ExplBottom(a3)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

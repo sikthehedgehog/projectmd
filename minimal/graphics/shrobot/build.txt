@@ -1,0 +1,38 @@
+palette ??? ??? ??? 000 ??? ??? ??? ??? ??? ??? ??? ??? ??? EEE AAA 666
+setmask
+
+openout graphics/shrobot/walk1.bin openin concept/shrobot/walk1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shrobot/walk2.bin openin concept/shrobot/walk2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shrobot/walk3.bin openin concept/shrobot/walk3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shrobot/walk4.bin openin concept/shrobot/walk4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shrobot/walk5.bin openin concept/shrobot/walk5.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shrobot/walk6.bin openin concept/shrobot/walk6.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shrobot/walk7.bin openin concept/shrobot/walk7.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shrobot/walk8.bin openin concept/shrobot/walk8.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/shrobot/walk1b.bin openin concept/shrobot/walk1b.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shrobot/walk2b.bin openin concept/shrobot/walk2b.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shrobot/walk3b.bin openin concept/shrobot/walk3b.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shrobot/walk4b.bin openin concept/shrobot/walk4b.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shrobot/walk5b.bin openin concept/shrobot/walk5b.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shrobot/walk6b.bin openin concept/shrobot/walk6b.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shrobot/walk7b.bin openin concept/shrobot/walk7b.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shrobot/walk8b.bin openin concept/shrobot/walk8b.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/shrobot/dead1.bin
+openin concept/shrobot/dead1.bmp
+sprite 0 0 2 2
+sprite 2 0 2 2
+sprite 0 2 2 2
+sprite 2 2 2 2
+closein
+closeout
+
+openout graphics/shrobot/dead2.bin
+openin concept/shrobot/dead2.bmp
+sprite 0 0 2 2
+sprite 2 0 2 2
+sprite 0 2 2 2
+sprite 2 2 2 2
+closein
+closeout

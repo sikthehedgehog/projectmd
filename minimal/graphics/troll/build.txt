@@ -1,0 +1,20 @@
+palette ??? EEE ??? ??? 8AE 68E 000 0EE EA6 E60 08E 00E 00A 0E0 0A0 060
+setmask
+
+openout graphics/troll/walk1.bin openin concept/troll/walk1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/troll/walk2.bin openin concept/troll/walk2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/troll/walk3.bin openin concept/troll/walk3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/troll/walk4.bin openin concept/troll/walk4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/troll/walk5.bin openin concept/troll/walk5.bmp sprite 0 0 4 4 closein closeout
+openout graphics/troll/walk6.bin openin concept/troll/walk6.bmp sprite 0 0 4 4 closein closeout
+openout graphics/troll/walk7.bin openin concept/troll/walk7.bmp sprite 0 0 4 4 closein closeout
+openout graphics/troll/walk8.bin openin concept/troll/walk8.bmp sprite 0 0 4 4 closein closeout
+openout graphics/troll/walk9.bin openin concept/troll/walk9.bmp sprite 0 0 4 4 closein closeout
+openout graphics/troll/walk10.bin openin concept/troll/walk10.bmp sprite 0 0 4 4 closein closeout
+openout graphics/troll/walk11.bin openin concept/troll/walk11.bmp sprite 0 0 4 4 closein closeout
+openout graphics/troll/walk12.bin openin concept/troll/walk12.bmp sprite 0 0 4 4 closein closeout
+openout graphics/troll/walk13.bin openin concept/troll/walk13.bmp sprite 0 0 4 4 closein closeout
+openout graphics/troll/walk14.bin openin concept/troll/walk14.bmp sprite 0 0 4 4 closein closeout
+openout graphics/troll/walk15.bin openin concept/troll/walk15.bmp sprite 0 0 4 4 closein closeout
+openout graphics/troll/walk16.bin openin concept/troll/walk16.bmp sprite 0 0 4 4 closein closeout
+openout graphics/troll/dead.bin openin concept/troll/dead.bmp sprite 0 0 4 4 closein closeout

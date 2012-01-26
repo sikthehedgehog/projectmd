@@ -1,0 +1,77 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------------;
+; InitLevel_BossBinary                      ;
+;                                           ;
+; Initializes stuff specific to Binary Fury ;
+;-------------------------------------------;
+; BREAKS: d6, d7, a5, a6                    ;
+;-------------------------------------------;
+
+InitLevel_BossBinary:
+
+;-----------------;
+; Initialize boss ;
+;-----------------;
+
+    lea     (RAM_LevelStuff), a6
+    move.l  #208<<16, (a6)+     ; Boss X coordinate
+    move.l  #144<<16, (a6)+     ; Boss Y coordinate
+    move.w  #0, (a6)+           ; Boss initial move
+    move.l  #1024<<16, (a6)+    ; Move specific parameter
+    move.l  #0, (a6)+           ; Recoil
+
+;----------------------;
+; Set HScroll per tile ;
+;----------------------;
+
+    move.w  #$8B02, ($C00004)
+
+;-----------------;
+; Draw background ;
+;-----------------;
+
+    movem.l d0-d5/a0-a1, -(sp)
+    lea     (Gfx_BossBinary_BGLayout), a0
+    move.l  (RAM_ObjectList), a1
+    move.l  a1, a6
+    bsr     Decompress
+    movem.l (sp)+, d0-d5/a0-a1
+
+    move.l  #$60000003, ($C00004)
+    lea     ($C00000), a5
+    move.w  #(64*28)-1, d7
+@BGLoop:
+    moveq   #0, d6
+    move.b  (a6)+, d6
+    add.w   #$2000|VRAM_Level, d6
+    move.w  d6, (a5)
+    dbf     d7, @BGLoop
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

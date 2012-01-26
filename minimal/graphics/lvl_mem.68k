@@ -1,0 +1,486 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------------------------------;
+; This file contains the graphics data for the memory-themed level ;
+;------------------------------------------------------------------;
+
+;----------------------------------------------------------------------------
+
+;---------------;
+; 8x8 tile data ;
+;---------------;
+
+Gfx_LevelMemory:
+    incbin "graphics/lvl_mem/gfx.bin"
+    even
+
+;----------------;
+; Animated water ;
+;----------------;
+
+Gfx_LevelMemory_Water:
+    incbin "graphics/lvl_mem/water.bin"
+
+;--------------------------------;
+; Layout used for the background ;
+;--------------------------------;
+
+Gfx_LevelMemory_BGLayout:
+    incbin  "graphics/lvl_mem/bglayout.bin"
+
+;----------;
+; Platform ;
+;----------;
+
+    cnop    0, 4*2*$20
+Gfx_LevelMemory_Platform:
+    incbin  "graphics/lvl_mem/platform.bin"
+
+;--------------------------------;
+; Tiles used for the fake layers ;
+;--------------------------------;
+
+    cnop    0, 32*$20
+Gfx_LevelMemory_BGScroll:
+    incbin  "graphics/lvl_mem/bgscroll.bin"
+
+;----------------------------------------------------------------------------
+
+;-----------------;
+; 32x32 tile data ;
+;-----------------;
+
+Tiles_LevelMemory:
+
+;--------------------------------------------;
+; To make my life easier and save text space ;
+;--------------------------------------------;
+
+@Begin equ Tiles_LevelMemory
+
+    rsset VRAM_Level
+    rs.b (16*4)+3
+@T2 rs.b (16*8)+10
+@T4 rs.b (16*2)+10
+@W  rs.b 0
+
+;-----------;
+; Tile list ;
+;-----------;
+
+    dc.w    @Tile00-@Begin, @Tile00-@Begin
+    dc.w    @Tile01-@Begin, @Tile01-@Begin
+    dc.w    @Tile02-@Begin, @Tile02-@Begin
+    dc.w    @Tile03-@Begin, @Tile03-@Begin
+    dc.w    @Tile04-@Begin, @Tile04B-@Begin
+    dc.w    @Tile05-@Begin, @Tile05B-@Begin
+    dc.w    @Tile06-@Begin, @Tile06-@Begin
+    dc.w    @Tile07-@Begin, @Tile07-@Begin
+    dc.w    @Tile08-@Begin, @Tile08-@Begin
+    dc.w    @Tile09-@Begin, @Tile09-@Begin
+    dc.w    @Tile0A-@Begin, @Tile0A-@Begin
+    dc.w    @Tile0B-@Begin, @Tile0B-@Begin
+    dc.w    @Tile0C-@Begin, @Tile0C-@Begin
+    dc.w    @Tile0D-@Begin, @Tile0D-@Begin
+    dc.w    @Tile0E-@Begin, @Tile0E-@Begin
+    dc.w    @Tile0F-@Begin, @Tile0F-@Begin
+
+    dc.w    @Tile10-@Begin, @Tile10-@Begin
+    dc.w    @Tile11-@Begin, @Tile11B-@Begin
+    dc.w    @Tile12-@Begin, @Tile12B-@Begin
+    dc.w    @Tile13-@Begin, @Tile13-@Begin
+    dc.w    @Tile14-@Begin, @Tile14B-@Begin
+    dc.w    @Tile15-@Begin, @Tile15B-@Begin
+    dc.w    @Tile16-@Begin, @Tile16B-@Begin
+    dc.w    @Tile17-@Begin, @Tile17B-@Begin
+    dc.w    @Tile18-@Begin, @Tile18-@Begin
+    dc.w    @Tile19-@Begin, @Tile19-@Begin
+    dc.w    @Tile1A-@Begin, @Tile1A-@Begin
+    dc.w    @Tile1B-@Begin, @Tile1BB-@Begin
+    dc.w    @Tile1C-@Begin, @Tile1CB-@Begin
+    dc.w    @Tile1D-@Begin, @Tile1DB-@Begin
+
+;----------------------;
+; Tile $00: empty tile ;
+;----------------------;
+
+@Tile00:
+    dcb.w   4*4, $8000
+
+;------------------;
+; Tile $01: bricks ;
+;------------------;
+
+@Tile01:
+    dc.w    @T2+$A000, @T2+$A001, @T2+$A002, @T2+$A003
+    dc.w    @T2+$A004, @T2+$A005, @T2+$A006, @T2+$A007
+    dc.w    @T2+$A002, @T2+$A003, @T2+$A000, @T2+$A001
+    dc.w    @T2+$A006, @T2+$A007, @T2+$A004, @T2+$A005
+
+;--------------------;
+; Tile $02: frozen 0 ;
+;--------------------;
+
+@Tile02:
+    dc.w    @T2+$A000, @T2+$A008, @T2+$A009, @T2+$A00A
+    dc.w    @T2+$A00B, @T2+$A00C, @T2+$A00D, @T2+$A00E
+    dc.w    @T2+$A00F, @T2+$A010, @T2+$A011, @T2+$A012
+    dc.w    @T2+$A013, @T2+$A014, @T2+$A015, @T2+$A016
+
+;--------------------;
+; Tile $03: frozen 1 ;
+;--------------------;
+
+@Tile03:
+    dc.w    @T2+$A000, @T2+$A017, @T2+$A018, @T2+$A00A
+    dc.w    @T2+$A019, @T2+$A01A, @T2+$A01B, @T2+$A01C
+    dc.w    @T2+$A01D, @T2+$A01E, @T2+$A01F, @T2+$A020
+    dc.w    @T2+$A013, @T2+$A014, @T2+$A015, @T2+$A016
+
+;-----------------------------;
+; Tile $04: rainbow waterfall ;
+;-----------------------------;
+
+@Tile04:
+    dc.w    @T4+$E000, @T4+$E001, @T4+$E002, @T4+$E003
+    dc.w    @T4+$E004, @T4+$E005, @T4+$E006, @T4+$E007
+    dc.w    @T4+$E008, @T4+$E009, @T4+$E00A, @T4+$E00B
+    dc.w    @T4+$E00C, @T4+$E00D, @T4+$E00E, @T4+$E00F
+
+@Tile04B:
+    dc.w    @T4+$E010, @T4+$E011, @T4+$E012, @T4+$E013
+    dc.w    @T4+$E014, @T4+$E015, @T4+$E016, @T4+$E017
+    dc.w    @T4+$E018, @T4+$E019, @T4+$E01A, @T4+$E01B
+    dc.w    @T4+$E01C, @T4+$E01D, @T4+$E01E, @T4+$E01F
+
+;------------------------------;
+; Tile $05: bridge + waterfall ;
+;------------------------------;
+
+@Tile05:
+    dc.w    @T2+$A021, @T2+$A022, @T2+$A023, @T2+$A024
+    dc.w    @T4+$E004, @T4+$E005, @T4+$E006, @T4+$E007
+    dc.w    @T4+$E008, @T4+$E009, @T4+$E00A, @T4+$E00B
+    dc.w    @T4+$E00C, @T4+$E00D, @T4+$E00E, @T4+$E00F
+
+@Tile05B:
+    dc.w    @T2+$A021, @T2+$A022, @T2+$A023, @T2+$A024
+    dc.w    @T4+$E014, @T4+$E015, @T4+$E016, @T4+$E017
+    dc.w    @T4+$E018, @T4+$E019, @T4+$E01A, @T4+$E01B
+    dc.w    @T4+$E01C, @T4+$E01D, @T4+$E01E, @T4+$E01F
+
+;-------------------------------;
+; Tile $06: bridge left extreme ;
+;-------------------------------;
+
+@Tile06:
+    dc.w    @T2+$A025, @T2+$A026, @T2+$A027, @T2+$A028
+    dc.w    @T2+$A029, @T2+$A02A, @T2+$A02B, $8000
+    dc.w    @T2+$A02C, @T2+$A02D, $8000, $8000
+    dc.w    $8000, $8000, $8000, $8000
+
+;--------------------------------;
+; Tile $07: bridge right extreme ;
+;--------------------------------;
+
+@Tile07:
+    dc.w    @T2+$A02E, @T2+$A02F, @T2+$A030, @T2+$A031
+    dc.w    $8000, @T2+$A032, @T2+$A033, @T2+$A034
+    dc.w    $8000, $8000, @T2+$A035, @T2+$A036
+    dc.w    $8000, $8000, $8000, $8000
+
+;-----------------------------------------;
+; Tile $08: upwards green crystals (left) ;
+;-----------------------------------------;
+
+@Tile08:
+    dc.w    $8000, @T2+$A037, @T2+$A038, @T2+$A039
+    dc.w    @T2+$A03A, @T2+$A03B, @T2+$A03C, @T2+$A03D
+    dc.w    @T2+$A03E, @T2+$A03F, @T2+$A040, @T2+$A041
+    dc.w    @T2+$A042, @T2+$A043, @T2+$A044, @T2+$A045
+
+;------------------------------------------;
+; Tile $09: upwards green crystals (right) ;
+;------------------------------------------;
+
+@Tile09:
+    dc.w    @T2+$A046, @T2+$A047, @T2+$A048, $8000
+    dc.w    @T2+$A049, @T2+$A04A, @T2+$A04B, @T2+$A04C
+    dc.w    @T2+$A04D, @T2+$A04E, @T2+$A04F, @T2+$A050
+    dc.w    @T2+$A051, @T2+$A052, @T2+$A053, @T2+$A054
+
+;---------------------------------------;
+; Tile $0A: upwards red crystals (left) ;
+;---------------------------------------;
+
+@Tile0A:
+    dc.w    $8000, @T2+$C037, @T2+$C038, @T2+$C039
+    dc.w    @T2+$C03A, @T2+$C03B, @T2+$C03C, @T2+$C03D
+    dc.w    @T2+$C03E, @T2+$C03F, @T2+$C040, @T2+$C041
+    dc.w    @T2+$C042, @T2+$C043, @T2+$C044, @T2+$C045
+
+;----------------------------------------;
+; Tile $0B: upwards red crystals (right) ;
+;----------------------------------------;
+
+@Tile0B:
+    dc.w    @T2+$C046, @T2+$C047, @T2+$C048, $8000
+    dc.w    @T2+$C049, @T2+$C04A, @T2+$C04B, @T2+$C04C
+    dc.w    @T2+$C04D, @T2+$C04E, @T2+$C04F, @T2+$C050
+    dc.w    @T2+$C051, @T2+$C052, @T2+$C053, @T2+$C054
+
+;-------------------------------------------;
+; Tile $0C: downwards green crystals (left) ;
+;-------------------------------------------;
+
+@Tile0C:
+    dc.w    @T2+$B042, @T2+$B043, @T2+$B044, @T2+$B045
+    dc.w    @T2+$B03E, @T2+$B03F, @T2+$B040, @T2+$B041
+    dc.w    @T2+$B03A, @T2+$B03B, @T2+$B03C, @T2+$B03D
+    dc.w    $8000, @T2+$B037, @T2+$B038, @T2+$B039
+
+;--------------------------------------------;
+; Tile $0D: downwards green crystals (right) ;
+;--------------------------------------------;
+
+@Tile0D:
+    dc.w    @T2+$B051, @T2+$B052, @T2+$B053, @T2+$B054
+    dc.w    @T2+$B04D, @T2+$B04E, @T2+$B04F, @T2+$B050
+    dc.w    @T2+$B049, @T2+$B04A, @T2+$B04B, @T2+$B04C
+    dc.w    @T2+$B046, @T2+$B047, @T2+$B048, $8000
+
+;-----------------------------------------;
+; Tile $0E: downwards red crystals (left) ;
+;-----------------------------------------;
+
+@Tile0E:
+    dc.w    @T2+$D042, @T2+$D043, @T2+$D044, @T2+$D045
+    dc.w    @T2+$D03E, @T2+$D03F, @T2+$D040, @T2+$D041
+    dc.w    @T2+$D03A, @T2+$D03B, @T2+$D03C, @T2+$D03D
+    dc.w    $8000, @T2+$D037, @T2+$D038, @T2+$D039
+
+;------------------------------------------;
+; Tile $0F: downwards red crystals (right) ;
+;------------------------------------------;
+
+@Tile0F:
+    dc.w    @T2+$D051, @T2+$D052, @T2+$D053, @T2+$D054
+    dc.w    @T2+$D04D, @T2+$D04E, @T2+$D04F, @T2+$D050
+    dc.w    @T2+$D049, @T2+$D04A, @T2+$D04B, @T2+$D04C
+    dc.w    @T2+$D046, @T2+$D047, @T2+$D048, $8000
+
+;------------------------;
+; Tile $10: bridge alone ;
+;------------------------;
+
+@Tile10:
+    dc.w    @T2+$A021, @T2+$A022, @T2+$A023, @T2+$A024
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    $8000, $8000, $8000, $8000
+
+;------------------------------;
+; Tile $11: bridge with pillar ;
+;------------------------------;
+
+@Tile11:
+    dc.w    @T2+$A021, @T2+$A022, @T2+$A023, @T2+$A024
+    dc.w    @T2+$A055, @T2+$A056, @T2+$A057, @T2+$A058
+    dc.w    $8000, @T2+$A05D, @T2+$A05E, $8000
+    dc.w    $8000, @T2+$A05D, @T2+$A05E, $8000
+
+@Tile11B:
+    dc.w    @T2+$A021, @T2+$A022, @T2+$A023, @T2+$A024
+    dc.w    @T2+$A059, @T2+$A05A, @T2+$A05B, @T2+$A05C
+    dc.w    $8000, @T2+$B05D, @T2+$B05E, $8000
+    dc.w    $8000, @T2+$B05D, @T2+$B05E, $8000
+
+;-----------------------;
+; Tile $12: pillar body ;
+;-----------------------;
+
+@Tile12:
+    dc.w    $8000, @T2+$A05D, @T2+$A05E, $8000
+    dc.w    $8000, @T2+$A05D, @T2+$A05E, $8000
+    dc.w    $8000, @T2+$A05D, @T2+$A05E, $8000
+    dc.w    $8000, @T2+$A05D, @T2+$A05E, $8000
+
+@Tile12B:
+    dc.w    $8000, @T2+$B05D, @T2+$B05E, $8000
+    dc.w    $8000, @T2+$B05D, @T2+$B05E, $8000
+    dc.w    $8000, @T2+$B05D, @T2+$B05E, $8000
+    dc.w    $8000, @T2+$B05D, @T2+$B05E, $8000
+
+;------------------;
+; Tile $13: spikes ;
+;------------------;
+
+@Tile13:
+    dc.w    @T2+$A05F, @T2+$A05F, @T2+$A05F, @T2+$A05F
+    dc.w    @T2+$A060, @T2+$A060, @T2+$A060, @T2+$A060
+    dc.w    @T2+$A061, @T2+$A061, @T2+$A061, @T2+$A061
+    dc.w    @T2+$A062, @T2+$A062, @T2+$A062, @T2+$A062
+
+;-----------------------------;
+; Tile $14: spikes and pillar ;
+;-----------------------------;
+
+@Tile14:
+    dc.w    @T2+$A05F, @T2+$A063, @T2+$A064, @T2+$A05F
+    dc.w    @T2+$A060, @T2+$A065, @T2+$A066, @T2+$A060
+    dc.w    @T2+$A061, @T2+$A067, @T2+$A068, @T2+$A061
+    dc.w    @T2+$A062, @T2+$A062, @T2+$A062, @T2+$A062
+
+@Tile14B:
+    dc.w    @T2+$A05F, @T2+$A069, @T2+$A06A, @T2+$A05F
+    dc.w    @T2+$A060, @T2+$A06B, @T2+$A06C, @T2+$A060
+    dc.w    @T2+$A061, @T2+$A06D, @T2+$A06E, @T2+$A061
+    dc.w    @T2+$A062, @T2+$A062, @T2+$A062, @T2+$A062
+
+;----------------;
+; Tile $15: hole ;
+;----------------;
+
+@Tile15:
+    dc.w    @T2+$A070, @T2+$A06F, @T2+$A86F, @T2+$A071
+    dc.w    @T2+$A072, @T2+$A06F, @T2+$A86F, @T2+$A073
+    dc.w    @T2+$A074, @T2+$A06F, @T2+$A86F, @T2+$A075
+    dc.w    @T2+$A076, @T2+$A06F, @T2+$A86F, @T2+$A077
+
+@Tile15B:
+    dc.w    @T2+$B072, @T2+$B06F, @T2+$B86F, @T2+$B073
+    dc.w    @T2+$B070, @T2+$B06F, @T2+$B86F, @T2+$B071
+    dc.w    @T2+$A078, @T2+$B06F, @T2+$B86F, @T2+$A079
+    dc.w    @T2+$A07A, @T2+$B06F, @T2+$B86F, @T2+$A07B
+
+;-----------------;
+; Tile $16: water ;
+;-----------------;
+
+@Tile16:
+    dc.w    @W+$E000, @W+$E002, @W+$E004, @W+$E006
+    dc.w    @W+$E001, @W+$E003, @W+$E005, @W+$E007
+    dc.w    @W+$E000, @W+$E002, @W+$E004, @W+$E006
+    dc.w    @W+$E001, @W+$E003, @W+$E005, @W+$E007
+
+@Tile16B:
+    dc.w    @W+$E008, @W+$E00A, @W+$E00C, @W+$E00E
+    dc.w    @W+$E009, @W+$E00B, @W+$E00D, @W+$E00F
+    dc.w    @W+$E008, @W+$E00A, @W+$E00C, @W+$E00E
+    dc.w    @W+$E009, @W+$E00B, @W+$E00D, @W+$E00F
+
+;---------------------------;
+; Tile $17: waterfall (end) ;
+;---------------------------;
+
+@Tile17:
+    dc.w    @T4+$E000, @T4+$E001, @T4+$E002, @T4+$E003
+    dc.w    @T4+$E004, @T4+$E005, @T4+$E006, @T4+$E007
+    dc.w    @T4+$E008, @T4+$E009, @T4+$E00A, @T4+$E00B
+    dc.w    @T4+$E020, @T4+$E021, @T4+$E022, @T4+$E023
+
+@Tile17B:
+    dc.w    @T4+$E010, @T4+$E011, @T4+$E012, @T4+$E013
+    dc.w    @T4+$E014, @T4+$E015, @T4+$E016, @T4+$E017
+    dc.w    @T4+$E018, @T4+$E019, @T4+$E01A, @T4+$E01B
+    dc.w    @T4+$E024, @T4+$E025, @T4+$E026, @T4+$E027
+
+;-----------------------------------;
+; Tile $18: waterfall bounce (left) ;
+;-----------------------------------;
+
+@Tile18:
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    $8000, $8000, $8000, @T4+$E028
+
+;------------------------------------;
+; Tile $19: waterfall bounce (right) ;
+;------------------------------------;
+
+@Tile19:
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    @T4+$E029, $8000, $8000, $8000
+
+;-----------------------------;
+; Tile $1A: background bricks ;
+;-----------------------------;
+
+@Tile1A:
+    dc.w    @T2+$A07C, @T2+$A07D, @T2+$A07C, @T2+$A07D
+    dc.w    @T2+$A07D, @T2+$A07C, @T2+$A07D, @T2+$A07C
+    dc.w    @T2+$A07C, @T2+$A07D, @T2+$A07C, @T2+$A07D
+    dc.w    @T2+$A07D, @T2+$A07C, @T2+$A07D, @T2+$A07C
+
+;-------------------------------------------;
+; Tile $1B: background bricks (left border) ;
+;-------------------------------------------;
+
+@Tile1B:
+    dc.w    @T2+$A07E, @T2+$A07D, @T2+$A07C, @T2+$A07D
+    dc.w    @T2+$A07F, @T2+$A07C, @T2+$A07D, @T2+$A07C
+    dc.w    @T2+$A07E, @T2+$A07D, @T2+$A07C, @T2+$A07D
+    dc.w    @T2+$A07F, @T2+$A07C, @T2+$A07D, @T2+$A07C
+
+@Tile1BB:
+    dc.w    @T2+$A080, @T2+$A07D, @T2+$A07C, @T2+$A07D
+    dc.w    @T2+$A081, @T2+$A07C, @T2+$A07D, @T2+$A07C
+    dc.w    @T2+$A080, @T2+$A07D, @T2+$A07C, @T2+$A07D
+    dc.w    @T2+$A081, @T2+$A07C, @T2+$A07D, @T2+$A07C
+
+;--------------------------------------------;
+; Tile $1C: background bricks (right border) ;
+;--------------------------------------------;
+
+@Tile1C:
+    dc.w    @T2+$A07C, @T2+$A07D, @T2+$A07C, @T2+$A082
+    dc.w    @T2+$A07D, @T2+$A07C, @T2+$A07D, @T2+$A083
+    dc.w    @T2+$A07C, @T2+$A07D, @T2+$A07C, @T2+$A082
+    dc.w    @T2+$A07D, @T2+$A07C, @T2+$A07D, @T2+$A083
+
+@Tile1CB:
+    dc.w    @T2+$A07C, @T2+$A07D, @T2+$A07C, @T2+$A084
+    dc.w    @T2+$A07D, @T2+$A07C, @T2+$A07D, @T2+$A085
+    dc.w    @T2+$A07C, @T2+$A07D, @T2+$A07C, @T2+$A084
+    dc.w    @T2+$A07D, @T2+$A07C, @T2+$A07D, @T2+$A085
+
+;---------------------------------------------;
+; Tile $1D: background bricks (bottom border) ;
+;---------------------------------------------;
+
+@Tile1D:
+    dc.w    @T2+$A07C, @T2+$A07D, @T2+$A07C, @T2+$A07D
+    dc.w    @T2+$A07D, @T2+$A07C, @T2+$A07D, @T2+$A07C
+    dc.w    @T2+$A07C, @T2+$A07D, @T2+$A07C, @T2+$A07D
+    dc.w    @T2+$A086, @T2+$A087, @T2+$A086, @T2+$A087
+
+@Tile1DB:
+    dc.w    @T2+$A07C, @T2+$A07D, @T2+$A07C, @T2+$A07D
+    dc.w    @T2+$A07D, @T2+$A07C, @T2+$A07D, @T2+$A07C
+    dc.w    @T2+$A07C, @T2+$A07D, @T2+$A07C, @T2+$A07D
+    dc.w    @T2+$A088, @T2+$A089, @T2+$A088, @T2+$A089
+
+;----------------------------------------------------------------------------

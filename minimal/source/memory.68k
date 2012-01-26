@@ -1,0 +1,538 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------;
+; Variables common to all game modes ;
+;------------------------------------;
+
+    rsset $FF0000
+
+RAM_ErrorType       rs.w 1          ; What kind of error is it
+RAM_ErrorPC         rs.l 1          ; Where the program crashed
+RAM_ErrorAddr       rs.l 1          ; Where the program attempted to access
+RAM_ErrorRegs       rs.l 16         ; Where registers are stored
+
+RAM_VDPBuffer       rs.w $200       ; VDP command buffer
+RAM_PalBuffer       rs.w $40        ; Palette buffer
+RAM_FadeBuffer      rs.w $40        ; Same as above, but for fading
+RAM_SprBuffer       rs.w 4*80       ; Sprite table buffer
+RAM_HScrBuffer      rs.w 224*2      ; HScroll buffer
+RAM_VScrBuffer      rs.w 2          ; VScroll buffer
+
+RAM_GameMode        rs.b 1          ; Next game mode to run
+RAM_NumSprites      rs.b 1          ; Number of sprites in sprite buffer
+RAM_VDPBufPos       rs.l 1          ; VDP command buffer tail address
+RAM_JoypadPress     rs.b 1          ; Pressed status of joypad buttons
+RAM_JoypadHold      rs.b 1          ; Held status of joypad buttons
+RAM_GlobalAnim      rs.l 1          ; Used for global animations
+RAM_GlobalAnim2     rs.l 1          ; Same as above, increased differently
+RAM_GlobalAnimSpd   rs.l 1          ; Speed at which the above increases
+RAM_GameStatus      rs.w 1          ; Global status flags
+RAM_Score           rs.l 1          ; Player score
+RAM_ScoreLen        rs.b 1          ; To determine the size of score HUD
+RAM_Lives           rs.b 1          ; Amount of lives
+RAM_Level           rs.b 1          ; Current level
+                    rs.b 1          ; Padding
+RAM_FadeStage       rs.l 1          ; Current stage of fading (0 = over)
+RAM_FadeSpeed       rs.l 1          ; Fading speed
+RAM_BGMToPlay       rs.b 1          ; BGM to play (unused for now...)
+RAM_SFXToPlay       rs.b 1          ; SFX to play
+RAM_Random          rs.w 1          ; Last random value fetched
+RAM_MusicTest       rs.b 1          ; Current option in music test
+RAM_SoundTest       rs.b 1          ; Current option in sound test
+RAM_Base            rs.b 0          ; Where non-shared data is stored
+
+;-----------------------------------------;
+; Variables used in the in-game mode only ;
+;-----------------------------------------;
+
+    rsreset
+
+Player_X            rs.l 1          ; Player X coordinate
+Player_Y            rs.l 1          ; Player Y coordinate
+Player_Speed        rs.l 1          ; Player horizontal speed
+Player_Gravity      rs.l 1          ; Player vertical speed
+Player_Status       rs.w 1          ; Player status
+Player_AnimTime     rs.w 1          ; Time before next frame
+Player_AnimNext     rs.w 1          ; ID of next frame
+Player_CurrAct      rs.b 1          ; Current action
+Player_PrevAct      rs.b 1          ; Previous action
+Player_AccelSpd     rs.l 1          ; Acceleration speed
+Player_MaxSpeed     rs.l 1          ; Maximum speed
+Player_AccelGrav    rs.l 1          ; Gravity acceleration
+Player_JumpForce    rs.l 1          ; Jump strength
+Player_RideSpeed    rs.l 1          ; Speed caused by riding
+Player_RideGrav     rs.l 1          ; Gravity caused by riding
+Player_Flash        rs.b 1          ; Invulnerability time left
+Player_FlashLen     rs.b 1          ; Length of invulnerability
+Player_Power        rs.b 1          ; Current power
+Player_OldPower     rs.b 1          ; Previous power
+Player_PowerTime    rs.b 1          ; How long it takes to transform
+Player_PowerDelay   rs.b 1          ; Delay while transforming
+Player_ExplTime     rs.b 1          ; How long it takes to explode
+Player_Exploding    rs.b 1          ; Delay while exploding
+Player_ExplLeft     rs.w 1          ; Explosion coordinates
+Player_ExplRight    rs.w 1          ; Explosion coordinates
+Player_ExplTop      rs.w 1          ; Explosion coordinates
+Player_ExplBottom   rs.w 1          ; Explosion coordinates
+Player_Energy       rs.b 1          ; Energy (health)
+Player_DeathDelay   rs.b 1          ; Delay used when dying
+Player_Frozen       rs.b 1          ; Time in which the player is "frozen"
+Player_KissTime     rs.b 1          ; How long it takes to kiss
+Player_Invinc       rs.w 1          ; Invincibility time
+Player_InvincLen    rs.w 1          ; How long does invincibility last
+Player_ShockTime    rs.w 1          ; Time before playing shock SFX again
+Player_ShockLen     rs.w 1          ; How long to wait for the above
+Player_Size         rs.b 0          ; Size of player data
+
+    rsreset
+
+Object_Type         rs.w 1          ; Object type
+Object_MapPos       rs.w 1          ; Object position in object map
+Object_X            rs.l 1          ; Object X coordinate
+Object_Y            rs.l 1          ; Object Y coordinate
+Object_Misc         rs.l 1          ; Object-specific stuff
+Object_Size         rs.b 0          ; Size of an object entry
+
+    rsset RAM_Base
+
+RAM_LayoutAddr      rs.l 1          ; Address of layout map
+RAM_CollAddr        rs.l 1          ; Address of collision map
+RAM_ItemAddr        rs.l 1          ; Address of item map
+RAM_TileAddr        rs.l 1          ; Address of 32x32 tile data
+RAM_UpdateFunc      rs.l 1          ; Pointer to level update function
+RAM_LevelStuff      rs.b $800       ; Memory used for level-specific things
+RAM_Scroll          rs.w 1          ; Camera scroll coordinate
+RAM_MaxScroll       rs.w 1          ; Maximum allowable scroll coordinate
+RAM_LevelSize       rs.w 1          ; Level size
+RAM_ObjectList      rs.l 1          ; Address of object list
+RAM_LastObject      rs.l 1          ; Address of last object
+RAM_RhombusGfx      rs.w 1          ; Sprite used by the rhombuses
+RAM_PulseGfx        rs.w 1          ; Sprite used by electrical pulses
+RAM_RayGfx          rs.w 1          ; Sprite used by the ray power-ups
+RAM_BombGfx         rs.w 1          ; Sprite used by the bomb power-ups
+RAM_DJumpGfx        rs.w 1          ; Sprite used by the dbl. jump power-ups
+RAM_ThinBlockGfx    rs.w 1          ; Sprite used by breakable thin blocks
+RAM_CheckPointGfx   rs.w 1          ; Sprite used by checkpoints
+RAM_StarsGfx        rs.w 4          ; Sprites used by stars
+RAM_StalactiteGfx   rs.w 1          ; Sprite used by stalactites
+RAM_IceRockGfx      rs.w 1          ; Sprite used by ice rocks
+RAM_WLIceFloorGfx   rs.w 1          ; Sprite used by waterlava ice floor
+RAM_BumperPadGfx    rs.w 1          ; Sprite used by bumper pads
+RAM_IngameStatus    rs.w 1          ; In-game specific status stuff
+RAM_CheckPoint      rs.w 1          ; Last checkpoint hit
+RAM_StartX          rs.w 1          ; Starting X coordinate
+RAM_StartY          rs.w 1          ; Starting Y coordinate
+RAM_LevelTime       rs.l 1          ; How long has the player been playing
+RAM_ComboScore      rs.l 1          ; How much to award when killing an enemy
+
+RAM_Player          rs.b Player_Size    ; Player data
+RAM_ObjectMap       rs.b 0              ; Where the object map starts
+
+;----------------------------------------;
+; Variables used by the score tally only ;
+;----------------------------------------;
+
+RAM_EnergyBonus     rs.l 1          ; Energy/perfect bonus
+RAM_TimeBonus       rs.l 1          ; Time bonus
+RAM_TallyTemp       rs.b 0          ; For storing uncompressed graphics
+
+;---------------------------------------;
+; Variables used in the game intro only ;
+;---------------------------------------;
+
+    rsset RAM_Base
+    
+RAM_ConBlinkSpd     rs.b 1          ; Cursor blinking speed
+RAM_ConBlinkTime    rs.b 1          ; Used to animate the cursor
+RAM_ConCursorX      rs.b 1          ; Cursor X coordinate (in tiles)
+                    rs.b 1
+
+RAM_StarfieldPos    rs.l 1          ; For starfield animation
+RAM_StarfieldData   rs.w 256*2      ; Star positions
+
+;-----------------------------------------;
+; Variables used in the title screen only ;
+;-----------------------------------------;
+
+    rsset RAM_Base
+
+RAM_TitleStage      rs.l 1          ; Title screen current section
+RAM_TitleShift      rs.l 1          ; Used when quitting
+RAM_TitleOption     rs.b 1          ; Current option
+
+;-------------------------------------;
+; Variables used in menu screens only ;
+;-------------------------------------;
+
+    rsset RAM_Base
+
+RAM_MenuHandler     rs.l 1          ; Menu handler
+RAM_CurrOption      rs.b 1          ; Current option
+RAM_NumOptions      rs.b 1          ; Number of options
+RAM_MenuQuit        rs.b 1          ; Quit from menu?
+RAM_MenuHexStr      rs.b 3          ; Buffer for printing hex values
+RAM_MenuBase        rs.b 0          ; In case somebody needs more data...
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------;
+; Game mode IDs (used with RAM_GameMode) ;
+;----------------------------------------;
+
+    rsreset
+
+GameMode_Intro      rs.b 1          ; Game intro
+GameMode_Title      rs.b 1          ; Title screen
+GameMode_LvlSelect  rs.b 1          ; Level select
+GameMode_Options    rs.b 1          ; Options menu
+GameMode_InGameInit rs.b 1          ; In-game mode init
+GameMode_InGame     rs.b 1          ; In-game mode
+GameMode_Tally      rs.b 1          ; Score tally
+
+;---------------------;
+; Global status flags ;
+;---------------------;
+
+    rsreset
+
+GameStat_Blink      rs.b 1          ; Used to do blinking
+GameStat_FadeOut    rs.b 1          ; 1 = Fade out, 0 = Fade in
+GameStat_WhiteFade  rs.b 1          ; 1 = White fade, 0 = Black fade
+
+;----------------------;
+; In-game status flags ;
+;----------------------;
+
+    rsreset
+
+IngameStat_Score    rs.b 1          ; Set when score is updated
+IngameStat_Quit     rs.b 1          ; Set when quitting the game
+IngameStat_Pause    rs.b 1          ; Set when game is paused
+IngameStat_AnimChk  rs.b 1          ; Animate checkpoints
+IngameStat_NoHit    rs.b 1          ; Set until the player gets hit
+IngameStat_Lives    rs.b 1          ; Set when lives are updated
+IngameStat_World    rs.b 1          ; [WL] 0 = Lava, 1 = Water
+
+;----------------;
+; Joypad buttons ;
+;----------------;
+
+Joypad_Up           equ 0           ; D-pad up
+Joypad_Down         equ 1           ; D-pad down
+Joypad_Left         equ 2           ; D-pad left
+Joypad_Right        equ 3           ; D-pad right
+Joypad_A            equ 6           ; A button
+Joypad_B            equ 4           ; B button
+Joypad_C            equ 5           ; C button
+Joypad_Start        equ 7           ; Start button
+
+;---------;
+; BGM IDs ;
+;---------;
+
+    rsset 1
+
+BGM_Level3D         rs.b 1          ; Infinite Field
+BGM_LevelMotherboard rs.b 1         ; Electronic Madness
+BGM_LevelLogic      rs.b 1          ; Gate Array
+BGM_LevelMemory     rs.b 1          ; Frozen Memories
+BGM_LevelShape      rs.b 1          ; Crazy Shapes
+BGM_LevelVDP        rs.b 1          ; Pixelated World
+BGM_LevelLight      rs.b 1          ; Bright Darkness
+BGM_LevelInternet   rs.b 1          ; Ether Network
+BGM_LevelTray       rs.b 1          ; Mechanical Heart
+BGM_LevelLava       rs.b 1          ; Waterlava (lava world)
+BGM_LevelWater      rs.b 1          ; Waterlava (water world)
+BGM_LevelSelect     rs.b 1          ; Level Select
+BGM_GameOver        rs.b 1          ; Game Over
+BGM_Max             rs.b 0          ; Number of BGMs
+BGMStop             equ $FF         ; Stop BGMs
+
+;---------;
+; SFX IDs ;
+;---------;
+
+    rsset 1
+
+SFX_Jump            rs.b 1      ; Jump
+SFX_Rhombus         rs.b 4      ; Get rhombus
+SFX_PowerUp         rs.b 1      ; Power-up
+SFX_Attack          rs.b 1      ; Attack
+SFX_GetHurt         rs.b 1      ; Getting hurt (normal)
+SFX_Electrocute     rs.b 1      ; Getting electrocuted
+SFX_ShockShield     rs.b 1      ; Electric shield
+SFX_BigExplosion    rs.b 1      ; Big explosion
+SFX_Explosion       rs.b 1      ; Normal explosion
+SFX_GiantExplosion  rs.b 1      ; GIANT explosion
+SFX_Beep            rs.b 1      ; Beep!
+SFX_OK              rs.b 1      ; Accept option
+SFX_Cancel          rs.b 1      ; Cancel
+SFX_Swim            rs.b 1      ; Swim
+SFX_Splash          rs.b 1      ; Fall into water
+SFX_Checkpoint      rs.b 1      ; Checkpoint
+SFX_1up             rs.b 1      ; Get 1-up
+SFX_Capacitor       rs.b 1      ; Exploding capacitor
+SFX_Bumper          rs.b 1      ; Bumper
+SFX_BumperPad       rs.b 1      ; Bumper pad
+SFX_Teleporter      rs.b 1      ; Teleporter
+
+SFX_Max             rs.b 0      ; Number of SFXs
+SFXStop             equ $FF     ; Stop SFXs
+
+;----------------------------------------------------------------------------
+
+;--------------------------------;
+; Constants used for player data ;
+;--------------------------------;
+
+    rsreset
+
+PlayerStat_Dir      rs.b 1          ; 0 = facing right, 1 = facing left
+PlayerStat_Ground   rs.b 1          ; Set when touching the ground
+PlayerStat_Hurt     rs.b 1          ; Set if the player just got hurt
+PlayerStat_Ride     rs.b 1          ; Set if the player is riding something
+
+PlayerStat_Crouch   rs.b 1          ; Set if the player is crouching
+PlayerStat_NoCtrl   rs.b 1          ; Player doesn't control itself
+PlayerStat_Shock    rs.b 1          ; Player is using the electric shield
+PlayerStat_DJump    rs.b 1          ; Set if the player double jumped
+
+PlayerStat_Swim     rs.b 1          ; Set if the player is swimming
+PlayerStat_WasSwim  rs.b 1          ; Set if player was swimming
+
+    rsreset
+
+PlayerAct_Idle      rs.w 1          ; Idle
+PlayerAct_IdleLove  rs.w 1          ; Idle (love power-up)
+PlayerAct_Walk      rs.w 1          ; Walking
+PlayerAct_WalkSlow  rs.w 1          ; Walking (slower)
+PlayerAct_Fall      rs.w 1          ; Falling
+PlayerAct_Jump      rs.w 1          ; Jumping
+PlayerAct_Crouch    rs.w 1          ; Crouching (going down)
+PlayerAct_Crouch2   rs.w 1          ; Crouching (already down)
+PlayerAct_Hurt      rs.w 1          ; Getting hurt
+PlayerAct_Die       rs.w 1          ; Dying
+PlayerAct_OnGoal    rs.w 1          ; When disappearing
+PlayerAct_Shock     rs.w 1          ; Using electric shield
+PlayerAct_Explode   rs.w 1          ; Exploding
+PlayerAct_Kiss      rs.w 1          ; Kissing
+
+    rsreset
+
+PlayerPow_None      rs.b 1          ; No powers
+PlayerPow_Ray       rs.b 1          ; Electricity
+PlayerPow_Bomb      rs.b 1          ; Explosive
+PlayerPow_Love      rs.b 1          ; Allows kissing
+PlayerPow_DJump     rs.b 1          ; Double jump
+
+;-------------------------;
+; List of object type IDs ;
+;-------------------------;
+
+    rsreset
+
+Obj_Rhombus         rs.b 1          ; Rhombus
+Obj_PulseGen        rs.b 1          ; Pulse generator
+Obj_Spark           rs.b 1          ; Spark
+Obj_Ray             rs.b 1          ; Ray power-up
+Obj_ThinBlock       rs.b 1          ; Breakable thin block
+Obj_Bomb            rs.b 1          ; Bomb power-up
+Obj_Troll           rs.b 1          ; Troll (walking enemies)
+Obj_Flamethrower    rs.b 1          ; Flamethrower aiming up
+Obj_Flamethrower2   rs.b 1          ; Flamethrower aiming down
+Obj_VPlatform       rs.b 1          ; Vertical platform
+Obj_CapacitorTop    rs.b 1          ; Capacitors that go boom
+Obj_CableBase       rs.b 1          ; Hanging cable base
+Obj_VSpark          rs.b 1          ; Vertical spark
+Obj_Heart           rs.b 1          ; Love power-up
+Obj_EndButton       rs.b 1          ; Button that ends the level
+Obj_DblCircle       rs.b 1          ; Double circle thingy
+Obj_CheckPoint      rs.b 1          ; Checkpoint!
+Obj_Stalactite      rs.b 1          ; Stalactite
+Obj_Spikes          rs.b 1          ; Spike behaviour
+Obj_BrkPlatform     rs.b 1          ; Breakable platform
+Obj_Stars           rs.b 1          ; Invincibility item
+Obj_Laser           rs.b 1          ; Lasers
+Obj_GearHazard      rs.b 1          ; Gear hazard area
+Obj_IceRock         rs.b 1          ; Falling ice rock
+Obj_RailPlatform    rs.b 1          ; Rail platforms
+Obj_DJump           rs.b 1          ; Double jump power-up
+Obj_1up             rs.b 1          ; 1-up
+Obj_WLTeleporter    rs.b 1          ; Waterlava teleporter
+Obj_WLIceFloor      rs.b 1          ; Waterlava ice floor
+Obj_Bumper          rs.b 1          ; Bumper
+Obj_BumperPad       rs.b 1          ; Bumper pad
+Obj_LightBulb       rs.b 1          ; Light bulb
+Obj_VSparkEmit      rs.b 1          ; Vertical spark emitter (floor)
+Obj_VSparkEmit2     rs.b 1          ; Vertical spark emitter (ceiling)
+Obj_SpinSpike       rs.b 1          ; Spinning spikeball
+Obj_Barrier         rs.b 1          ; Barrier
+
+Obj_Pulse           rs.b 1          ; Pulse
+Obj_Flameball       rs.b 1          ; Flameball going up
+Obj_Flameball2      rs.b 1          ; Flameball going down
+Obj_CablePiece      rs.b 1          ; Piece of hanging cable
+Obj_CableSpark      rs.b 1          ; Hanging cable spark
+Obj_PlatformPiece   rs.b 1          ; Falling piece of platform
+Obj_FallingPiece    rs.b 1          ; Generic falling piece
+Obj_HeartBullet     rs.b 1          ; Heart bullet
+Obj_Sparkle         rs.b 1          ; Sparkle when getting a rhombus
+
+;----------------------------------;
+; Score given by different objects ;
+;----------------------------------;
+
+Score_Rhombus       equ $10         ; Rhombus
+Score_Enemy         equ $100        ; Enemy
+Score_Powerup       equ $500        ; Power-up
+Score_Goal          equ $1000       ; Finish a level
+Score_Misc          equ $50         ; Miscellaneous
+
+;-------------;
+; Level order ;
+;-------------;
+
+    rsreset
+Level_3D            rs.b 1          ; Infinite Field
+Level_Motherboard   rs.b 1          ; Electronic Madness
+Level_Logic         rs.b 1          ; Gate Array
+Level_Memory        rs.b 1          ; Frozen Memories
+Level_Shape         rs.b 1          ; Crazy Shapes
+Level_VDP           rs.b 1          ; Pixelated World
+Level_BossBinary    rs.b 1          ; Binary Fury
+Level_Light         rs.b 1          ; Bright Darkness
+Level_Internet      rs.b 1          ; Ether Network
+Level_Tray          rs.b 1          ; Mechanical Heart
+Level_BossTray      rs.b 1          ; Dangerous Gears
+Level_Waterlava     rs.b 1          ; Waterlava
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------;
+; VRAM positions for in-game graphics ;
+;-------------------------------------;
+
+    rsset 1
+
+VRAM_Player         rs.b 16         ; Player sprite
+VRAM_HUDScore       rs.b 2*8        ; HUD score
+VRAM_HUDEnergy      rs.b 4*4        ; HUD energy
+VRAM_HUDLives       rs.b 2+(2*2)    ; HUD lives
+VRAM_HUDBorder      rs.b 4          ; HUD borders
+VRAM_PauseContinue  rs.b 8*2        ; Pause menu "CONTINUE"
+VRAM_PauseRestart   rs.b 8*2        ; Pause menu "RESTART"
+                    rs.b 2*2        ; (pause menu background)
+VRAM_PauseExit      rs.b 4*2        ; Pause menu "EXIT"
+                    rs.b 2*2        ; (pause menu background)
+VRAM_Rhombus        rs.b 5*4        ; Rhombus
+VRAM_RayPowerup     rs.b 4*6        ; Ray power-up
+VRAM_BombPowerup    rs.b 3*9        ; Bomb power-up
+VRAM_LovePowerup    rs.b 4*2        ; Love power-up
+VRAM_DJumpPowerup   rs.b 4*8        ; Double jump power-up
+VRAM_Player_Heart   rs.b 1          ; Heart (love power-up bullet)
+VRAM_1up            rs.b 4*3        ; 1-up!
+VRAM_Spark          rs.b 16         ; Sparks
+VRAM_TrollWalk      rs.b 16         ; Troll walking animation
+VRAM_TrollDead      rs.b 16         ; Troll dead animation
+VRAM_DblCircleFly   rs.b 16         ; Double circle thingy normal animation
+VRAM_DblCircleDead  rs.b 16         ; Double circle thingy dead animation
+VRAM_ThinBlock      rs.b 4          ; Breakable think block
+VRAM_Platform       rs.b 8          ; Platforms
+VRAM_CheckPoint     rs.b 8          ; Checkpoint
+VRAM_EndButton      rs.b (4+2+2)*2  ; Button that ends the level
+VRAM_EndBeam        rs.b (1+1+2+2)*4; Beam that takes Stephany away at finish
+VRAM_Stars          rs.b 4*8        ; Invincibility stars
+VRAM_ElectricShield rs.b 24         ; Electric shield
+VRAM_LevelSpec      rs.b 160        ; Level-specific graphics
+VRAM_Level          rs.b 0          ; Level graphics
+
+    rsset VRAM_LevelSpec
+VRAM_CapacitorTop   rs.b 3          ; Top of capacitors that go boom x_X
+VRAM_CapacExplode   rs.b 16         ; Capacitor exploding :V
+VRAM_HangingCable   rs.b 5          ; Hanging cable pieces
+VRAM_CableSpark     rs.b 1          ; Hanging cable spark
+
+    rsset VRAM_LevelSpec
+VRAM_Stalactite     rs.b 8*2        ; Stalactites
+VRAM_IceRock        rs.b 16*4       ; Falling ice rocks
+VRAM_Barrier        rs.b 4          ; Barrier
+VRAM_PowerSource    rs.b 16*4       ; Power source
+
+    rsset VRAM_LevelSpec
+VRAM_Bumper         rs.b 16*5       ; Bumpers
+VRAM_BumperPad      rs.b 4          ; Bumper pad
+
+    rsset VRAM_LevelSpec
+VRAM_LightBG        rs.b 4          ; Light-themed level BG
+VRAM_LightBulb      rs.b 12         ; Light bulbs
+VRAM_VSpark         rs.b 14         ; Vertical sparks
+VRAM_VSparkBase     rs.b 3          ; Vertical spark emitters
+VRAM_SpinSpike      rs.b 16         ; Spinning spikeballs
+
+    rsset VRAM_LevelSpec
+VRAM_Pulse          rs.b 6+5+4+3+2  ; Electrical pulses
+VRAM_PulseGen       rs.b 1+4+9+8    ; Pulse generator
+VRAM_Flamethrower   rs.b 8          ; Flamethrower
+VRAM_Flameball      rs.b 107        ; Flameballs... HOLY CRAP IT'S A LOT o_O
+
+    rsset VRAM_LevelSpec
+VRAM_Laser          rs.b 4          ; Lasers
+
+    rsset VRAM_LevelSpec
+                    rs.b 8*2        ; Stalactites
+VRAM_WLTeleporter   rs.b 8          ; Waterlava teleporter
+VRAM_WLIceFloor     rs.b 4*2        ; Waterlava ice floor
+
+    rsset VRAM_LevelSpec            ; [Binary Fury]
+VRAM_BinBoss        rs.b 16         ; Dark Stephany
+
+;-------------------------------------;
+; VRAM positions for the title screen ;
+;-------------------------------------;
+
+    rsset 1
+VRAM_TitleProjMD    rs.b 57         ; "PROJECT MD"
+VRAM_PressStart     rs.b 4*10       ; "PRESS START"
+VRAM_TitleOptions   rs.b 30         ; "Start" and "Options"
+VRAM_TitleCopy      rs.b 7          ; Copyright text
+VRAM_TitleBG        rs.b 0          ; 3D field
+
+;---------------------------------;
+; VRAM positions for menu screens ;
+;---------------------------------;
+
+    rsreset
+
+VRAM_MenuFont       rs.b 32*2       ; Font
+VRAM_MenuArrow      rs.b 4          ; Arrow of selected option
+VRAM_MenuBG         rs.b 11         ; Background
+
+;------------------------------------;
+; VRAM positions for the score tally ;
+;------------------------------------;
+
+    rsset 1
+VRAM_TallyBG        rs.b 8          ; Background
+VRAM_TallyFont      rs.b 4*24       ; Font
+
+;----------------------------------------------------------------------------

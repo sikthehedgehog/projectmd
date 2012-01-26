@@ -1,0 +1,27 @@
+palette 000 ??? ??? ??? ??? ??? ??? ??? ??? ??? ??? ??? 00E 60A A06 E00
+
+openout graphics/dcircle/spin1.bin openin concept/dcircle/spin1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dcircle/spin2.bin openin concept/dcircle/spin2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dcircle/spin3.bin openin concept/dcircle/spin3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dcircle/spin4.bin openin concept/dcircle/spin4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dcircle/spin5.bin openin concept/dcircle/spin5.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dcircle/spin6.bin openin concept/dcircle/spin6.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dcircle/spin7.bin openin concept/dcircle/spin7.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dcircle/spin8.bin openin concept/dcircle/spin8.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dcircle/spin9.bin openin concept/dcircle/spin9.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dcircle/spin10.bin openin concept/dcircle/spin10.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dcircle/spin11.bin openin concept/dcircle/spin11.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dcircle/spin12.bin openin concept/dcircle/spin12.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dcircle/spin13.bin openin concept/dcircle/spin13.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dcircle/spin14.bin openin concept/dcircle/spin14.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dcircle/spin15.bin openin concept/dcircle/spin15.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dcircle/spin16.bin openin concept/dcircle/spin16.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/dcircle/dead.bin
+openin concept/dcircle/dead.bmp
+sprite 0 0 2 2
+sprite 2 0 2 2
+sprite 0 2 2 2
+sprite 2 2 2 2
+closein
+closeout

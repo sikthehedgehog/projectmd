@@ -1,0 +1,37 @@
+palette 000 060 0A0 0E0 E00 C00 222 444 ??? ??? ??? ??? ??? ??? ??? ???
+
+openout graphics/menu/font.bin
+openin concept/menu/font.bmp
+sprite 0 0 16 2
+sprite 0 2 15 2
+closein
+closeout
+
+openout graphics/menu/bkground.bin
+openin concept/menu/bkground.bmp
+scroll 0 0 2 2
+scroll 2 0 2 2
+scroll 4 0 2 2
+scroll 6 0 2 2
+scroll 0 2 2 2
+scroll 2 2 2 2
+scroll 4 2 2 2
+scroll 6 2 2 2
+scroll 0 4 2 2
+scroll 2 4 2 2
+scroll 4 4 2 2
+scroll 6 4 2 2
+scroll 0 6 2 2
+scroll 2 6 2 2
+scroll 4 6 2 2
+scroll 6 6 2 2
+closein
+closeout
+
+setmask
+
+openout graphics/menu/arrow.bin
+openin concept/menu/arrow.bmp
+sprite 0 0 2 2
+closein
+closeout

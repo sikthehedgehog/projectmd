@@ -1,0 +1,209 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------------------------------------------------;
+; This file contains the graphics data for the Waterlava level ;
+;--------------------------------------------------------------;
+
+;----------------------------------------------------------------------------
+
+;---------------;
+; 8x8 tile data ;
+;---------------;
+
+Gfx_LevelWaterlava:
+    incbin "graphics/lvl_wl/gfx.bin"
+    even
+
+;---------------;
+; Animated lava ;
+;---------------;
+
+Gfx_LevelWaterlava_Lava:
+    incbin  "graphics/lvl_wl/lava.bin"
+
+;----------;
+; Platform ;
+;----------;
+
+    cnop    0, 4*2*$20
+Gfx_LevelWaterlava_Platform:
+    incbin  "graphics/lvl_wl/platform.bin"
+
+;----------------------------------------------------------------------------
+
+;-----------------;
+; 32x32 tile data ;
+;-----------------;
+
+Tiles_LevelWaterlava:
+
+;--------------------------------------------;
+; To make my life easier and save text space ;
+;--------------------------------------------;
+
+@Begin equ Tiles_LevelWaterlava
+
+    rsset VRAM_Level
+@T2 rs.b (16*3)+8
+@T3 rs.b 1
+@L  rs.b 0
+@P equ VRAM_Platform
+
+;-----------;
+; Tile list ;
+;-----------;
+
+    dc.w    @Tile00-@Begin, @Tile00-@Begin
+    dc.w    @Tile01-@Begin, @Tile01-@Begin
+    dc.w    @Tile02-@Begin, @Tile02-@Begin
+    dc.w    @Tile03-@Begin, @Tile03-@Begin
+    dc.w    @Tile04-@Begin, @Tile04-@Begin
+    dc.w    @Tile05-@Begin, @Tile05-@Begin
+    dc.w    @Tile06-@Begin, @Tile06-@Begin
+    dc.w    @Tile07-@Begin, @Tile07-@Begin
+    dc.w    @Tile08-@Begin, @Tile08B-@Begin
+    dc.w    @Tile09-@Begin, @Tile09-@Begin
+    dc.w    @Tile0A-@Begin, @Tile0A-@Begin
+    dc.w    @Tile0B-@Begin, @Tile0B-@Begin
+
+;----------------------;
+; Tile $00: empty tile ;
+;----------------------;
+
+@Tile00:
+    dcb.w   4*4, $8000
+
+;------------------------;
+; Tile $01: rock wall #1 ;
+;------------------------;
+
+@Tile01:
+    dc.w    @T2+$A000, @T2+$A001, @T2+$A004, @T2+$A005
+    dc.w    @T2+$A002, @T2+$A003, @T2+$A008, @T2+$A008
+    dc.w    @T2+$A008, @T2+$A006, @T2+$A000, @T2+$A001
+    dc.w    @T2+$A008, @T2+$A007, @T2+$A002, @T2+$A003
+
+;------------------------;
+; Tile $02: rock wall #2 ;
+;------------------------;
+
+@Tile02:
+    dc.w    @T2+$A009, @T2+$A005, @T2+$A004, @T2+$A00A
+    dc.w    @T2+$A007, @T2+$A000, @T2+$A001, @T2+$A007
+    dc.w    @T2+$A006, @T2+$A002, @T2+$A003, @T2+$A006
+    dc.w    @T2+$A00B, @T2+$A005, @T2+$A004, @T2+$A00C
+
+;---------------------------;
+; Tile $03: rock background ;
+;---------------------------;
+
+@Tile03:
+    dc.w    @T2+$A00D, @T2+$A00D, @T2+$A010, @T2+$A00D
+    dc.w    @T2+$A00E, @T2+$A00F, @T2+$A011, @T2+$A00D
+    dc.w    @T2+$A00D, @T2+$A010, @T2+$A00E, @T2+$A00F
+    dc.w    @T2+$A00D, @T2+$A011, @T2+$A00D, @T2+$A00D
+
+;------------------;
+; Tile $04: bridge ;
+;------------------;
+
+@Tile04:
+    dc.w    @P+$A000, @P+$A002, @P+$A004, @P+$A006
+    dc.w    @P+$A001, @P+$A003, @P+$A005, @P+$A007
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    $8000, $8000, $8000, $8000
+
+;------------------;
+; Tile $05: spikes ;
+;------------------;
+
+@Tile05:
+    dc.w    @T2+$A012, @T2+$A012, @T2+$A012, @T2+$A012
+    dc.w    @T2+$A013, @T2+$A013, @T2+$A013, @T2+$A013
+    dc.w    @T2+$A014, @T2+$A014, @T2+$A014, @T2+$A014
+    dc.w    @T2+$A015, @T2+$A015, @T2+$A015, @T2+$A015
+
+;----------------;
+; Tile $06: fall ;
+;----------------;
+
+@Tile06:
+    dc.w    @T2+$A016, @T2+$A017, @T2+$A018, @T2+$A019
+    dc.w    @T2+$A01A, @T2+$A01B, @T2+$A01C, @T2+$A01D
+    dc.w    @T2+$A01E, @T2+$A01F, @T2+$A020, @T2+$A021
+    dc.w    @T2+$A022, @T2+$A023, @T2+$A024, @T2+$A025
+
+;---------------------------;
+; Tile $07: bridge and fall ;
+;---------------------------;
+
+@Tile07:
+    dc.w    @P+$A000, @P+$A002, @P+$A004, @P+$A006
+    dc.w    @T2+$A026, @T2+$A027, @T2+$A028, @T2+$A029
+    dc.w    @T2+$A01E, @T2+$A01F, @T2+$A020, @T2+$A021
+    dc.w    @T2+$A022, @T2+$A023, @T2+$A024, @T2+$A025
+
+;----------------------------;
+; Tile $08: liquid (surface) ;
+;----------------------------;
+
+@Tile08:
+    dc.w    @L+$C000, @L+$C000, @L+$C000, @L+$C000
+    dc.w    @L+$C001, @L+$C001, @L+$C001, @L+$C001
+    dc.w    @L+$C002, @L+$C002, @L+$C002, @L+$C002
+    dc.w    @T3+$C000, @T3+$C000, @T3+$C000, @T3+$C000
+
+@Tile08B:
+    dc.w    @L+$C000, @L+$C000, @L+$C000, @L+$C000
+    dc.w    @L+$C001, @L+$C001, @L+$C001, @L+$C001
+    dc.w    @L+$C003, @L+$C003, @L+$C003, @L+$C003
+    dc.w    @T3+$C000, @T3+$C000, @T3+$C000, @T3+$C000
+
+;------------------;
+; Tile $09: liquid ;
+;------------------;
+
+@Tile09:
+    dcb.w   4*4, @T3+$C000
+
+;------------------------------;
+; Tile $0A: waterfall + spikes ;
+;------------------------------;
+
+@Tile0A:
+    dc.w    @T2+$A02A, @T2+$A02B, @T2+$A02C, @T2+$A02D
+    dc.w    @T2+$A02E, @T2+$A02F, @T2+$A030, @T2+$A031
+    dc.w    @T2+$A032, @T2+$A033, @T2+$A034, @T2+$A035
+    dc.w    @T2+$A036, @T2+$A036, @T2+$A036, @T2+$A037
+
+;--------------------------;
+; Tile $0B: ceiling spikes ;
+;--------------------------;
+
+@Tile0B:
+    dc.w    @T2+$B015, @T2+$B015, @T2+$B015, @T2+$B015
+    dc.w    @T2+$B014, @T2+$B014, @T2+$B014, @T2+$B014
+    dc.w    @T2+$B013, @T2+$B013, @T2+$B013, @T2+$B013
+    dc.w    @T2+$B012, @T2+$B012, @T2+$B012, @T2+$B012
+
+;----------------------------------------------------------------------------

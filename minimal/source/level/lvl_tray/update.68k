@@ -1,0 +1,254 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------;
+; UpdateLevel_Tray                                   ;
+;                                                    ;
+; Updates stuff specific to the CD tray-themed level ;
+;----------------------------------------------------;
+; BREAKS: all                                        ;
+;----------------------------------------------------;
+
+UpdateLevel_Tray:
+
+;-----------------------------;
+; Gotta reduce text length :P ;
+;-----------------------------;
+
+    rsset VRAM_Level
+    rs.b 16+10
+@T2 rs.b (16*5)+8
+@T3 rs.b 16+7
+@G  rs.b 11
+@G2 rs.b 11
+
+@Addr_Gears equ @G*$20
+@Addr_Gears2 equ @G2*$20
+
+;-----------------------;
+; Update HScroll buffer ;
+;-----------------------;
+
+    moveq   #0, d0
+    move.w  (RAM_Scroll), d0
+    neg.w   d0
+
+    move.w  d0, d1
+    move.w  d0, d2
+    move.w  d0, d3
+    asr.w   #2, d1
+    asr.w   #3, d2
+    asr.w   #4, d3
+    moveq   #0, d4
+    move.w  d0, d4
+    swap    d4
+
+    lea     (RAM_HScrBuffer), a0
+    moveq   #4-1, d7
+@ScrollLoopFG1:
+    move.w  d0, (a0)+
+    move.w  d1, (a0)+
+    add.w   #28, a0
+    dbf     d7, @ScrollLoopFG1
+
+    move.l  d4, (a0)+
+    move.l  d4, (a0)+
+    move.l  d4, (a0)+
+    move.l  d4, (a0)+
+    move.l  d4, (a0)+
+    move.l  d4, (a0)+
+    move.l  d4, (a0)+
+    move.l  d4, (a0)+
+
+    moveq   #3-1, d7
+@ScrollLoopMG1:
+    move.w  d0, (a0)+
+    move.w  d2, (a0)+
+    add.w   #28, a0
+    dbf     d7, @ScrollLoopMG1
+
+    moveq   #12-1, d7
+@ScrollLoopBG:
+    move.w  d0, (a0)+
+    move.w  d3, (a0)+
+    add.w   #28, a0
+    dbf     d7, @ScrollLoopBG
+
+    moveq   #3-1, d7
+@ScrollLoopMG2:
+    move.w  d0, (a0)+
+    move.w  d2, (a0)+
+    add.w   #28, a0
+    dbf     d7, @ScrollLoopMG2
+
+    move.l  d4, (a0)+
+    move.l  d4, (a0)+
+    move.l  d4, (a0)+
+    move.l  d4, (a0)+
+    move.l  d4, (a0)+
+    move.l  d4, (a0)+
+    move.l  d4, (a0)+
+    move.l  d4, (a0)+
+
+    moveq   #4-1, d7
+@ScrollLoopFG2:
+    move.w  d0, (a0)+
+    move.w  d1, (a0)+
+    add.w   #28, a0
+    dbf     d7, @ScrollLoopFG2
+
+;----------------------------------------------------------;
+; Update HScroll                                           ;
+; TO-DO: improve this code to reduce amount to transfer... ;
+;----------------------------------------------------------;
+
+    FixedDMA RAM_HScrBuffer, $F800, 2*224*2
+
+;------------------;
+; Perform blinking ;
+;------------------;
+
+    moveq   #0, d0
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @BlinkFrame1
+    move.w  #224, d0
+@BlinkFrame1:
+    move.w  d0, (RAM_VScrBuffer)
+    move.w  d0, (RAM_VScrBuffer+2)
+
+;--------------------;
+; Load gear graphics ;
+;--------------------;
+
+    moveq   #0, d0
+    move.w  (RAM_GlobalAnim), d0
+    add.w   d0, d0
+    and.w   #$7<<2, d0
+    lea     (@GearPatterns), a0
+    lea     (a0,d0.w), a0
+
+    move.l  #Gfx_LevelTray_Gears, d7
+    move.w  (a0)+, d0
+    add.l   d0, d7
+    VarSrcDMA @Addr_Gears, 11*$20
+
+    move.l  #Gfx_LevelTray_Gears, d7
+    move.w  (a0)+, d0
+    add.l   d0, d7
+    VarSrcDMA @Addr_Gears2, 11*$20
+
+;--------------------------------;
+; Animate the robots             ;
+; TO-DO: upload only when needed ;
+;--------------------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+
+    moveq   #0, d7
+    move.w  d0, d7
+    and.w   #$7<<1, d7
+    lsl.l   #8, d7
+    add.l   #Gfx_RobotWalk, d7
+    VarSrcDMA VRAM_TrollWalk*$20, 16*$20
+
+;----------------------;
+; Animate belt palette ;
+;----------------------;
+
+    lea     (@BGBeltPalette), a0
+    cmp.b   #Level_BossTray, (RAM_Level)
+    bne.s   @NoBossBeltPal
+    lea     14(a0), a0
+@NoBossBeltPal:
+
+    lsr.w   #2, d0
+    and.w   #$3<<1, d0
+    lea     (a0,d0.w), a0
+    lea     (RAM_PalBuffer+$68), a1
+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+
+;----------------------------------;
+; Animate first fake layer (tubes) ;
+;----------------------------------;
+
+    move.w  (RAM_Scroll), d0
+
+    move.w  d0, d7
+    add.w   #$1F, d7
+    asr.w   #5, d7
+    and.l   #$F, d7
+    lsl.w   #5+1, d7
+
+    add.l   #Gfx_LevelTray_BGScroll1, d7
+    VarSrcDMA (VRAM_Level+$16)*$20, 2*$20
+
+;-----------------------------------;
+; Animate second fake layer (vents) ;
+;-----------------------------------;
+
+    move.w  d0, d7
+    add.w   #$F, d7
+    asr.w   #4, d7
+    and.l   #$7, d7
+    lsl.w   #5, d7
+
+    add.l   #Gfx_LevelTray_BGScroll2, d7
+    VarSrcDMA (VRAM_Level+$18)*$20, 1*$20
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------;
+; LUT to determine from where to load gears graphics ;
+; It's either this or doing padding =|               ;
+;----------------------------------------------------;
+
+@GearPatterns:
+    dc.w    11*$20*0, 11*$20*0
+    dc.w    11*$20*1, 11*$20*7
+    dc.w    11*$20*2, 11*$20*6
+    dc.w    11*$20*3, 11*$20*5
+    dc.w    11*$20*4, 11*$20*4
+    dc.w    11*$20*5, 11*$20*3
+    dc.w    11*$20*6, 11*$20*2
+    dc.w    11*$20*7, 11*$20*1
+
+;---------------------------------------------------------------------;
+; Palette patterns for the background conveyor belt or whatever it is ;
+;---------------------------------------------------------------------;
+
+@BGBeltPalette:
+    dc.w    $642, $420, $200, $000
+    dc.w    $642, $420, $200
+
+@BGBeltPaletteBoss:
+    dc.w    $006, $004, $002, $000
+    dc.w    $006, $004, $002
+
+;----------------------------------------------------------------------------

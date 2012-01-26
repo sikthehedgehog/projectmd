@@ -1,0 +1,374 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------;
+; ErrorInt                          ;
+;                                   ;
+; Generic error exception handler   ;
+; Shows information about the crash ;
+;-----------------------------------;
+
+ErrorInt:
+
+;---------------------------------;
+; Store register data into memory ;
+; Later we'll need this           ;
+;---------------------------------;
+
+    move.l  d0, (RAM_ErrorRegs+$00)
+    move.l  d1, (RAM_ErrorRegs+$04)
+    move.l  d2, (RAM_ErrorRegs+$08)
+    move.l  d3, (RAM_ErrorRegs+$0C)
+    move.l  d4, (RAM_ErrorRegs+$10)
+    move.l  d5, (RAM_ErrorRegs+$14)
+    move.l  d6, (RAM_ErrorRegs+$18)
+    move.l  d7, (RAM_ErrorRegs+$1C)
+    move.l  a0, (RAM_ErrorRegs+$20)
+    move.l  a1, (RAM_ErrorRegs+$24)
+    move.l  a2, (RAM_ErrorRegs+$28)
+    move.l  a3, (RAM_ErrorRegs+$2C)
+    move.l  a4, (RAM_ErrorRegs+$30)
+    move.l  a5, (RAM_ErrorRegs+$34)
+    move.l  a6, (RAM_ErrorRegs+$38)
+    move.l  a7, (RAM_ErrorRegs+$3C)
+
+;-------------------------------;
+; Load VDP port addresses       ;
+; We're going to use them often ;
+;-------------------------------;
+
+    lea     ($C00004), a0
+    lea     ($C00000), a1
+
+;---------------------------------------------------;
+; Reset VDP command reading                         ;
+; We don't know what was up when the crash happened ;
+;---------------------------------------------------;
+
+    tst.w   (a0)
+
+;-----------------;
+; Disable display ;
+;-----------------;
+
+    move.w  #$8114, (a0)
+
+;----------------------;
+; Set up VDP registers ;
+;----------------------;
+
+    move.w  #$8004, (a0)    ; No IRQ4, no HV counter
+    move.w  #$8238, (a0)    ; Plane A table: $E000
+    move.w  #$8407, (a0)    ; Plane B table: $E000
+    move.w  #$8500, (a0)    ; Sprite table: $0000
+    move.w  #$8700, (a0)    ; Background color: palette 0, index 0
+    move.w  #$8B00, (a0)    ; No IRQ2, full VScroll, full HScroll
+    move.w  #$8C81, (a0)    ; H40, no S/H, no interlace
+    move.w  #$8D00, (a0)    ; HScroll table: $0000
+    move.w  #$8F02, (a0)    ; Autoincrement: 2 bytes
+    move.w  #$9001, (a0)    ; Tilemap size: 64x32
+    move.w  #$9100, (a0)    ; Hide window plane
+    move.w  #$9200, (a0)    ; Hide window plane
+
+;-------------;
+; Clear VSRAM ;
+;-------------;
+
+    move.l  #$40000010, (a0)
+    move.l  #$00000000, (a1)
+
+;--------------------------------------;
+; Load our palette in a hackish way :P ;
+;--------------------------------------;
+
+    move.l  #$C0000000, (a0)
+    move.w  #$0A00, (a1)
+    move.l  #$00000EEE, (a1)
+    move.l  #$C0220000, (a0)
+    move.l  #$000000EE, (a1)
+    move.l  #$C0420000, (a0)
+    move.l  #$000000E0, (a1)
+    move.l  #$C0620000, (a0)
+    move.l  #$00000AAE, (a1)
+
+;---------------;
+; Clear tilemap ;
+;---------------;
+
+    move.l  #$60000003, (a0)
+    moveq   #((64/16)*28)-1, d0
+    moveq   #0, d1
+@ClearTilemap:
+    move.l  d1, (a1)
+    move.l  d1, (a1)
+    move.l  d1, (a1)
+    move.l  d1, (a1)
+    move.l  d1, (a1)
+    move.l  d1, (a1)
+    move.l  d1, (a1)
+    move.l  d1, (a1)
+    dbf     d0, @ClearTilemap
+
+;--------------------------------;
+; Write exception name on screen ;
+;--------------------------------;
+
+    move.w  (RAM_ErrorType), d0
+    lea     (@NameList), a2
+    move.l  (a2,d0.w), a2
+    moveq   #3, d0
+    moveq   #2, d1
+    move.w  #$6000, d2
+    bsr     ErrorDrawString
+
+;---------------------------------;
+; Write all other texts on screen ;
+;---------------------------------;
+
+    lea     (@TextList), a4
+    moveq   #@TextListSize-1, d7
+@DrawTexts:
+    move.l  (a4)+, a2
+    move.w  (a4)+, d0
+    move.w  (a4)+, d1
+    move.w  (a4)+, d2
+    bsr     ErrorDrawString
+    dbf     d7, @DrawTexts
+
+;-------------------------------;
+; Write all registers on screen ;
+;-------------------------------;
+
+    lea     (@RegList), a2
+    moveq   #@RegListSize-1, d7
+@DrawRegs:
+    move.l  (a2)+, a3
+    move.l  (a3), d2
+    move.w  (a2)+, d0
+    move.w  (a2)+, d1
+    bsr     ErrorDrawDword
+    dbf     d7, @DrawRegs
+
+;-------------------------------;
+; Write crash address on screen ;
+;-------------------------------;
+
+    moveq   #17, d0
+    moveq   #23, d1
+    move.l  (RAM_ErrorPC), d2
+    bsr     ErrorDrawDword
+
+;------------------------------------------------------;
+; Write access address on screen if group #0 exception ;
+;------------------------------------------------------;
+
+    move.w  (RAM_ErrorType), d0
+    cmp.w   #4, d0
+    bhi.s   @NotGroup0
+
+    moveq   #3, d0
+    moveq   #25, d1
+    move.w  #$4000, d2
+    lea     (@StrAccessed), a2
+    bsr     ErrorDrawString
+
+    moveq   #17, d0
+    moveq   #25, d1
+    move.l  (RAM_ErrorAddr), d2
+    bsr     ErrorDrawDword
+@NotGroup0:
+
+;--------------;
+; Load charset ;
+;--------------;
+
+    move.l  #$40200000, (a0)
+    moveq   #@CharsetSize, d0
+    lea     (@Charset), a0
+    bsr     Load1BPPTilesShadow
+
+;----------------;
+; Enable display ;
+;----------------;
+
+    move.w  #$8154, ($C00004)
+
+;------;
+; Hang ;
+;------;
+
+    bra.s   *
+
+;----------------------------------------------------------------------------
+
+;------------------;
+; Charset graphics ;
+;------------------;
+
+@Charset incbin "graphics/error/charset.bin"
+@CharsetSize equ (*-@Charset)/$08
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------------;
+; Macros for defining entries for the lists ;
+;-------------------------------------------;
+; INPUT                                     ;
+;   addr ... Register to read               ;
+;   x ...... X coordinate                   ;
+;   y ...... Y coordinate                   ;
+;   pal .... Palette                        ;
+;-------------------------------------------;
+
+@TextEntry macro addr, x, y, palette
+    dc.l    addr
+    dc.w    x
+    dc.w    y
+    dc.w    (palette)<<13
+    endm
+
+@RegEntry macro addr, x, y
+    dc.l    addr
+    dc.w    x
+    dc.w    y
+    endm
+
+;----------------------------------;
+; Locations of each text on screen ;
+;----------------------------------;
+
+@TextList:
+    @TextEntry @StrRegD0, 6, 5, 1
+    @TextEntry @StrRegD1, 6, 7, 1
+    @TextEntry @StrRegD2, 6, 9, 1
+    @TextEntry @StrRegD3, 6, 11, 1
+    @TextEntry @StrRegD4, 6, 13, 1
+    @TextEntry @StrRegD5, 6, 15, 1
+    @TextEntry @StrRegD6, 6, 17, 1
+    @TextEntry @StrRegD7, 6, 19, 1
+    @TextEntry @StrRegA0, 23, 5, 1
+    @TextEntry @StrRegA1, 23, 7, 1
+    @TextEntry @StrRegA2, 23, 9, 1
+    @TextEntry @StrRegA3, 23, 11, 1
+    @TextEntry @StrRegA4, 23, 13, 1
+    @TextEntry @StrRegA5, 23, 15, 1
+    @TextEntry @StrRegA6, 23, 17, 1
+    @TextEntry @StrRegA7, 23, 19, 1
+    @TextEntry @StrCrashed, 4, 23, 2
+@TextListSize equ (*-@TextList)/10
+
+;--------------------------------------;
+; Locations of each register on screen ;
+;--------------------------------------;
+
+@RegList:
+    @RegEntry RAM_ErrorRegs+$00, 9, 5
+    @RegEntry RAM_ErrorRegs+$04, 9, 7
+    @RegEntry RAM_ErrorRegs+$08, 9, 9
+    @RegEntry RAM_ErrorRegs+$0C, 9, 11
+    @RegEntry RAM_ErrorRegs+$10, 9, 13
+    @RegEntry RAM_ErrorRegs+$14, 9, 15
+    @RegEntry RAM_ErrorRegs+$18, 9, 17
+    @RegEntry RAM_ErrorRegs+$1C, 9, 19
+    @RegEntry RAM_ErrorRegs+$20, 26, 5
+    @RegEntry RAM_ErrorRegs+$24, 26, 7
+    @RegEntry RAM_ErrorRegs+$28, 26, 9
+    @RegEntry RAM_ErrorRegs+$2C, 26, 11
+    @RegEntry RAM_ErrorRegs+$30, 26, 13
+    @RegEntry RAM_ErrorRegs+$34, 26, 15
+    @RegEntry RAM_ErrorRegs+$38, 26, 17
+    @RegEntry RAM_ErrorRegs+$3C, 26, 19
+@RegListSize equ (*-@RegList)/8
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------;
+; List of pointers to exception names ;
+;-------------------------------------;
+
+@NameList:
+    dc.l    @Name02
+    dc.l    @Name03
+    dc.l    @Name04
+    dc.l    @Name05
+    dc.l    @Name05
+    dc.l    @Name06
+    dc.l    @Name07
+    dc.l    @Name08
+    dc.l    @Name09
+    dc.l    @Name0A
+    dc.l    @Name0B
+    dc.l    @NameUnk
+    dc.l    @NameIRQ
+    dc.l    @NameTrap
+
+;----------------------------------------------------------------------------
+
+;-----------------;
+; Exception names ;
+;-----------------;
+
+@Name02:        dc.b 'BUS ERROR',0
+@Name03:        dc.b 'ADDRESS ERROR',0
+@Name04:        dc.b 'ILLEGAL INSTRUCTION',0
+@Name05:        dc.b 'ZERO DIVIDE',0
+@Name06:        dc.b 'CHK INSTRUCTION',0
+@Name07:        dc.b 'TRAPV INSTRUCTION',0
+@Name08:        dc.b 'PRIVILEGE VIOLATION',0
+@Name09:        dc.b 'TRACE',0
+@Name0A:        dc.b '1010 INSTRUCTION TRAP',0
+@Name0B:        dc.b '1111 INSTRUCTION TRAP',0
+@NameUnk:       dc.b 'UNKNOWN EXCEPTION',0
+@NameIRQ:       dc.b 'INVALID IRQ',0
+@NameTrap:      dc.b 'INVALID TRAP',0
+
+;----------------;
+; Register names ;
+;----------------;
+
+@StrRegD0:      dc.b 'D0',0
+@StrRegD1:      dc.b 'D1',0
+@StrRegD2:      dc.b 'D2',0
+@StrRegD3:      dc.b 'D3',0
+@StrRegD4:      dc.b 'D4',0
+@StrRegD5:      dc.b 'D5',0
+@StrRegD6:      dc.b 'D6',0
+@StrRegD7:      dc.b 'D7',0
+@StrRegA0:      dc.b 'A0',0
+@StrRegA1:      dc.b 'A1',0
+@StrRegA2:      dc.b 'A2',0
+@StrRegA3:      dc.b 'A3',0
+@StrRegA4:      dc.b 'A4',0
+@StrRegA5:      dc.b 'A5',0
+@StrRegA6:      dc.b 'A6',0
+@StrRegA7:      dc.b 'SP',0
+
+;-------------;
+; Other texts ;
+;-------------;
+
+@StrCrashed:    dc.b 'CRASHED AT',0
+@StrAccessed:   dc.b 'ACCESSED AT',0
+
+    even
+
+;----------------------------------------------------------------------------

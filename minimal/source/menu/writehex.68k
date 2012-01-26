@@ -1,0 +1,77 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------;
+; WriteMenuHex                       ;
+;                                    ;
+; Writes a hex value in menu screens ;
+;------------------------------------;
+; INPUT                              ;
+;   d0.w ... X coordinate            ;
+;   d1.w ... Y coordinate            ;
+;   d2.b ... Value to write          ;
+;------------------------------------;
+; BREAKS: all but d0 and d1          ;
+;------------------------------------;
+
+WriteMenuHex:
+
+;---------------------------;
+; Get look up table address ;
+;---------------------------;
+
+    lea     (@LUT), a6
+
+;------------------;
+; Get second digit ;
+;------------------;
+
+    lea     (RAM_MenuHexStr+2), a0
+
+    move.b  d2, d7
+    and.w   #$0F, d7
+    move.b  (a6,d7.w), -(a0)
+
+;-----------------;
+; Get first digit ;
+;-----------------;
+
+    move.b  d2, d7
+    lsr.w   #4, d7
+    move.b  (a6,d7.w), -(a0)
+
+;-------------------------;
+; Write string and return ;
+;-------------------------;
+
+    bra     WriteMenuString
+
+;----------------------------------------------------------------------------
+
+;---------------------------------------;
+; Table to convert from binary to ASCII ;
+;---------------------------------------;
+
+@LUT:
+    dc.b    '0123456789ABCDEF'
+
+;----------------------------------------------------------------------------

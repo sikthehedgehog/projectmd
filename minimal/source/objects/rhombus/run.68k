@@ -1,0 +1,143 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------;
+; RunRhombus                          ;
+;                                     ;
+; Game logic code for rhombus objects ;
+;-------------------------------------;
+
+RunRhombus:
+
+;-------------------;
+; Are we outbounds? ;
+;-------------------;
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+    cmp.w   #0-$40, d0
+    blt.s   @Outbounds
+    cmp.w   #320+$40, d0
+    ble.s   @CheckCol
+
+@Outbounds:
+    bra     DeleteObject
+
+;-----------------------------------;
+; Are we colliding with the player? ;
+;-----------------------------------;
+
+@CheckCol:
+    move.w  Object_X(a0), d0
+    move.w  Player_X(a3), d1
+    addq.w  #8, d0
+    addq.w  #3, d1
+    cmp.w   d0, d1
+    blt     @End
+
+    add.w   #15, d0
+    subq.w  #7, d1
+    cmp.w   d0, d1
+    bgt     @End
+
+    move.w  Object_Y(a0), d0
+    move.w  Player_Y(a3), d1
+    addq.w  #8, d0
+    cmp.w   d0, d1
+    blt     @End
+
+    add.w   #15, d0
+    sub.w   #31, d1
+    cmp.w   d0, d1
+    bgt     @End
+
+;-----------------;
+; Increase score! ;
+;-----------------;
+
+    moveq   #Score_Rhombus, d0
+    bsr     AddScore
+
+;----------;
+; Play SFX ;
+;----------;
+
+    ;bsr     Random
+    ;and.b   #$03, d0
+    ;add.b   #SFX_Rhombus, d0
+    ;move.b  d0, (RAM_SFXToPlay)
+    
+    move.b  #SFX_Rhombus, (RAM_SFXToPlay)
+
+;-----------------;
+; Create sparkles ;
+;-----------------;
+
+    move.l  Object_X(a0), d0
+    move.l  Object_Y(a0), d1
+    move.w  #Obj_Sparkle, d2
+    move.l  #$10<<16, d3
+
+    move.w  d2, Object_Type(a1)
+    move.w  #%00, Object_MapPos(a1)
+    move.l  d0, Object_X(a1)
+    move.l  d1, Object_Y(a1)
+    move.l  d3, Object_Misc(a1)
+    adda.w  #Object_Size, a1
+
+    move.w  d2, Object_Type(a1)
+    move.w  #%01, Object_MapPos(a1)
+    move.l  d0, Object_X(a1)
+    move.l  d1, Object_Y(a1)
+    move.l  d3, Object_Misc(a1)
+    adda.w  #Object_Size, a1
+
+    move.w  d2, Object_Type(a1)
+    move.w  #%10, Object_MapPos(a1)
+    move.l  d0, Object_X(a1)
+    move.l  d1, Object_Y(a1)
+    move.l  d3, Object_Misc(a1)
+    adda.w  #Object_Size, a1
+
+    move.w  d2, Object_Type(a1)
+    move.w  #%11, Object_MapPos(a1)
+    move.l  d0, Object_X(a1)
+    move.l  d1, Object_Y(a1)
+    move.l  d3, Object_Misc(a1)
+    adda.w  #Object_Size, a1
+    
+    move.l  a1, (RAM_LastObject)
+
+;-----------------------------;
+; We're taken, commit suicide ;
+;-----------------------------;
+
+    bra     DeleteObjectPermanent
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

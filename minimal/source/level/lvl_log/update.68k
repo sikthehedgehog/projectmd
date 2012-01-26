@@ -1,0 +1,303 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------------------------------------;
+; UpdateLevel_Logic                                ;
+;                                                  ;
+; Updates stuff specific to the logic-themed level ;
+;--------------------------------------------------;
+; BREAKS: all                                      ;
+;--------------------------------------------------;
+
+UpdateLevel_Logic:
+
+;-----------;
+; Variables ;
+;-----------;
+
+    rsset RAM_LevelStuff
+@Var_PlasmaDelay    rs.l    1
+@Var_PlasmaStage    rs.w    1
+
+;-------------------;
+; Animate the floor ;
+;-------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+
+    move.w  d0, d7
+    neg.w   d7
+    lsr.w   #3-1, d7
+    and.w   #$3<<1, d7
+    lea     (@FloorPatterns), a6
+    lea     (a6,d7.w), a6
+    lea     (RAM_PalBuffer+$22), a5
+    move.l  (a6)+, (a5)+
+    move.l  (a6), (a5)+
+
+;---------------------;
+; Animate the columns ;
+;---------------------;
+
+    move.w  d0, d7
+    lsr.w   #3-1, d7
+    and.w   #$7<<1, d7
+    lea     (@ColumnPatterns), a6
+    lea     (a6,d7.w), a6
+    move.l  (a6)+, (a5)+
+    move.l  (a6), (a5)+
+
+;-----------------------;
+; Animate the platforms ;
+;-----------------------;
+
+    move.w  d0, d7
+    neg.w   d7
+    lsr.w   #3-1, d7
+    and.w   #$3<<1, d7
+    lea     (@PlatformPatterns), a6
+    lea     (a6,d7.w), a6
+    move.l  (a6)+, (a5)+
+    move.l  (a6), (a5)+
+
+;--------------------;
+; Animate the spikes ;
+;--------------------;
+
+    move.w  d0, d7
+    and.w   #$3<<1, d7
+
+    lea     (@SpikePatterns), a6
+    lea     (a6,d7.w), a6
+    lea     (RAM_PalBuffer+$4C), a5
+    move.l  (a6)+, (a5)+
+    move.l  (a6)+, (a5)+
+
+;-----------------------------;
+; Animate the solid AND gates ;
+;-----------------------------;
+
+    move.w  d0, d7
+    lsr.w   #2-1, d7
+    and.w   #$F<<1, d7
+
+    lea     (@ANDPatterns), a6
+    lea     (a6,d7.w), a6
+    lea     (RAM_PalBuffer+$44), a5
+    move.l  (a6), (a5)+
+
+;-----------------------------;
+; Animate the solid NOT gates ;
+;-----------------------------;
+
+    lea     (@NOTPatterns), a6
+    lea     (a6,d7.w), a6
+    move.l  (a6), (a5)+
+
+;----------------------------------;
+; Animate the background NOT gates ;
+;----------------------------------;
+
+    lea     (@NOTPatterns2), a6
+    lea     (RAM_PalBuffer+$68), a5
+    lea     (a6,d7.w), a6
+    move.l  (a6), (a5)+
+
+;-----------------------;
+; Update HScroll buffer ;
+;-----------------------;
+
+    moveq   #0, d0
+    move.w  (RAM_Scroll), d0
+    neg.w   d0
+    moveq   #0, d1
+    lea     (RAM_HScrBuffer), a0
+
+    move.w  d0, (a0)+
+    move.w  d1, (a0)+
+
+;----------------;
+; Update HScroll ;
+;----------------;
+
+    FixedDMA RAM_HScrBuffer, $F800, 2*2
+
+;------------------;
+; Perform blinking ;
+;------------------;
+
+    moveq   #0, d0
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @BlinkFrame1
+    move.w  #224, d0
+@BlinkFrame1:
+    move.w  d0, (RAM_VScrBuffer)
+
+    move.w  (RAM_GlobalAnim), d0
+    moveq   #0, d1
+    btst.l  #3, d0
+    beq.s   @BGBlinkFrame1
+    move.w  #240, d1
+@BGBlinkFrame1:
+    move.w  d1, (RAM_VScrBuffer+2)
+
+;---------------------------;
+; Animate the spinning XORs ;
+;---------------------------;
+
+    moveq   #0, d7
+    move.w  d0, d7
+    and.w   #$7<<1, d7
+    lsl.l   #8, d7
+    add.l   #Gfx_XORSpin, d7
+    VarSrcDMA VRAM_TrollWalk*$20, 16*$20
+
+;------------------------------------;
+; Animate the double circle thingies ;
+;------------------------------------;
+
+    moveq   #0, d7
+    move.w  d0, d7
+    and.w   #$F<<1, d7
+    lsl.l   #8, d7
+    add.l   #Gfx_DblCircleSpin, d7
+    VarSrcDMA VRAM_DblCircleFly*$20, 16*$20
+
+;---------------------------------;
+; Do flickering on the background ;
+;---------------------------------;
+
+    lea     (RAM_PalBuffer+$58), a0
+    move.l  (a0), d0
+    swap    d0
+    move.l  d0, (a0)+
+    move.l  (a0), d0
+    swap    d0
+    move.l  d0, (a0)+
+
+;-----------------;
+; Animate plasma? ;
+;-----------------;
+
+    move.l  (@Var_PlasmaDelay), d0
+    sub.l   (RAM_GlobalAnimSpd), d0
+    move.l  d0, (@Var_PlasmaDelay)
+    bgt.s   @NoNewPlasma
+    add.l   #8<<16, d0
+    move.l  d0, (@Var_PlasmaDelay)
+    move.w  #30-5, (@Var_PlasmaStage)
+@NoNewPlasma:
+
+    move.w  (@Var_PlasmaStage), d0
+    blt.s   @NoPlasma
+    move.w  d0, -(sp)
+    bsr     Update_LevelLogic_Plasma
+    move.w  (sp)+, d0
+    subq.w  #5, d0
+    move.w  d0, (@Var_PlasmaStage)
+@NoPlasma:
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;--------------------------------------------;
+; Palette patterns used to animate the floor ;
+;--------------------------------------------;
+
+@FloorPatterns:
+    dc.w    $E00, $0A0, $00E, $A0A, $E00, $0A0, $00E
+
+;----------------------------------------------;
+; Palette patterns used to animate the columns ;
+;----------------------------------------------;
+
+@ColumnPatterns:
+    dc.w    $808, $608, $408, $208
+    dc.w    $208, $408, $608, $808
+    dc.w    $808, $608, $408, $208
+
+;------------------------------------------------;
+; Palette patterns used to animate the platforms ;
+;------------------------------------------------;
+
+@PlatformPatterns:
+    dc.w    $082, $0A6, $0CA, $0EE, $082, $0A6, $0CA
+
+;------------------------------------------------------;
+; Palette patterns used to animate the solid AND gates ;
+;------------------------------------------------------;
+
+@ANDPatterns:
+    dc.w    $EA0, $EA0
+    dc.w    $E82, $E82
+    dc.w    $E64, $E64
+    dc.w    $E46, $E46
+    dc.w    $E28, $E28
+    dc.w    $E46, $E46
+    dc.w    $E64, $E64
+    dc.w    $E82, $E82
+    dc.w    $EA0, $EA0
+
+;------------------------------------------------------;
+; Palette patterns used to animate the solid NOT gates ;
+;------------------------------------------------------;
+
+@NOTPatterns:
+    dc.w    $0CE, $0CE
+    dc.w    $0AE, $0AE
+    dc.w    $08E, $08E
+    dc.w    $06E, $06E
+    dc.w    $04E, $04E
+    dc.w    $06E, $06E
+    dc.w    $08E, $08E
+    dc.w    $0AE, $0AE
+    dc.w    $0CE, $0CE
+
+;-----------------------------------------------------------;
+; Palette patterns used to animate the background NOT gates ;
+;-----------------------------------------------------------;
+
+@NOTPatterns2:
+    dc.w    $606, $606
+    dc.w    $406, $406
+    dc.w    $206, $206
+    dc.w    $006, $006
+    dc.w    $006, $006
+    dc.w    $206, $206
+    dc.w    $406, $406
+    dc.w    $606, $606
+    dc.w    $606, $606
+
+;---------------------------------------------;
+; Palette patterns used to animate the spikes ;
+;---------------------------------------------;
+
+@SpikePatterns:
+    dc.w    $0EE, $6AA, $A66, $E00
+    dc.w    $0EE, $6AA, $A66, $E00
+
+;----------------------------------------------------------------------------

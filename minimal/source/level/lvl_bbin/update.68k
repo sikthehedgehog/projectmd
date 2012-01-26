@@ -1,0 +1,519 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;---------------------------------------;
+; UpdateLevel_BossBinary                ;
+;                                       ;
+; Updates stuff specific to Binary Fury ;
+;---------------------------------------;
+; BREAKS: all                           ;
+;---------------------------------------;
+
+UpdateLevel_BossBinary:
+
+;----------------;
+; Boss variables ;
+;----------------;
+
+    rsreset
+@Var_BossX      rs.l 1      ; Boss X coordinate
+@Var_BossY      rs.l 1      ; Boss Y coordinate
+@Var_BossStage  rs.w 1      ; Current boss move
+@Var_Param      rs.l 1      ; Move-specific parameter
+@Var_Recoil     rs.l 1      ; Set when recoiling
+@Var_Sprite     rs.w 1      ; Sprite flags for boss sprite
+@Var_SpriteGfx  rs.l 1      ; Graphics to use for boss sprite
+
+;-----------------------;
+; Update HScroll buffer ;
+;-----------------------;
+
+    lea     (RAM_HScrBuffer), a0
+
+    moveq   #0, d0
+    move.w  (RAM_GlobalAnim), d1
+    add.w   d1, d1
+    and.w   #$FFF0, d1
+    move.w  d1, d2
+    neg.w   d2
+
+    moveq   #(28/4)-1, d7
+@HLoop:
+
+    move.w  d0, (a0)+
+    move.w  d1, (a0)+
+    add.w   #28, a0
+    move.w  d0, (a0)+
+    move.w  d1, (a0)+
+    add.w   #28, a0
+
+    move.w  d0, (a0)+
+    move.w  d2, (a0)+
+    add.w   #28, a0
+    move.w  d0, (a0)+
+    move.w  d2, (a0)+
+    add.w   #28, a0
+
+    dbf     d7, @HLoop
+
+;----------------;
+; Update HScroll ;
+;----------------;
+
+    FixedDMA RAM_HScrBuffer, $F800, 2*224*2
+
+;------------------;
+; Perform blinking ;
+;------------------;
+
+    moveq   #0, d0
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @BlinkFrame1
+    move.w  #224, d0
+@BlinkFrame1:
+    move.w  d0, (RAM_VScrBuffer)
+    move.w  #0, (RAM_VScrBuffer+2)
+
+;-------------------------------------;
+; Don't update the boss while paused! ;
+;-------------------------------------;
+
+    lea     (RAM_LevelStuff), a0
+    btst.b  #IngameStat_Pause, (RAM_IngameStatus+1)
+    bne.s   @NoBossRun
+
+;--------------------;
+; Get boss variables ;
+;--------------------;
+
+    move.l  @Var_BossX(a0), d6
+    move.l  @Var_BossY(a0), d7
+
+;--------------------;
+; Run boss behaviour ;
+;--------------------;
+
+    lea     (@SubroutineList), a6
+    move.w  @Var_BossStage(a0), d0
+    move.w  (a6,d0.w), d0
+    lea     (a6,d0.w), a6
+    jsr     (a6)
+
+;----------------------;
+; Store new boss state ;
+;----------------------;
+
+    move.l  d6, @Var_BossX(a0)
+    move.l  d7, @Var_BossY(a0)
+@NoBossRun:
+
+;----------------------------;
+; Add Dark Stephany's sprite ;
+;----------------------------;
+
+    move.w  @Var_BossX(a0), d0
+    add.w   #$80-16, d0
+    move.w  @Var_BossY(a0), d1
+    add.w   #$80, d1
+    move.w  @Var_Sprite(a0), d2
+    moveq   #%1111, d3
+    bsr     AddSprite
+
+;-----------------------------;
+; Load Dark Stephany graphics ;
+;-----------------------------;
+
+    move.l  @Var_SpriteGfx(a0), d7
+    VarSrcDMA VRAM_BinBoss*$20, 16*$20
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;---------------------------;
+; Subroutines for each mode ;
+;---------------------------;
+
+@SubroutineList:
+    dc.w    @Intro-@SubroutineList
+
+    dc.w    @DropLeft-@SubroutineList
+    dc.w    @BounceLeft-@SubroutineList
+    dc.w    @FleeLeft-@SubroutineList
+    dc.w    @DropRight-@SubroutineList
+    dc.w    @BounceRight-@SubroutineList
+    dc.w    @FleeRight-@SubroutineList
+    dc.w    @ThrowLeft-@SubroutineList
+
+    dc.w    @DropRight-@SubroutineList
+    dc.w    @BounceRight-@SubroutineList
+    dc.w    @FleeRight-@SubroutineList
+    dc.w    @DropLeft-@SubroutineList
+    dc.w    @BounceLeft-@SubroutineList
+    dc.w    @FleeLeft-@SubroutineList
+    dc.w    @ThrowRight-@SubroutineList
+
+    dc.w    @Loop-@SubroutineList
+@Loop:
+    move.w  #1<<1, @Var_BossStage(a0)
+    bra     @DropLeft
+
+;----------------------------------------------------------------------------
+
+;------------;
+; Boss intro ;
+;------------;
+
+@Intro:
+
+;------------------------;
+; For animation purposes ;
+;------------------------;
+
+    move.w  (RAM_GlobalAnim), d2
+    lsl.w   #6, d2
+
+;---------------------------------------------;
+; Determine Dark Stephany's vertical position ;
+;---------------------------------------------;
+
+    move.w  d2, d3
+    and.l   #$20<<4, d3
+    add.l   #Gfx_DSteph_Hover1, d3
+    move.l  d3, @Var_SpriteGfx(a0)
+
+    move.l  (RAM_GlobalAnimSpd), d0
+    add.l   d0, d0
+    add.l   d0, d0
+    add.l   d0, d0
+    move.l  @Var_Param(a0), d1
+    sub.l   d0, d1
+    move.l  d1, @Var_Param(a0)
+
+    cmp.l   #144<<16, d1
+    bge.s   @Intro_DontRise
+    cmp.l   #-64<<16, d1
+    blt.s   @Intro_TooFar
+
+    move.l  d1, d7
+
+    lsl.w   #1, d2
+    move.w  d2, d3
+    and.l   #$20<<4, d3
+    add.l   #Gfx_DSteph_VDash1, d3
+    move.l  d3, @Var_SpriteGfx(a0)
+@Intro_DontRise:
+
+;------------------;
+; Set sprite flags ;
+;------------------;
+
+    move.w  #$8800|VRAM_BinBoss, @Var_Sprite(a0)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------;
+; Moved too far? ;
+;----------------;
+
+@Intro_TooFar:
+    move.w  #1<<1, @Var_BossStage(a0)
+    move.l  #0, @Var_Param(a0)
+    rts
+
+;----------------------------------------------------------------------------
+
+;-----------------------;
+; Drop-on-player attack ;
+;-----------------------;
+
+@DropLeft:
+    move.w  #$9800|VRAM_BinBoss, @Var_Sprite(a0)
+    bra.s   @Drop
+@DropRight:
+    move.w  #$9000|VRAM_BinBoss, @Var_Sprite(a0)
+
+@Drop:
+
+;----------------------;
+; Aim onto the player? ;
+;----------------------;
+
+    move.l  @Var_Param(a0), d0
+    bne.s   @Drop_DontAim
+    move.l  (RAM_Player+Player_X), d6
+@Drop_DontAim:
+
+;---------------;
+; Update status ;
+;---------------;
+
+    add.l   (RAM_GlobalAnimSpd), d0
+    move.l  d0, @Var_Param(a0)
+
+;-------;
+; Over? ;
+;-------;
+
+    cmp.l   #(288/8)<<16, d0
+    ble.s   @Drop_NotOver
+
+    move.b  #SFX_Explosion, (RAM_SFXToPlay)
+    addq.w  #2, @Var_BossStage(a0)
+    move.l  #0, @Var_Param(a0)
+    rts
+@Drop_NotOver:
+
+;-------;
+; Drop! ;
+;-------;
+
+    move.l  d0, d1
+    lsl.l   #3, d1
+    sub.l   #128<<16, d1
+    move.l  d1, d7
+
+;------------;
+; Set sprite ;
+;------------;
+
+    move.w  (RAM_GlobalAnim), d0
+    lsl.w   #7, d0
+    move.w  d0, d1
+    and.l   #$20<<4, d1
+    add.l   #Gfx_DSteph_VDash1, d1
+    move.l  d1, @Var_SpriteGfx(a0)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------;
+; Bouncing when crashing against the floor ;
+;------------------------------------------;
+
+@BounceLeft:
+    move.w  #$8800|VRAM_BinBoss, @Var_Sprite(a0)
+    bra.s   @Bounce
+@BounceRight:
+    move.w  #$8000|VRAM_BinBoss, @Var_Sprite(a0)
+
+@Bounce:
+
+;-------------------;
+; Get current speed ;
+;-------------------;
+
+    move.l  @Var_Param(a0), d0
+    bne.s   @Bounce_NoInit
+    move.l  (RAM_Player+Player_JumpForce), d0
+@Bounce_NoInit:
+
+;-------------;
+; Deccelerate ;
+;-------------;
+
+    move.l  (RAM_Player+Player_AccelGrav), d1
+    add.l   d1, d0
+    blt.s   @Bounce_NotOver
+    addq.w  #2, @Var_BossStage(a0)
+    move.l  #0, @Var_Param(a0)
+    rts
+@Bounce_NotOver:
+    move.l  d0, @Var_Param(a0)
+    asr.l   #1, d0
+    add.l   d0, d7
+
+;------------;
+; Set sprite ;
+;------------;
+
+    move.w  (RAM_GlobalAnim), d0
+    lsl.w   #7, d0
+    move.w  d0, d1
+    and.l   #$20<<4, d1
+    add.l   #Gfx_DSteph_Hover1, d1
+    move.l  d1, @Var_SpriteGfx(a0)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;-----------;
+; Flee left ;
+;-----------;
+
+@FleeLeft:
+
+;-----------;
+; Move left ;
+;-----------;
+
+    move.l  (RAM_GlobalAnimSpd), d0
+    add.l   d0, d0
+    add.l   d0, d0
+    add.l   d0, d0
+    sub.l   d0, d6
+
+;----------;
+; Too far? ;
+;----------;
+
+    cmp.l   #-32<<16, d6
+    bgt.s   @FleeLeft_NotOver
+    addq.w  #2, @Var_BossStage(a0)
+    move.l  #0, @Var_Param(a0)
+    rts
+@FleeLeft_NotOver:
+
+;------------;
+; Set sprite ;
+;------------;
+
+    move.w  (RAM_GlobalAnim), d0
+    lsl.w   #7, d0
+    move.w  d0, d1
+    and.l   #$20<<4, d1
+    add.l   #Gfx_DSteph_HDash1, d1
+    move.l  d1, @Var_SpriteGfx(a0)
+
+    move.w  #$8800|VRAM_BinBoss, @Var_Sprite(a0)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;------------;
+; Flee right ;
+;------------;
+
+@FleeRight:
+
+;------------;
+; Move right ;
+;------------;
+
+    move.l  (RAM_GlobalAnimSpd), d0
+    add.l   d0, d0
+    add.l   d0, d0
+    add.l   d0, d0
+    add.l   d0, d6
+
+;----------;
+; Too far? ;
+;----------;
+
+    cmp.l   #352<<16, d6
+    blt.s   @FleeRight_NotOver
+    addq.w  #2, @Var_BossStage(a0)
+    move.l  #0, @Var_Param(a0)
+    rts
+@FleeRight_NotOver:
+
+;------------;
+; Set sprite ;
+;------------;
+
+    move.w  (RAM_GlobalAnim), d0
+    lsl.w   #7, d0
+    move.w  d0, d1
+    and.l   #$20<<4, d1
+    add.l   #Gfx_DSteph_HDash1, d1
+    move.l  d1, @Var_SpriteGfx(a0)
+
+    move.w  #$8000|VRAM_BinBoss, @Var_Sprite(a0)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;----------------;
+; Throw missiles ;
+;----------------;
+
+@Throw_Over:
+    addq.w  #2, @Var_BossStage(a0)
+    move.l  #0, @Var_Param(a0)
+    rts
+
+@ThrowLeft:
+    move.w  #$8800|VRAM_BinBoss, @Var_Sprite(a0)
+    move.l  (RAM_GlobalAnimSpd), d0
+    lsl.l   #3, d0
+    sub.l   d0, d6
+    cmp.l   #-32<<16, d6
+    blt.s   @Throw_Over
+    bra.s   @Throw
+
+@ThrowRight:
+    move.w  #$8000|VRAM_BinBoss, @Var_Sprite(a0)
+    move.l  (RAM_GlobalAnimSpd), d0
+    lsl.l   #3, d0
+    add.l   d0, d6
+    cmp.l   #352<<16, d6
+    bgt.s   @Throw_Over
+
+@Throw:
+    move.l  #32<<16, d7
+
+;------------;
+; Set sprite ;
+;------------;
+
+    move.w  (RAM_GlobalAnim), d0
+    lsl.w   #7, d0
+    move.w  d0, d1
+    and.l   #$20<<4, d1
+    add.l   #Gfx_DSteph_HDash1, d1
+    move.l  d1, @Var_SpriteGfx(a0)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

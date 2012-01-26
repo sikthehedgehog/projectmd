@@ -1,0 +1,18 @@
+palette ??? 020 060 0E0 ??? ??? ??? ??? ??? ??? ??? ??? ??? ??? ??? ???
+setmask
+
+openout graphics/ledscr/led.bin
+openin concept/ledscr/led.bmp
+scroll 0 0 4 4
+closein
+closeout
+
+palette 000 EEE 000 000 000 000 000 000 000 000 000 000 000 000 000 000
+
+openout graphics/ledscr/letters.bin
+openin concept/ledscr/letters.bmp
+scroll1bpp 0 0 16 1
+scroll1bpp 0 1 16 1
+scroll1bpp 0 2 6 1
+closein
+closeout

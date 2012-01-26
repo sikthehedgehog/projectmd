@@ -1,0 +1,24 @@
+palette ??? EEE ??? ??? 8AE 68E 000 0EE EA6 E60 08E 00E 00A 0E0 0A0 060
+setmask
+
+openout graphics/cryscrea/walk1.bin openin concept/cryscrea/walk1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/cryscrea/walk2.bin openin concept/cryscrea/walk2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/cryscrea/walk3.bin openin concept/cryscrea/walk3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/cryscrea/walk4.bin openin concept/cryscrea/walk4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/cryscrea/walk5.bin openin concept/cryscrea/walk5.bmp sprite 0 0 4 4 closein closeout
+openout graphics/cryscrea/walk6.bin openin concept/cryscrea/walk6.bmp sprite 0 0 4 4 closein closeout
+openout graphics/cryscrea/walk7.bin openin concept/cryscrea/walk7.bmp sprite 0 0 4 4 closein closeout
+openout graphics/cryscrea/walk8.bin openin concept/cryscrea/walk8.bmp sprite 0 0 4 4 closein closeout
+openout graphics/cryscrea/walk9.bin openin concept/cryscrea/walk9.bmp sprite 0 0 4 4 closein closeout
+openout graphics/cryscrea/walk10.bin openin concept/cryscrea/walk10.bmp sprite 0 0 4 4 closein closeout
+openout graphics/cryscrea/walk11.bin openin concept/cryscrea/walk11.bmp sprite 0 0 4 4 closein closeout
+openout graphics/cryscrea/walk12.bin openin concept/cryscrea/walk12.bmp sprite 0 0 4 4 closein closeout
+openout graphics/cryscrea/walk13.bin openin concept/cryscrea/walk13.bmp sprite 0 0 4 4 closein closeout
+openout graphics/cryscrea/walk14.bin openin concept/cryscrea/walk14.bmp sprite 0 0 4 4 closein closeout
+openout graphics/cryscrea/walk15.bin openin concept/cryscrea/walk15.bmp sprite 0 0 4 4 closein closeout
+openout graphics/cryscrea/walk16.bin openin concept/cryscrea/walk16.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/cryscrea/piece1.bin openin concept/cryscrea/piece1.bmp sprite 0 0 2 2 closein closeout
+openout graphics/cryscrea/piece2.bin openin concept/cryscrea/piece2.bmp sprite 0 0 2 2 closein closeout
+openout graphics/cryscrea/piece3.bin openin concept/cryscrea/piece3.bmp sprite 0 0 2 2 closein closeout
+openout graphics/cryscrea/piece4.bin openin concept/cryscrea/piece4.bmp sprite 0 0 2 2 closein closeout

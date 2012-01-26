@@ -1,0 +1,445 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------------------;
+; Main code for the title screen ;
+;--------------------------------;
+
+TitleScreen:
+
+;------------------------;
+; Initialize game status ;
+;------------------------;
+
+    move.w  #%100, (RAM_GameStatus)
+    move.l  #0, (RAM_GlobalAnim)
+
+;-------------------;
+; Initialize fading ;
+;-------------------;
+
+    move.l  #7<<16, (RAM_FadeStage)
+    move.l  (RAM_GlobalAnimSpd), d0
+    asr.l   #2, d0
+    move.l  d0, (RAM_FadeSpeed)
+
+;------------;
+; Set up VDP ;
+;------------;
+
+    lea     ($C00004), a4
+    lea     ($C00000), a5
+
+    move.w  #$8230, (a4)    ; Tilemap A: $C000
+    move.w  #$8407, (a4)    ; Tilemap B: $E000
+    move.w  #$857E, (a4)    ; Sprite table: $FC00
+    move.w  #$8B00, (a4)    ; No IRQ2, full VScroll, full HScroll
+    move.w  #$8D00, (a4)    ; HScroll table: $0000 (no HScroll!)
+    move.w  #$9001, (a4)    ; Tilemap size: 64x32
+
+;------------;
+; Clear CRAM ;
+;------------;
+
+    move.l  #$C0000000, (a4)
+    move.l  #$0EEE0EEE, d0
+    moveq   #($40/8)-1, d1
+@ClearCRAM:
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    dbf     d1, @ClearCRAM
+
+;--------------------;
+; Clear sprite table ;
+;--------------------;
+
+    movem.l a0-a1/a4-a5, -(sp)
+    bsr     ClearSprites
+    bsr     UpdateSprites
+    bsr     FlushVDPBuffer
+    movem.l (sp)+, a0-a1/a4-a5
+
+;-------------;
+; Clear VSRAM ;
+;-------------;
+
+    move.l  #0, (RAM_VScrBuffer)
+
+;--------------------------;
+; Load palette into buffer ;
+;--------------------------;
+
+    lea     (Pal_Title), a0
+    lea     (RAM_PalBuffer), a1
+    moveq   #(32/8)-1, d0
+@LoadPalette:
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    dbf     d0, @LoadPalette
+
+;------------;
+; Draw stuff ;
+;------------;
+
+    bsr     DrawTitleFG
+    bsr     DrawTitleBG
+
+;---------------;
+; Load graphics ;
+;---------------;
+
+    lea     (Gfx_Title), a0
+    lea     (RAM_Base), a1
+    bsr     Decompress
+    lea     (Gfx_Level3D), a0
+    bsr     Decompress
+
+    FixedDMA RAM_Base, VRAM_TitleProjMD*$20, (57+40+30+7+296)*$20
+    bsr     FlushVDPBuffer
+
+;-------------------;
+; Initialize status ;
+;-------------------;
+
+    move.l  #0, (RAM_TitleStage)
+    move.l  #0, (RAM_TitleShift)
+    move.b  #0, (RAM_TitleOption)
+
+;----------------------------------------------------------------------------
+
+;-----------;
+; Main loop ;
+;-----------;
+
+@MainLoop:
+
+;-----------;
+; Do fading ;
+;-----------;
+
+    bsr     Fade
+
+;---------------;
+; Clear sprites ;
+;---------------;
+
+    bsr     ClearSprites
+
+;-----------------;
+; Read user input ;
+;-----------------;
+
+    bsr     ReadJoypad
+
+;---------------------------------;
+; Pressed start at "PRESS START"? ;
+;---------------------------------;
+
+    move.w  (RAM_TitleStage), d0
+    bne.s   @NotInPressStart
+    btst.b  #7, (RAM_JoypadPress)
+    beq.s   @NotInPressStart
+    move.l  (RAM_GlobalAnimSpd), (RAM_TitleStage)
+    move.b  #SFX_OK, (RAM_SFXToPlay)
+@NotInPressStart:
+
+;----------------;
+; Switch option? ;
+;----------------;
+
+    cmp.w   #$40, d0
+    bne     @InputDone
+    tst.l   (RAM_TitleShift)
+    bne     @InputDone
+
+    move.b  (RAM_JoypadPress), d0
+    btst.l  #2, d0
+    bne.s   @SwitchOption
+    btst.l  #3, d0
+    beq.s   @DontSwitchOption
+@SwitchOption:
+    eor.b   #1, (RAM_TitleOption)
+    move.b  #SFX_Beep, (RAM_SFXToPlay)
+@DontSwitchOption:
+
+;------------------;
+; Option selected? ;
+;------------------;
+
+    and.b   #$E0, d0
+    beq.s   @InputDone
+    move.l  (RAM_GlobalAnimSpd), (RAM_TitleShift)
+    move.b  #SFX_OK, (RAM_SFXToPlay)
+
+    move.w  (RAM_GameStatus), d0
+    btst.l  #GameStat_WhiteFade, d0
+    beq.s   @AlreadyQuiting
+    bset.l  #GameStat_FadeOut, d0
+    bclr.l  #GameStat_WhiteFade, d0
+    move.w  d0, (RAM_GameStatus)
+
+    move.l  #7<<16, (RAM_FadeStage)
+    move.l  (RAM_GlobalAnimSpd), d0
+    asr.l   #1, d0
+    move.l  d0, (RAM_FadeSpeed)
+    move.l  #0, (RAM_GlobalAnim)
+@AlreadyQuiting:
+
+;------------------------------------;
+; All user input processed by now... ;
+;------------------------------------;
+
+@InputDone:
+
+;--------------------;
+; Draw "PRESS START" ;
+;--------------------;
+
+    move.w  (RAM_TitleStage), d4
+    beq.s   @DoPressStart
+    cmp.w   #32, d4
+    bhs     @NoPressStart
+    btst.l  #1, d4
+    beq     @NoPressStart
+@DoPressStart:
+
+    move.w  #128+160-88, d0
+    move.w  #128+144, d1
+    move.w  #$A000|VRAM_PressStart, d2
+    moveq   #%1101, d3
+    bsr     AddSprite
+    add.w   #32, d0
+    addq.w  #8, d2
+    bsr     AddSprite
+    add.w   #32, d0
+    addq.w  #8, d2
+    moveq   #%0101, d3
+    bsr     AddSprite
+
+    add.w   #32, d0
+    addq.w  #4, d2
+    moveq   #%1101, d3
+    bsr     AddSprite
+    add.w   #32, d0
+    addq.w  #8, d2
+    bsr     AddSprite
+    add.w   #32, d0
+    addq.w  #8, d2
+    moveq   #%0101, d3
+    bsr     AddSprite
+
+;-----------------------;
+; Animate "PRESS START" ;
+;-----------------------;
+
+    lea     (RAM_PalBuffer+$30), a1
+    move.l  #$0EEE0EEE, (a1)
+    move.w  #$0EEE, 4(a1)
+    move.w  (RAM_TitleStage), d7
+    bne     @StuffDrawn
+
+    move.w  (RAM_GlobalAnim), d0
+    add.w   d0, d0
+    add.w   d0, d0
+    and.w   #$F<<3, d0
+
+    lea     (Pal_PressStart), a0
+    lea     (a0,d0.w), a0
+    move.l  (a0)+, (a1)+
+    move.w  (a0)+, (a1)+
+@NoPressStart:
+
+;---------------;
+; Draw "START"? ;
+;---------------;
+
+    cmp.w   #48, d4
+    blo     @StuffDrawn
+
+    move.w  #$E000|VRAM_TitleOptions, d2
+    tst.b   (RAM_TitleOption)
+    bne.s   @NoHighlightStart
+    bclr.l  #14, d2
+@NoHighlightStart:
+
+    moveq   #0, d0
+    cmp.w   #64, d4
+    bhs.s   @NoStartAnim
+    move.w  d4, d5
+    lsl.w   #4, d5
+    sub.w   d5, d0
+    subq.w  #1, d0
+@NoStartAnim:
+    add.w   #128+32, d0
+    move.w  (RAM_TitleShift), d5
+    lsl.w   #4, d5
+    sub.w   d5, d0
+
+    move.w  #128+144, d1
+    moveq   #%0101, d3
+    bsr     AddSprite
+    add.w   #16, d0
+    addq.w  #4, d2
+    bsr     AddSprite
+    add.w   #16, d0
+    addq.w  #4, d2
+    bsr     AddSprite
+    add.w   #16, d0
+    addq.w  #4, d2
+    bsr     AddSprite
+    add.w   #16, d0
+    subq.w  #2*4, d2
+    bsr     AddSprite
+
+;-----------------;
+; Draw "OPTIONS"? ;
+;-----------------;
+
+    move.w  #$E000|(VRAM_TitleOptions+(4*4)), d2
+    tst.b   (RAM_TitleOption)
+    beq.s   @NoHighlightOptions
+    bclr.l  #14, d2
+@NoHighlightOptions:
+
+    moveq   #0, d0
+    cmp.w   #64, d4
+    bhs.s   @NoOptionsAnim
+    move.w  d4, d5
+    lsl.w   #4, d5
+    add.w   d5, d0
+@NoOptionsAnim:
+    add.w   #128+320-32-104, d0
+    move.w  (RAM_TitleShift), d5
+    lsl.w   #4, d5
+    add.w   d5, d0
+
+    bsr     AddSprite
+    add.w   #16, d0
+    addq.w  #1*4, d2
+    bsr     AddSprite
+    add.w   #16, d0
+    sub.w   #4*4, d2
+    bsr     AddSprite
+    add.w   #16, d0
+    add.w   #5*4, d2
+    moveq   #%0001, d3
+    bsr     AddSprite
+    addq.w  #8, d0
+    subq.w  #2*4, d2
+    moveq   #%0101, d3
+    bsr     AddSprite
+    add.w   #16, d0
+    add.w   #(2*4)+2, d2
+    bsr     AddSprite
+    add.w   #16, d0
+    sub.w   #(6*4)+2, d2
+    bsr     AddSprite
+
+;--------------------------;
+; OK, drawn all sprites... ;
+;--------------------------;
+
+@StuffDrawn:
+
+;----------------;
+; Blink palette! ;
+;----------------;
+
+    lea     (RAM_PalBuffer+4), a0
+
+    move.w  (a0), d0
+    move.w  2(a0), d1
+    move.w  d0, 2(a0)
+    move.w  d1, (a0)
+
+    move.w  6(a0), d0
+    move.w  8(a0), d1
+    move.w  d0, 8(a0)
+    move.w  d1, 6(a0)
+
+;-------;
+; Quit? ;
+;-------;
+
+    move.w  (RAM_GameStatus), d0
+    btst.l  #GameStat_WhiteFade, d0
+    bne.s   @DontQuit
+    move.w  (RAM_FadeStage), d0
+    beq.s   @Quit
+@DontQuit:
+
+;-------------;
+; Next frame! ;
+;-------------;
+
+    move.w  (RAM_TitleStage), d0
+    beq.s   @NoStageUpdate
+    cmp.w   #$40, d0
+    bhs.s   @NoStageUpdate
+    move.l  (RAM_TitleStage), d0
+    add.l   (RAM_GlobalAnimSpd), d0
+    move.l  d0, (RAM_TitleStage)
+@NoStageUpdate:
+
+    tst.w   (RAM_TitleShift)
+    beq.s   @NoShiftUpdate
+    move.l  (RAM_TitleShift), d0
+    add.l   (RAM_GlobalAnimSpd), d0
+    move.l  d0, (RAM_TitleShift)
+@NoShiftUpdate:
+
+    jsr     (UpdateSound).w
+    bsr     UpdateSprites
+    bsr     VSync
+    move.w  #$8C89, ($C00004)
+    bsr     FlushVDPBuffer
+    bchg.b  #GameStat_Blink, (RAM_GameStatus+1)
+    move.l  (RAM_GlobalAnimSpd), d1
+    add.l   d1, (RAM_GlobalAnim)
+    bra     @MainLoop
+
+;----------------------------------------------------------------------------
+
+;------------------------;
+; Quits the title screen ;
+;------------------------;
+
+@Quit:
+
+;-------------------------------;
+; Go into whatever was selected ;
+;-------------------------------;
+
+    move.b  (RAM_TitleOption), d0
+    add.b   #GameMode_LvlSelect, d0
+    move.w  #$8114, ($C00004)
+    move.w  #$8C81, ($C00004)
+    
+    move.b  d0, (RAM_GameMode)
+    move.b  #BGM_LevelSelect, (RAM_BGMToPlay)
+    jmp     SwitchMode
+
+;----------------------------------------------------------------------------

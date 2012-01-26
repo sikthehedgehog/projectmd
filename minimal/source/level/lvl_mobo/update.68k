@@ -1,0 +1,123 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------------------------------------------;
+; UpdateLevel_Motherboard                                ;
+;                                                        ;
+; Updates stuff specific to the Motherboard-themed level ;
+;--------------------------------------------------------;
+; BREAKS: all                                            ;
+;--------------------------------------------------------;
+
+UpdateLevel_Motherboard:
+
+;--------------------------------;
+; Animate LEDs in the background ;
+;--------------------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+    add.w   d0, d0
+    and.w   #$F<<3, d0
+    lea     (@LEDPalettes), a0
+    lea     (a0,d0.w), a0
+    lea     (RAM_PalBuffer+$6E), a1
+    move.l  (a0)+, (a1)+
+    move.l  (a0), (a1)
+
+;-----------------------;
+; Update HScroll buffer ;
+;-----------------------;
+
+    moveq   #0, d0
+    move.w  (RAM_Scroll), d0
+    neg.w   d0
+    move.w  d0, d1
+    asr.w   #4, d1
+    lea     (RAM_HScrBuffer), a0
+
+    move.w  d0, (a0)+
+    move.w  d1, (a0)+
+
+;----------------;
+; Update HScroll ;
+;----------------;
+
+    FixedDMA RAM_HScrBuffer, $F800, 2*2
+
+;------------------;
+; Perform blinking ;
+;------------------;
+
+    moveq   #0, d0
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @BlinkFrame1
+    move.w  #224, d0
+@BlinkFrame1:
+    move.w  d0, (RAM_VScrBuffer)
+    move.w  #0, (RAM_VScrBuffer+2)
+
+;--------------------------------;
+; Animate the robots             ;
+; TO-DO: upload only when needed ;
+;--------------------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+
+    moveq   #0, d7
+    move.w  d0, d7
+    and.w   #$7<<1, d7
+    lsl.l   #8, d7
+    add.l   #Gfx_RobotWalk, d7
+    VarSrcDMA VRAM_TrollWalk*$20, 16*$20
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------------------------;
+; Palettes used to animate the LEDs in the background ;
+;-----------------------------------------------------;
+
+@LEDPalettes:
+    dc.w    $004, $006, $040, $060
+    dc.w    $006, $008, $040, $060
+    dc.w    $008, $00A, $040, $060
+    dc.w    $00A, $00C, $040, $060
+    dc.w    $00C, $00E, $040, $060
+    dc.w    $00A, $00C, $040, $060
+    dc.w    $008, $00A, $040, $060
+    dc.w    $006, $008, $040, $060
+
+    dc.w    $004, $006, $040, $060
+    dc.w    $004, $006, $060, $080
+    dc.w    $004, $006, $080, $0A0
+    dc.w    $004, $006, $0A0, $0C0
+    dc.w    $004, $006, $0C0, $0E0
+    dc.w    $004, $006, $0A0, $0C0
+    dc.w    $004, $006, $080, $0A0
+    dc.w    $004, $006, $060, $080
+
+;----------------------------------------------------------------------------

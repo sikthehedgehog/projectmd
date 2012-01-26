@@ -1,0 +1,55 @@
+palette 000 660 440 220 0E0 0C0 0A0 080 006 004 002 ??? ??? ??? ??? ???
+
+openin concept/lvl_tray/_bgscroll.bmp
+openout graphics/lvl_tray/bgscrol1.bin
+scroll 0 0 2 16
+closeout
+openout graphics/lvl_tray/bgscrol2.bin
+scroll 2 0 1 8
+closeout
+closein
+
+openout graphics/lvl_tray/gfx.tmp
+
+openin concept/lvl_tray/_background.bmp
+scroll 0 0 16 1
+scroll 0 1 10 1
+closein
+
+palette ??? 0CA 0A8 086 064 042 000 222 444 666 888 AAA 86C 64A 428 206
+setmask
+
+openin concept/lvl_tray/_tilemap_pal2.bmp
+scroll 0 0 16 5
+scroll 0 5 8 1
+closein
+
+palette ??? ??? ??? ??? ??? ??? 00A 008 006 004 002 ??? 846 624 402 200
+setmask
+
+openin concept/lvl_tray/_tilemap_pal3.bmp
+scroll 0 0 16 1
+scroll 0 1 7 1
+closein
+
+closeout
+
+palette ??? 0CA 0A8 086 064 042 000 222 444 666 888 AAA 86C 64A 428 206
+setmask
+
+openout graphics/lvl_tray/gears.bin
+openin concept/lvl_tray/gears/spin1.bmp scroll 1 0 3 1 scroll 0 1 4 1 scroll 0 2 2 2 closein
+openin concept/lvl_tray/gears/spin2.bmp scroll 1 0 3 1 scroll 0 1 4 1 scroll 0 2 2 2 closein
+openin concept/lvl_tray/gears/spin3.bmp scroll 1 0 3 1 scroll 0 1 4 1 scroll 0 2 2 2 closein
+openin concept/lvl_tray/gears/spin4.bmp scroll 1 0 3 1 scroll 0 1 4 1 scroll 0 2 2 2 closein
+openin concept/lvl_tray/gears/spin5.bmp scroll 1 0 3 1 scroll 0 1 4 1 scroll 0 2 2 2 closein
+openin concept/lvl_tray/gears/spin6.bmp scroll 1 0 3 1 scroll 0 1 4 1 scroll 0 2 2 2 closein
+openin concept/lvl_tray/gears/spin7.bmp scroll 1 0 3 1 scroll 0 1 4 1 scroll 0 2 2 2 closein
+openin concept/lvl_tray/gears/spin8.bmp scroll 1 0 3 1 scroll 0 1 4 1 scroll 0 2 2 2 closein
+closeout
+
+openout graphics/lvl_tray/platform.bin
+openin concept/lvl_tray/platform.bmp
+sprite 0 0 4 2
+closein
+closeout

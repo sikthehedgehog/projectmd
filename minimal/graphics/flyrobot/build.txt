@@ -1,0 +1,14 @@
+palette ??? EEE ??? ??? 8AE 68E 000 0EE EA6 E60 08E 00E 00A 0E0 0A0 060
+
+openout graphics/flyrobot/fly1.bin openin concept/flyrobot/base.bmp sprite 0 0 4 4 closein closeout
+openout graphics/flyrobot/fly2.bin openin concept/flyrobot/fly1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/flyrobot/fly3.bin openin concept/flyrobot/fly2.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/flyrobot/dead.bin
+openin concept/flyrobot/dead.bmp
+sprite 0 0 2 2
+sprite 2 0 2 2
+sprite 0 2 2 2
+sprite 2 2 2 2
+closein
+closeout

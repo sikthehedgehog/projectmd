@@ -1,0 +1,284 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo, Eric Voirin
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------;
+; Voice used by rhombuses ;
+;-------------------------;
+
+Voice_Rhombus:
+    incbin  "sound/voices/rhombus.eif"
+
+;--------------------------------;
+; Voice used by electric hazards ;
+;--------------------------------;
+
+Voice_Electric:
+    incbin  "sound/voices/electric.eif"
+
+;----------------------------------;
+; Voice used by the big explosions ;
+;----------------------------------;
+
+Voice_BigExplosion:
+    incbin  "sound/voices/bigboom.eif"
+
+;---------------------;
+; Musicbox-like voice ;
+;---------------------;
+
+Voice_Musicbox:
+    incbin  "sound/voices/musicbox.eif"
+
+;-------------------------------;
+; Beep when accepting an option ;
+;-------------------------------;
+
+Voice_Option:
+    incbin  "sound/voices/option.eif"
+
+;---------------------------------;
+; Voice used by normal explosions ;
+;---------------------------------;
+
+Voice_Explosion:
+    incbin  "sound/voices/boom.eif"
+
+;-------------------;
+; Flat PSG envelope ;
+;-------------------;
+
+Voice_PSGFlat:
+    dc.b    $FE, $00, $FF
+
+;------------;
+; Oerg drums ;
+;------------;
+
+Voice_BassDrum:
+    incbin  "sound/voices/bass.ewf"
+Voice_BassDrum2:
+    incbin  "sound/voices/bass2.ewf"
+Voice_SnareDrum:
+    incbin  "sound/voices/snare.ewf"
+Voice_SnareDrum2:
+    incbin  "sound/voices/snare2.ewf"
+Voice_SnareDrum3:
+    incbin  "sound/voices/snare3.ewf"
+Voice_Cymbal:
+    incbin  "sound/voices/cymbal.ewf"
+Voice_TomTom:
+    incbin  "sound/voices/tom.ewf"
+Voice_TomTom2:
+    incbin  "sound/voices/tom2.ewf"
+Voice_TomTom3:
+    incbin  "sound/voices/tom3.ewf"
+Voice_TomTom4:
+    incbin  "sound/voices/tom4.ewf"
+Voice_Rrrchh:
+    incbin  "sound/voices/rrrchh.ewf"
+Voice_Cowbell:
+    incbin  "sound/voices/cowbell.ewf"
+Voice_JingleBell:
+    incbin  "sound/voices/jingle.ewf"
+Voice_Tambourine:
+    incbin  "sound/voices/tambour.ewf"
+
+;---------------------;
+; Oerg FM instruments ;
+;---------------------;
+
+Voice_ShreaungFX:
+    incbin  "sound/voices/shrsfx.eif"
+Voice_CrashFX:
+    incbin  "sound/voices/crashsfx.eif"
+Voice_InfBass:
+    incbin  "sound/voices/infbass.eif"
+Voice_InfLead:
+    incbin  "sound/voices/inflead.eif"
+Voice_InfString:
+    incbin  "sound/voices/infstr.eif"
+Voice_ElecBass:
+    incbin  "sound/voices/elecbass.eif"
+Voice_ElecString:
+    incbin  "sound/voices/elecstr.eif"
+Voice_GateString:
+    incbin  "sound/voices/gatestr.eif"
+Voice_FrozString:
+    incbin  "sound/voices/frozstr.eif"
+Voice_FrozBass:
+    incbin  "sound/voices/frozbass.eif"
+Voice_ShapLead:
+    incbin  "sound/voices/shaplead.eif"
+Voice_PixelLead:
+    incbin  "sound/voices/pixlead.eif"
+Voice_BrghString:
+    incbin  "sound/voices/brghstr.eif"
+Voice_BrghBass:
+    incbin  "sound/voices/brghbass.eif"
+Voice_MechLead1:
+    incbin  "sound/voices/mechld1.eif"
+Voice_MechLead2:
+    incbin  "sound/voices/mechld2.eif"
+Voice_SelectBass1:
+    incbin  "sound/voices/selbas1.eif"
+Voice_SelectBass2:     
+    incbin  "sound/voices/selbas2.eif"
+Voice_SelectPiano:
+    incbin  "sound/voices/selpiano.eif"
+Voice_LavaGuitar:
+    incbin  "sound/voices/lavaguit.eif"
+Voice_LavaBass:
+    incbin  "sound/voices/lavabass.eif"
+Voice_WaterString:
+	incbin	"sound/voices/waterstr.eif"
+Voice_GameOverString:
+	incbin	"sound/voices/gmovrstr.eif"
+Voice_InetString:
+	incbin	"sound/voices/inetstr.eif"
+Voice_InetLead:
+	incbin	"sound/voices/inetlead.eif"
+Voice_InetArp:
+	incbin	"sound/voices/inetarp.eif"
+Voice_InetFade:
+	incbin	"sound/voices/inetstr2.eif"
+
+;----------------------;
+; Oerg PSG instruments ;
+;----------------------;
+
+Voice_OpenHitHat:
+    dc.b    $00,$00, $01,$01, $02,$02, $03,$03
+    dc.b    $04,$04
+	dc.b    $05,$05, $06,$06, $07,$07
+    dc.b    $08,$08, $09,$09, $0A,$0A, $0B,$0B
+    dc.b    $0C,$0C, $0D,$0D, $0E,$0E, $FE,$0F,$FF
+   
+Voice_ClosedHitHat:
+	dc.b    $00,$01,$05, $FE,$0F,$FF
+
+Voice_ElecArpeggio1:
+    dcb.b   3, $00
+    dcb.b   7, $01
+    dcb.b   6, $02
+    dcb.b   7, $03
+    dcb.b   5, $04
+    dcb.b   3, $05
+    dcb.b   3, $06
+    dcb.b   3, $07
+    dcb.b   3, $08
+    dcb.b   3, $09
+    dcb.b   2, $0A
+    dcb.b   2, $0B
+    dcb.b   2, $0C
+    dcb.b   2, $0D
+    dcb.b   2, $0E
+    dc.b    $FE,$0F,$FF
+
+Voice_ElecArpeggio2:
+    dc.b    $01,$01, $02, $03,$03, $04
+    dc.b    $05,$05, $06, $07,$07, $08
+    dc.b    $09,$09, $0A, $0B,$0B, $0C
+    dc.b    $0D,$0D, $FE,$0F,$FF
+
+Voice_FrozHitHat:
+    dc.b    $00,$01,$03,$05,$08,$FE,$0F,$FF
+
+Voice_ShapPSGFade:
+    dc.b    $05,$05, $06,$06, $07,$07, $08,$08
+    dc.b    $09,$09, $0A,$0A, $0B,$0B, $0C,$0C
+    dc.b    $0E,$0E, $FE,$0F,$FF
+
+Voice_MechLongPSG:
+    dc.b    $0C,$0C, $0B,$0B, $0A,$0A, $09,$09
+    dc.b    $08,$08,$08,$08, $07,$07,$07,$07
+    dc.b    $06,$06,$06,$06, $05,$05,$05
+    dc.b    $04,$04,$04,$04, $03,$03,$03,$03
+    dc.b    $02,$02,$02,$02, $01,$01,$01,$01
+    dc.b    $00,$00,$00,$00,$00,$00
+    dc.b    $01,$01,$01,$01, $02,$02,$02,$02,$02
+    dc.b    $03,$03,$03,$03, $04,$04,$04,$04,$04
+    dc.b    $05,$05,$05,$05, $06,$06,$06,$06
+    dc.b    $07,$07,$07,$07, $08,$08,$08,$08
+    dc.b    $09,$09,$09, $0A,$0A,$0A,$0A
+    dc.b    $0B,$0B,$0B,$0B, $0C,$0C,$0C,$0C
+    dc.b    $0D,$0D,$0D, $0E,$0E,$0E,$0E
+    dc.b    $FE,$0F,$FF
+	
+Voice_LavaPSG:
+	dc.b	$00,$00,00,0,1,$01,$01,$02,2,$03,4,$05,$07,$09,$A,$C,$FE,$0F,$FF
+
+Voice_InetPSGArp1:
+    dc.l	$00,$00
+    dc.l	$00,$00
+    dc.b	$01,$01,$01,$01
+    dc.b	$01,$01,$01,$01
+    dc.b    $01,$01,$01
+    dc.b    $02,$02,$02,$02,$02,$02,$02,$02
+    dc.b    $02,$02,$02,$02
+    dc.b    $03,$03,$03,$03,$03
+    dc.b    $03,$03,$03,$03,$03
+
+Voice_InetPSGArp2:
+    dc.b	$04,$04,$04,$04
+    dc.b	$04,$04,$04,$04
+    dc.b	$04,$04,$04,$04
+    dc.b	$05,$05,$05,$05,$05,$05
+    dc.b	$05,$05,$05,$05,$05,$05
+    dc.b    $05,$05,$05,$05,$05,$05
+    dc.b    $06,$06,$06,$06,$06,$06,$06,$06
+    dc.b    $06,$06,$06,$06,$06,$06,$06,$06
+    dc.b    $07,$07,$07,$07,$07,$07,$07,$07,$07,$07,$07,$07
+    dc.b	$08,$08,$08,$08,$08,$08,$09,$09,$0A,$0A,$0A,$0B
+    dc.b    $0B,$0C,$0C,$0D,$0E,$0D,$FE,$0F,$FF
+	
+Voice_InetPSGArp3:	
+	dc.b	$00,$00,$01,$02,$03,$05,$07,$09,$0C,$FE,$0F,$FF
+	
+Voice_InetPSGArp4:	
+	dc.b	$04,$04,$05,$06,$07,$08,$09,$0a,$0C,$FE,$0F,$FF
+
+;----------------------------;
+; Drumloop for Ether Network ;
+;----------------------------;
+
+Drumloop1:
+	incbin "sound/voices/inet1.ewf"
+Drumloop2:
+	incbin "sound/voices/inet2.ewf"
+Drumloop3:
+	incbin "sound/voices/inet3.ewf"
+Drumloop4:
+	incbin "sound/voices/inet4.ewf"
+Drumloop5:
+	incbin "sound/voices/inet5.ewf"
+Drumloop6:
+	incbin "sound/voices/inet6.ewf"
+Drumloop7:
+	incbin "sound/voices/inet7.ewf"
+Drumloop8:
+	incbin "sound/voices/inet8.ewf"
+Drumloop9:
+	incbin "sound/voices/inet9.ewf"
+Drumloop10:
+	incbin "sound/voices/inet10.ewf"
+
+;----------------------------------------------------------------------------

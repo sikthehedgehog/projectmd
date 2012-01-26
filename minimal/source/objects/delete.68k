@@ -1,0 +1,86 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------;
+; DeleteObject                                                            ;
+; DeleteObjectPermanent                                                   ;
+;                                                                         ;
+; Pseudo-subroutines, as objects jump here instead of calling as a normal ;
+; subroutine. This code will kill the object (removing it from the object ;
+; list).                                                                  ;
+;                                                                         ;
+; DeleteObject restores the object into the object map                    ;
+; DeleteObjectPermanent deletes the object permanently                    ;
+;-------------------------------------------------------------------------;
+
+DeleteObject:
+
+;---------------------------------;
+; Put object back into object map ;
+;---------------------------------;
+
+    move.w  Object_MapPos(a0), d7
+    move.w  d7, d6
+    and.w   #7, d7
+    lsr.w   #3, d6
+    lea     (RAM_ObjectMap), a6
+    lea     (a6,d6.w), a6
+    move.b  (a6), d6
+    bset.l  d7, d6
+    move.b  d6, (a6)
+
+;----------------------------------------------------------------------;
+; Code above is only for objects that are restored into the object map ;
+; Code below also belongs to objects that are deleted permanently      ;
+;----------------------------------------------------------------------;
+
+DeleteObjectPermanent:
+
+;-------------------------------------;
+; Move last object into current entry ;
+;-------------------------------------;
+
+    adda.w  #Object_Size, a0
+    move.l  -(a1), -(a0)            ; Object-specific data
+    move.l  -(a1), -(a0)            ; Y coordinate
+    move.l  -(a1), -(a0)            ; X coordinate
+    move.l  -(a1), -(a0)            ; Type and location in object map
+
+;------------------------------------------------;
+; Ensure that the object we moved gets processed ;
+;------------------------------------------------;
+
+    suba.w  #Object_Size, a0
+
+;-----------------------------------;
+; Update pointer to object list end ;
+;-----------------------------------;
+
+    move.l  a1, (RAM_LastObject)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

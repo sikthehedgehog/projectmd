@@ -1,0 +1,128 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------------;
+; RunBumper                   ;
+;                             ;
+; Game logic code for bumpers ;
+;-----------------------------;
+
+RunBumper:
+
+;---------;
+; Animate ;
+;---------;
+
+    tst.w   Object_Misc(a0)
+    beq.s   @DontAnimate
+    move.l  (RAM_GlobalAnimSpd), d0
+    lsr.l   #1, d0
+    sub.l   d0, Object_Misc(a0)
+@DontAnimate:
+
+;-------------------;
+; Are we outbounds? ;
+;-------------------;
+
+    move.l  Object_X(a0), d0
+    swap    d0
+    sub.w   (RAM_Scroll), d0
+    cmp.w   #0-$100, d0
+    blt.s   @Outbounds
+    cmp.w   #320+$C0, d0
+    ble.s   @CheckCol
+
+@Outbounds:
+    bra     DeleteObject
+
+;-----------------------------------;
+; Are we colliding with the player? ;
+;-----------------------------------;
+
+@CheckCol:
+    move.w  Object_X(a0), d0
+    move.w  Player_X(a3), d1
+    addq.w  #4, d0
+    addq.w  #3, d1
+    cmp.w   d0, d1
+    blt     @End
+
+    add.w   #23, d0
+    subq.w  #7, d1
+    cmp.w   d0, d1
+    bgt     @End
+
+    move.w  Object_Y(a0), d0
+    move.w  Player_Y(a3), d1
+    addq.w  #4, d0
+    cmp.w   d0, d1
+    blt     @End
+
+    add.w   #23, d0
+    sub.w   #31, d1
+    cmp.w   d0, d1
+    bgt     @End
+
+;---------;
+; Bumped! ;
+;---------;
+
+    move.b  #SFX_Bumper, (RAM_SFXToPlay)
+    move.l  #$4FFFF, Object_Misc(a0)
+
+;-------------------------------;
+; Calculate new player momentum ;
+;-------------------------------;
+
+    move.w  Player_X(a3), d0
+    sub.w   Object_X(a0), d0
+    sub.w   #16, d0
+    move.w  Player_Y(a3), d1
+    sub.w   Object_Y(a0), d1
+    sub.w   #32, d1
+    bsr     GetAngle
+    
+    add.w   d0, d0
+    
+    moveq   #0, d7
+    lea     (Cosines), a6
+    move.w  (a6,d0.w), d7
+    ext.l   d7
+    asl.l   #8, d7
+    move.l  d7, Player_Speed(a3)
+    
+    moveq   #0, d7
+    lea     (Sines), a6
+    move.w  (a6,d0.w), d7
+    ext.l   d7
+    neg.l   d7
+    asl.l   #6, d7
+    move.l  d7, Player_Gravity(a3)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

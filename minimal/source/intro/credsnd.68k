@@ -1,0 +1,71 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------;
+; Sound credits from the game intro      ;
+;----------------------------------------;
+; OUTPUT                                 ;
+;   d0.w ... 0 if cutscene must continue ;
+;            1 if cutscene should stop   ;
+;----------------------------------------;
+; BREAKS: all                            ;
+;----------------------------------------;
+
+IntroSound:
+
+;--------------------;
+; Initialize console ;
+;--------------------;
+
+    bsr     InitIntroConsole
+
+;-----------;
+; Draw text ;
+;-----------;
+
+    moveq   #10, d0
+    moveq   #9, d1
+    lea     (Credit_BGM), a0
+    bsr     WriteConsoleDirect
+
+    moveq   #30-11, d0
+    moveq   #11, d1
+    lea     (Credit_Eric), a0
+    bsr     WriteConsoleDirect
+
+    moveq   #10, d0
+    moveq   #16, d1
+    lea     (Credit_SFX), a0
+    bsr     WriteConsoleDirect
+
+    moveq   #30-16, d0
+    moveq   #18, d1
+    lea     (Credit_Javier), a0
+    bsr     WriteConsoleDirect
+
+;--------------;
+; Show credits ;
+;--------------;
+
+    bra     DoIntroCredits
+
+;----------------------------------------------------------------------------

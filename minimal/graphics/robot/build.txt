@@ -1,0 +1,20 @@
+palette ??? EEE ??? ??? 8AE 68E 000 0EE EA6 E60 08E 00E 00A 0E0 0A0 060
+setmask
+
+openout graphics/robot/walk1.bin openin concept/robot/walk1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/robot/walk2.bin openin concept/robot/walk2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/robot/walk3.bin openin concept/robot/walk3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/robot/walk4.bin openin concept/robot/walk4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/robot/walk5.bin openin concept/robot/walk5.bmp sprite 0 0 4 4 closein closeout
+openout graphics/robot/walk6.bin openin concept/robot/walk6.bmp sprite 0 0 4 4 closein closeout
+openout graphics/robot/walk7.bin openin concept/robot/walk7.bmp sprite 0 0 4 4 closein closeout
+openout graphics/robot/walk8.bin openin concept/robot/walk8.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/robot/dead.bin
+openin concept/robot/dead.bmp
+sprite 0 0 2 2
+sprite 2 0 2 2
+sprite 0 2 2 2
+sprite 2 2 2 2
+closein
+closeout

@@ -1,0 +1,144 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------------------;
+; UpdateSound                                     ;
+;                                                 ;
+; Updates the data to be sent to the sound driver ;
+;-------------------------------------------------;
+; BREAKS: all                                     ;
+;-------------------------------------------------;
+
+UpdateSound:
+
+;------------------------------------;
+; Check if there's any sound to play ;
+;------------------------------------;
+
+    move.w  (RAM_BGMToPlay), d0
+    beq.s   @End
+
+;------------------;
+; Play BGM, if any ;
+;------------------;
+
+    move.w  d0, d1
+    lsr.w   #8, d1
+    beq.s   @NoBGM
+
+    cmp.b   #BGMStop, d1
+    bne.s   @DontStopBGM
+    bsr     Echo_StopBGM
+    bra.s   @NoBGM
+@DontStopBGM:
+
+    subq.b  #1, d1
+    add.w   d1, d1
+    add.w   d1, d1
+    lea     (@BGMAddrList), a0
+    move.l  (a0,d1.w), a0
+    bsr     Echo_PlayBGM
+@NoBGM:
+
+;------------------;
+; Play SFX, if any ;
+;------------------;
+
+    moveq   #0, d1
+    move.b  d0, d1
+    beq.s   @NoSFX
+
+    cmp.b   #SFXStop, d1
+    bne.s   @DontStopSFX
+    bsr     Echo_StopSFX
+    bra.s   @Processed
+@DontStopSFX:
+
+    subq.b  #1, d1
+    add.w   d1, d1
+    add.w   d1, d1
+    lea     (@SFXAddrList), a0
+    move.l  (a0,d1.w), a0
+    bsr     Echo_PlaySFX
+@NoSFX:
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@Processed:
+    move.w  #0, (RAM_BGMToPlay)
+@End:
+    rts
+
+;----------------------------------------------------------------------------
+
+;-----------------------;
+; List of BGM addresses ;
+;-----------------------;
+
+@BGMAddrList:
+    dc.l    BGMData_Level3D             ; Infinite Field
+    dc.l    BGMData_LevelMotherboard    ; Electronic Madness
+    dc.l    BGMData_LevelLogic          ; Gate Array
+    dc.l    BGMData_LevelMemory         ; Frozen Memories
+    dc.l    BGMData_LevelShape          ; Crazy Shapes
+    dc.l    BGMData_LevelVDP            ; Pixelated World
+    dc.l    BGMData_LevelLight          ; Bright Darkness
+    dc.l    BGMData_LevelInternet       ; Ether Network
+    dc.l    BGMData_LevelTray           ; Mechanical Heart
+    dc.l    BGMData_LevelLava           ; Waterlava
+    dc.l    BGMData_LevelWater          ; Waterlava
+    dc.l    BGMData_LevelSelect         ; Level Select
+    dc.l    BGMData_GameOver            ; Game Over 
+
+;-----------------------;
+; List of SFX addresses ;
+;-----------------------;
+
+@SFXAddrList:
+    dc.l    SFXData_Jump                ; Jump
+    dc.l    SFXData_Rhombus_1           ; Get rhombus #1
+    dc.l    SFXData_Rhombus_2           ; Get rhombus #2
+    dc.l    SFXData_Rhombus_3           ; Get rhombus #3
+    dc.l    SFXData_Rhombus_4           ; Get rhombus #4
+    dc.l    SFXData_PowerUp             ; Power-up
+    dc.l    SFXData_Attack              ; Attack
+    dc.l    SFXData_GetHurt             ; Getting hurt (normal)
+    dc.l    SFXData_Electrocute         ; Getting electrocuted
+    dc.l    SFXData_ShockShield         ; Electric shield
+    dc.l    SFXData_BigExplosion        ; Big explosion
+    dc.l    SFXData_Explosion           ; Normal explosion
+    dc.l    SFXData_GiantExplosion      ; GIANT explosion
+    dc.l    SFXData_Beep                ; Beep!
+    dc.l    SFXData_OK                  ; Accept option
+    dc.l    SFXData_Cancel              ; Cancel
+    dc.l    SFXData_Swim                ; Swim
+    dc.l    SFXData_Splash              ; Fall into water
+    dc.l    SFXData_Checkpoint          ; Checkpoint
+    dc.l    SFXData_1up                 ; 1-up
+    dc.l    SFXData_Capacitor           ; Exploding capacitor
+    dc.l    SFXData_Bumper              ; Bumper
+    dc.l    SFXData_BumperPad           ; Bumper pad
+    dc.l    SFXData_Teleporter          ; Teleporter
+
+;----------------------------------------------------------------------------

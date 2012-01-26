@@ -1,0 +1,291 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------------;
+; Tile data for different in-game objects ;
+;-----------------------------------------;
+
+;-----------------------------------------;
+; Rhombus-shaped generic collectible item ;
+;-----------------------------------------;
+
+Gfx_Rhombus:
+    incbin  "graphics/objects/rhombus1.bin"
+    incbin  "graphics/objects/rhombus2.bin"
+    incbin  "graphics/objects/rhombus3.bin"
+    incbin  "graphics/objects/rhombus4.bin"
+    incbin  "graphics/objects/rhombus5.bin"
+
+;-----------;
+; Power-ups ;
+;-----------;
+
+Gfx_RayPowerup:
+    incbin  "graphics/objects/ray1.bin"
+    incbin  "graphics/objects/ray2.bin"
+    incbin  "graphics/objects/ray3.bin"
+    incbin  "graphics/objects/ray4.bin"
+
+Gfx_BombPowerup:
+    incbin  "graphics/objects/bomb1.bin"
+    incbin  "graphics/objects/bomb2.bin"
+    incbin  "graphics/objects/bomb3.bin"
+
+Gfx_LovePowerup:
+    incbin  "graphics/objects/heart.bin"
+
+Gfx_DJumpPowerup:
+    incbin  "graphics/objects/djump1.bin"
+    incbin  "graphics/objects/djump2.bin"
+    incbin  "graphics/objects/djump3.bin"
+    incbin  "graphics/objects/djump4.bin"
+    incbin  "graphics/objects/djump5.bin"
+    incbin  "graphics/objects/djump6.bin"
+    incbin  "graphics/objects/djump7.bin"
+    incbin  "graphics/objects/djump8.bin"
+
+;-------;
+; 1-up! ;
+;-------;
+
+Gfx_1up:
+    incbin  "graphics/objects/1up.bin"
+
+;--------;
+; Sparks ;
+;--------;
+
+Gfx_Spark:
+    incbin  "graphics/objects/spark.bin"
+
+;----------------------;
+; Breakable thin block ;
+;----------------------;
+
+Gfx_ThinBlock:
+    incbin  "graphics/objects/thinblk.bin"
+
+;--------------;
+; Flamethrower ;
+;--------------;
+
+Gfx_Flamethrower:
+    incbin  "graphics/objects/flamethw.bin"
+
+Gfx_Flameballs:
+    incbin  "graphics/objects/fball1.bin"
+    incbin  "graphics/objects/fball2.bin"
+    incbin  "graphics/objects/fball3.bin"
+    incbin  "graphics/objects/fball4.bin"
+    incbin  "graphics/objects/fball5.bin"
+    incbin  "graphics/objects/fball6.bin"
+    incbin  "graphics/objects/fball7.bin"
+    incbin  "graphics/objects/fball8.bin"
+    incbin  "graphics/objects/fball9.bin"
+    incbin  "graphics/objects/fball10.bin"
+
+;-------------;
+; Checkpoints ;
+;-------------;
+
+Gfx_CheckPoint:
+    incbin  "graphics/objects/chkpnt1.bin"
+    incbin  "graphics/objects/chkpnt2.bin"
+    incbin  "graphics/objects/chkpnt3.bin"
+    incbin  "graphics/objects/chkpnt4.bin"
+    incbin  "graphics/objects/chkpnt5.bin"
+    incbin  "graphics/objects/chkpnt6.bin"
+    incbin  "graphics/objects/chkpnt7.bin"
+    incbin  "graphics/objects/chkpnt8.bin"
+    incbin  "graphics/objects/chkpnt9.bin"
+    incbin  "graphics/objects/chkpnt10.bin"
+    incbin  "graphics/objects/chkpnt11.bin"
+    incbin  "graphics/objects/chkpnt12.bin"
+    incbin  "graphics/objects/chkpnt13.bin"
+    incbin  "graphics/objects/chkpnt14.bin"
+    incbin  "graphics/objects/chkpnt15.bin"
+    incbin  "graphics/objects/chkpnt16.bin"
+    incbin  "graphics/objects/chkpnt17.bin"
+
+;----------------------------;
+; Button that ends the level ;
+;----------------------------;
+
+Gfx_EndButton:
+    incbin  "graphics/objects/endbut.bin"
+
+Gfx_EndBeam:
+    incbin  "graphics/objects/endbeam1.bin"
+    incbin  "graphics/objects/endbeam2.bin"
+    incbin  "graphics/objects/endbeam3.bin"
+    incbin  "graphics/objects/endbeam4.bin"
+
+;---------------------;
+; Invincibility stars ;
+;---------------------;
+
+Gfx_Stars:
+    incbin  "graphics/objects/stars.bin"
+
+;-------------------------------------------------;
+; Electrical shield used by the electric power-up ;
+;-------------------------------------------------;
+
+Gfx_ElectricShield:
+    incbin  "graphics/objects/elecshld.bin"
+
+;-------------------;
+; Electrical pulses ;
+;-------------------;
+
+Gfx_Pulse:
+    incbin  "graphics/objects/pulse.bin"
+    incbin  "graphics/objects/pulsdie1.bin"
+    incbin  "graphics/objects/pulsdie2.bin"
+    incbin  "graphics/objects/pulsdie3.bin"
+    incbin  "graphics/objects/pulsdie4.bin"
+
+Gfx_PulseGenerator:
+    incbin  "graphics/objects/pulsgen1.bin"
+    incbin  "graphics/objects/pulsgen2.bin"
+    incbin  "graphics/objects/pulsgen3.bin"
+    incbin  "graphics/objects/pulsgen4.bin"
+
+;-------------------------;
+; Capacitors that go boom ;
+;-------------------------;
+
+Gfx_CapacitorTop:
+    incbin  "graphics/objects/captop.bin"
+    incbin  "graphics/objects/captopex.bin"
+
+;-------------------------------------;
+; Pieces that make up swinging cables ;
+;-------------------------------------;
+
+Gfx_HangingCable:
+    incbin  "graphics/objects/cable00.bin"
+    incbin  "graphics/objects/cable10.bin"
+    incbin  "graphics/objects/cable20.bin"
+    incbin  "graphics/objects/cable30.bin"
+    incbin  "graphics/objects/cable40.bin"
+
+Gfx_CableSpark:
+    incbin  "graphics/objects/cspark.bin"
+
+;-------------;
+; Stalactites ;
+;-------------;
+
+Gfx_Stalactite:
+    incbin  "graphics/objects/stalact.bin"
+
+;----------------------------------;
+; Falling rocks in Frozen Memories ;
+;----------------------------------;
+
+Gfx_IceRock:
+    incbin  "graphics/objects/icerock1.bin"
+    incbin  "graphics/objects/icerock2.bin"
+    incbin  "graphics/objects/icerock3.bin"
+    incbin  "graphics/objects/icerock4.bin"
+
+;--------;
+; Lasers ;
+;--------;
+
+Gfx_Laser:
+    incbin  "graphics/objects/laser.bin"
+
+;--------------------------;
+; Teleporters in Waterlava ;
+;--------------------------;
+
+Gfx_WLTeleporter:
+    incbin  "graphics/objects/wl_tport.bin"
+
+;------------------------;
+; Ice floor in waterlava ;
+;------------------------;
+
+Gfx_WLIceFloor:
+    incbin  "graphics/objects/icefloor.bin"
+
+;---------;
+; Bumpers ;
+;---------;
+
+Gfx_Bumpers:
+    incbin  "graphics/objects/bumper1.bin"
+    incbin  "graphics/objects/bumper2.bin"
+    incbin  "graphics/objects/bumper3.bin"
+    incbin  "graphics/objects/bumper4.bin"
+    incbin  "graphics/objects/bumper5.bin"
+
+Gfx_BumperPad:
+    incbin  "graphics/objects/bumppad.bin"
+
+;-------------;
+; Light bulbs ;
+;-------------;
+
+Gfx_LightBulb:
+    incbin  "graphics/objects/lghtbulb.bin"
+
+;-------------------------;
+; Vertical spark emitters ;
+;-------------------------;
+
+Gfx_VSpark:
+    incbin  "graphics/objects/vspark.bin"
+
+Gfx_VSparkBase:
+    incbin  "graphics/objects/vsparkb.bin"
+
+;---------------------;
+; Spinning spikeballs ;
+;---------------------;
+
+Gfx_SpinSpike:
+    incbin  "graphics/objects/spinspk1.bin"
+    incbin  "graphics/objects/spinspk2.bin"
+    incbin  "graphics/objects/spinspk3.bin"
+    incbin  "graphics/objects/spinspk4.bin"
+    incbin  "graphics/objects/spinspk5.bin"
+    incbin  "graphics/objects/spinspk6.bin"
+    incbin  "graphics/objects/spinspk7.bin"
+    incbin  "graphics/objects/spinspk8.bin"
+
+;---------;
+; Barrier ;
+;---------;
+
+Gfx_Barrier:
+    incbin  "graphics/objects/barrier.bin"
+
+Gfx_PowerSource:
+    incbin  "graphics/objects/pwrsrc1.bin"
+    incbin  "graphics/objects/pwrsrc1b.bin"
+    incbin  "graphics/objects/pwrsrc2.bin"
+    incbin  "graphics/objects/pwrsrc2b.bin"
+
+;----------------------------------------------------------------------------

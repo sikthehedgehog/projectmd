@@ -1,0 +1,67 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;---------------------;
+; InitHUD             ;
+;                     ;
+; Initializes the HUD ;
+;---------------------;
+; BREAKS: all         ;
+;---------------------;
+
+InitHUD:
+
+;-------------;
+; Load border ;
+;-------------;
+
+    FixedDMA Gfx_HUDBorder, VRAM_HUDBorder*$20, 4*$20
+
+;--------------------------------;
+; Load energy indicator graphics ;
+;--------------------------------;
+
+    FixedDMA Gfx_HUDEnergy+($20*4), (VRAM_HUDEnergy+0)*$20, 4*$20
+    FixedDMA Gfx_HUDEnergy+($20*4), (VRAM_HUDEnergy+4)*$20, 4*$20
+    FixedDMA Gfx_HUDEnergy, (VRAM_HUDEnergy+8)*$20, 4*$20
+    FixedDMA Gfx_HUDEnergy, (VRAM_HUDEnergy+12)*$20, 4*$20
+
+;--------------------------;
+; Load cross for the lives ;
+;--------------------------;
+
+    FixedDMA Gfx_HUDLivesCross, VRAM_HUDLives*$20, 2*$20
+
+;--------------------------------;
+; Load background for pause menu ;
+;--------------------------------;
+
+    FixedDMA Gfx_PauseBG, (VRAM_PauseExit-(2*2))*$20, 2*2*$20
+    FixedDMA Gfx_PauseBG, (VRAM_PauseExit+(4*2))*$20, 2*2*$20
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

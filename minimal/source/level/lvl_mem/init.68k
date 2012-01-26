@@ -1,0 +1,123 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------------------------;
+; InitLevel_Memory                                      ;
+;                                                       ;
+; Initializes stuff specific to the memory-themed level ;
+;-------------------------------------------------------;
+; BREAKS: d6, d7, a5, a6                                ;
+;-------------------------------------------------------;
+
+InitLevel_Memory:
+
+;-----------------------------;
+; Gotta reduce text length :P ;
+;-----------------------------;
+
+    rsset VRAM_Level
+    rs.b (16*4)+3
+@T2 rs.b (16*8)+10
+@T4 rs.b (16*2)+10
+@W  rs.b 0
+
+@Addr_Water equ @W*$20
+
+;----------------------;
+; Set per-tile HScroll ;
+;----------------------;
+
+    move.w  #$8B02, ($C00004)
+
+;------------------------------;
+; Load level-specific graphics ;
+;------------------------------;
+
+    FixedDMA Gfx_CrystalCreatureWalk, VRAM_TrollWalk*$20, 16*$20
+    FixedDMA Gfx_CrystalCreaturePieces, VRAM_TrollDead*$20, 4*$20
+    FixedDMA Gfx_Stalactite, VRAM_Stalactite*$20, 8*2*$20
+    FixedDMA Gfx_IceRock, VRAM_IceRock*$20, 16*4*$20
+    FixedDMA Gfx_LevelMemory_Platform, VRAM_Platform*$20, 8*$20
+    FixedDMA Gfx_CrystalBatFly, VRAM_DblCircleFly*$20, $10*$20
+    FixedDMA Gfx_Barrier, VRAM_Barrier*$20, 4*$20
+    FixedDMA Gfx_PowerSource, VRAM_PowerSource*$20, 16*4*$20
+
+    FixedDMA Gfx_LevelMemory_Water+(0*$20), @Addr_Water+(0*$20), 2*$20
+    FixedDMA Gfx_LevelMemory_Water+(4*$20), @Addr_Water+(2*$20), 2*$20
+    FixedDMA Gfx_LevelMemory_Water+(8*$20), @Addr_Water+(4*$20), 2*$20
+    FixedDMA Gfx_LevelMemory_Water+(12*$20), @Addr_Water+(6*$20), 2*$20
+    FixedDMA Gfx_LevelMemory_Water+(16*$20), @Addr_Water+(8*$20), 2*$20
+    FixedDMA Gfx_LevelMemory_Water+(20*$20), @Addr_Water+(10*$20), 2*$20
+    FixedDMA Gfx_LevelMemory_Water+(24*$20), @Addr_Water+(12*$20), 2*$20
+    FixedDMA Gfx_LevelMemory_Water+(28*$20), @Addr_Water+(14*$20), 2*$20
+
+;------------------------------------;
+; Get address of level-specific data ;
+;------------------------------------;
+
+    lea     (RAM_LevelStuff), a6
+
+;--------------------------------;
+; Initialize level-specific data ;
+;--------------------------------;
+
+    move.l  #0, (a6)+           ; Used to animate the rainbow waterfalls
+
+;-----------------;
+; Draw background ;
+;-----------------;
+
+    move.l  #$60000003, ($C00004)
+    lea     (Gfx_LevelMemory_BGLayout), a6
+    lea     ($C00000), a5
+    move.w  #(64*28)-1, d7
+@BGLoop:
+    moveq   #0, d6
+    move.b  (a6)+, d6
+    add.w   #VRAM_Level+$4000, d6
+    move.w  d6, (a5)
+    dbf     d7, @BGLoop
+
+;------------------------------------;
+; We need to flip one of the rows... ;
+;------------------------------------;
+
+    move.l  #$68800003, ($C00004)
+    moveq   #(64/16)-1, d7
+@BGFlip:
+    move.l  #((VRAM_Level+$403D)<<16)|(VRAM_Level+$5041), (a5)
+    move.l  #((VRAM_Level+$5042)<<16)|(VRAM_Level+$5041), (a5)
+    move.l  #((VRAM_Level+$403D)<<16)|(VRAM_Level+$5041), (a5)
+    move.l  #((VRAM_Level+$5042)<<16)|(VRAM_Level+$5041), (a5)
+    move.l  #((VRAM_Level+$403D)<<16)|(VRAM_Level+$5041), (a5)
+    move.l  #((VRAM_Level+$5042)<<16)|(VRAM_Level+$5041), (a5)
+    move.l  #((VRAM_Level+$403D)<<16)|(VRAM_Level+$5041), (a5)
+    move.l  #((VRAM_Level+$5042)<<16)|(VRAM_Level+$5041), (a5)
+    dbf     d7, @BGFlip
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

@@ -1,0 +1,135 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------------;
+; RunPulse                                     ;
+;                                              ;
+; Game logic code for electrical pulse objects ;
+;----------------------------------------------;
+
+RunPulse:
+
+;-------------------;
+; Move to the right ;
+;-------------------;
+
+    move.l  (RAM_GlobalAnimSpd), d7
+    ;move.l  d7, d6
+    ;add.l   d7, d7
+    ;add.l   d6, d7
+    add.l   d7, d7
+    add.l   d7, d7
+
+    move.l  Object_X(a0), d0
+    add.l   d7, d0
+    move.l  d0, Object_X(a0)
+
+;--------------------------------------;
+; Check if we're colliding with a wall ;
+;--------------------------------------;
+
+    swap    d0
+
+    move.w  d0, d1
+    add.w   #48, d1
+    and.w   #$FFE0, d1
+    lsr.w   #2, d1
+    move.w  Object_Y(a0), d2
+    lsr.w   #5, d2
+    add.w   d2, d1
+    move.l  (RAM_CollAddr), a6
+
+    move.b  (a6,d1.w), d1
+    beq.s   @NotStopping
+
+    move.l  Object_Misc(a0), d1
+    add.l   (RAM_GlobalAnimSpd), d1
+    move.l  d1, Object_Misc(a0)
+    cmp.l   #($20/4)<<16, d1
+    blt.s   @NotStopping
+
+    bra     DeleteObjectPermanent
+@NotStopping:
+
+;-------------------;
+; Are we outbounds? ;
+;-------------------;
+
+    sub.w   (RAM_Scroll), d0
+    cmp.w   #0-$A0, d0
+    blt.s   @Outbounds
+    cmp.w   #320+$60, d0
+    ble.s   @CheckCol
+
+@Outbounds:
+    bra     DeleteObjectPermanent
+
+;-------------------------------;
+; Is the player stepping on us? ;
+;-------------------------------;
+
+@CheckCol:
+    move.w  Player_Gravity(a3), d0
+    blt.s   @End
+
+    move.w  Object_X(a0), d0
+    move.w  Player_X(a3), d1
+    cmp.w   d0, d1
+    blt.s   @End
+
+    add.w   #48, d0
+    cmp.w   d0, d1
+    bgt.s   @End
+
+    move.w  Object_Y(a0), d0
+    move.w  Player_Y(a3), d1
+    add.w   #13, d0
+    cmp.w   d0, d1
+    blt.s   @End
+
+    addq.w  #5, d0
+    cmp.w   d0, d1
+    bgt.s   @End
+
+;---------------------------;
+; Make Stephany ride on us! ;
+;---------------------------;
+
+    subq.w  #4, d0
+    move.w  d0, Player_Y(a3)
+    move.w  #0, Player_Y+2(a3)
+    move.w  Player_Status(a3), d0
+    bset.l  #PlayerStat_Ride, d0
+    move.w  d0, Player_Status(a3)
+    move.w  #0, Player_Gravity(a3)
+
+    move.l  d7, Player_RideSpeed(a3)
+    move.l  #0, Player_RideGrav(a3)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

@@ -1,0 +1,77 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------------;
+; RunCableBase                                   ;
+;                                                ;
+; Game logic code for the base of hanging cables ;
+;------------------------------------------------;
+
+RunCableBase:
+
+;-------------------;
+; Are we outbounds? ;
+;-------------------;
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+    cmp.w   #0-$C0, d0
+    blt.s   @Outbounds
+    cmp.w   #320+$C0, d0
+    ble.s   @NotOutbounds
+
+@Outbounds:
+    bra     DeleteObject
+@NotOutbounds:
+
+;-------------------------;
+; Spawn first cable piece ;
+;-------------------------;
+
+    move.l  Object_X(a0), d0
+    add.l   #16<<16, d0
+
+    move.w  (RAM_GlobalAnim2), d1
+    add.w   d1, d1
+    add.w   d1, d1
+    and.w   #$FF<<1, d1
+    lea     (Sines), a6
+    move.w  (a6,d1), d1
+    asr.w   #7, d1
+
+    move.w  #Obj_CablePiece, Object_Type(a1)
+    move.l  d0, Object_X(a1)
+    move.l  Object_Y(a0), Object_Y(a1)
+    move.w  #$FF, Object_Misc(a1)
+    move.b  d1, Object_Misc+2(a1)
+    move.b  #16, Object_Misc+3(a1)
+
+    adda.w  #Object_Size, a1
+    move.l  a1, (RAM_LastObject)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

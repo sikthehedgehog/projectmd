@@ -1,0 +1,144 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------;
+; RunBarrier                          ;
+;                                     ;
+; Game logic code for barrier objects ;
+;-------------------------------------;
+
+RunBarrier:
+
+;-------------------;
+; Are we outbounds? ;
+;-------------------;
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+    cmp.w   #0-$40, d0
+    blt.s   @Outbounds
+    cmp.w   #320+$40, d0
+    ble.s   @NotOutbounds
+
+@Outbounds:
+    bra     DeleteObject
+
+;----------;
+; Opening? ;
+;----------;
+
+@NotOutbounds:
+    move.l  Object_Misc(a0), d0
+    beq.s   @CheckCol
+    
+    move.l  (RAM_GlobalAnimSpd), d1
+    add.l   d1, d1
+    add.l   d1, d0
+    cmp.l   #$20<<16, d0
+    blt.s   @NotTooHigh
+    move.l  #$20<<16, d0
+@NotTooHigh:
+    move.l  d0, Object_Misc(a0)
+    
+    rts
+
+;-----------------------------------;
+; Are we colliding with the player? ;
+;-----------------------------------;
+
+@CheckCol:
+    move.w  Object_X(a0), d0
+    move.w  Player_X(a3), d1
+    add.w   #12, d0
+    addq.w  #3, d1
+    cmp.w   d0, d1
+    blt.s   @NoPush
+
+    addq.w  #7, d0
+    subq.w  #7, d1
+    cmp.w   d0, d1
+    bgt.s   @NoPush
+
+    move.w  Object_Y(a0), d0
+    move.w  Player_Y(a3), d1
+    cmp.w   d0, d1
+    blt.s   @NoPush
+
+    add.w   #31, d0
+    sub.w   #31, d1
+    cmp.w   d0, d1
+    bgt.s   @NoPush
+
+;-------------------;
+; Push player away! ;
+;-------------------;
+
+    move.l  Object_X(a0), d0
+    add.l   #8<<16, d0
+    move.l  d0, Player_X(a3)
+    move.l  #0, Player_Speed(a3)
+@NoPush:
+
+;----------------------------------------;
+; Is Stephany shocking the power source? ;
+;----------------------------------------;
+
+    move.w  Object_X(a0), d0
+    move.w  Player_X(a3), d1
+    sub.w   #32, d0
+    addq.w  #3, d1
+    cmp.w   d0, d1
+    blt.s   @End
+
+    add.w   #31, d0
+    subq.w  #7, d1
+    cmp.w   d0, d1
+    bgt.s   @End
+
+    move.w  Object_Y(a0), d0
+    move.w  Player_Y(a3), d1
+    cmp.w   d0, d1
+    blt.s   @End
+
+    add.w   #31, d0
+    sub.w   #31, d1
+    cmp.w   d0, d1
+    bgt.s   @End
+    
+    move.w  Player_Status(a3), d0
+    btst.l  #PlayerStat_Shock, d0
+    beq.s   @End
+
+;-------;
+; Open! ;
+;-------;
+
+    move.l  #1, Object_Misc(a0)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

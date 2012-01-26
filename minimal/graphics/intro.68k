@@ -1,0 +1,83 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;---------------------------------------------------;
+; Graphics used in the text mode parts of the intro ;
+;---------------------------------------------------;
+
+Gfx_TextMode: incbin "graphics/intro/textmode.bin"
+Gfx_TextMode_Size equ *-Gfx_TextMode
+
+;---------------------------------;
+; Graphics used for the starfield ;
+;---------------------------------;
+
+Gfx_Starfield: incbin "graphics/intro/starfld.bin"
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------------------------------------;
+; LUT used to convert from ASCII to the VRAM values for text mode ;
+; Bear into mind that this table starts at $20, not at $00!       ;
+;-----------------------------------------------------------------;
+
+ASCII2Console:
+    dc.w    $01,$01,$2D,$01,$2A,$01,$01,$01     ; $20..$28
+    dc.w    $01,$01,$2B,$01,$01,$2C,$26,$01     ; $28..$2F
+    dc.w    $02,$03,$04,$05,$06,$07,$08,$09     ; $30..$38
+    dc.w    $0A,$0B,$27,$01,$01,$01,$01,$01     ; $38..$3F
+    dc.w    $01,$0C,$0D,$0E,$0F,$10,$11,$12     ; $40..$48
+    dc.w    $13,$14,$15,$16,$17,$18,$19,$1A     ; $48..$4F
+    dc.w    $1B,$1C,$1D,$1E,$1F,$20,$21,$22     ; $50..$58
+    dc.w    $23,$24,$25,$01,$01,$01,$01,$01     ; $58..$5F
+    dc.w    $01,$0C,$0D,$0E,$0F,$10,$11,$12     ; $60..$68
+    dc.w    $13,$14,$15,$16,$17,$18,$19,$1A     ; $68..$6F
+    dc.w    $1B,$1C,$1D,$1E,$1F,$20,$21,$22     ; $70..$78
+    dc.w    $23,$24,$25,$01,$01,$01,$29,$01     ; $78..$7F
+
+;-----------------------------------------------------;
+; LUT used to calculate 3D positions in the starfield ;
+;-----------------------------------------------------;
+
+StarfieldTable:
+    incbin  "graphics/intro/starlut.bin"
+
+;----------------------------------------------------------------------------
+
+;------------------------------;
+; Strings used for the credits ;
+;------------------------------;
+
+Credit_Programming:     dc.b "PROGRAMMING",0
+Credit_Graphics:        dc.b "GRAPHICS",0
+Credit_CharDesign:      dc.b "CHARACTER DESIGN",0
+Credit_BGM:             dc.b "BACKGROUND MUSIC",0
+Credit_SFX:             dc.b "SOUND EFFECTS",0
+Credit_Testing:         dc.b "HARDWARE TESTING",0
+
+Credit_Javier:          dc.b "JAVIER DEGIROLMO",0
+Credit_Eric:            dc.b "ERIC VOIRIN",0
+Credit_Tiido:           dc.b "TIIDO PRIIMAGI",0
+
+    even
+
+;----------------------------------------------------------------------------

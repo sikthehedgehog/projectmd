@@ -1,0 +1,54 @@
+openout graphics/lvl_3d/gfx.tmp
+
+palette 000 202 404 626 848 A6A C8C EAE ??? ??? ??? ??? ??? ??? ??? ???
+
+openin concept/lvl_3d/3dfield.bmp
+scroll 0 0 23 1
+scroll 0 1 23 1
+scroll 0 2 23 1
+scroll 0 3 24 1
+scroll 0 4 24 1
+scroll 0 5 24 1
+scroll 0 6 25 1
+scroll 0 7 25 1
+scroll 0 8 26 1
+scroll 0 9 26 1
+scroll 0 10 26 1
+scroll 0 11 27 1
+closein
+
+palette ??? ??? ??? ??? ??? ??? ??? ??? ??? ??? ??? ??? ??? 800 600 400
+
+openin concept/lvl_3d/_background.bmp
+scroll 0 0 7 1
+closein
+
+palette ??? EEE ??? ??? 8AE 68E 000 0EE EA6 E60 08E 00E 00A 0E0 0A0 060
+setmask
+
+openin concept/lvl_3d/_tilemap_pal1.bmp
+scroll 0 0 4 1
+closein
+
+palette 000 202 404 626 848 A6A C8C EAE EEA EC8 EA6 C84 A62 ??? ??? ???
+setmask
+
+openin concept/lvl_3d/_tilemap_pal3.bmp
+scroll 0 0 16 1
+scroll 0 1 8 1
+closein
+
+closeout
+
+openout graphics/lvl_3d/platform.bin
+openin concept/lvl_3d/platform.bmp
+sprite 0 0 4 2
+closein
+closeout
+
+openout graphics/lvl_3d/bgtree.bin
+openin concept/lvl_3d/_bgtree.bmp
+sprite 0 0 4 4
+sprite 0 4 3 2
+closein
+closeout

@@ -1,0 +1,247 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------------------------------------;
+; UpdateLevel_Light                                ;
+;                                                  ;
+; Updates stuff specific to the light-themed level ;
+;--------------------------------------------------;
+; BREAKS: all                                      ;
+;--------------------------------------------------;
+
+UpdateLevel_Light:
+
+;---------------------;
+; Animate main blocks ;
+;---------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+
+    lea     (@BlockPal), a0
+    lea     (RAM_PalBuffer+$38), a1
+
+    move.w  d0, d7
+    lsr.w   #1, d7
+    and.w   #$F<<2, d7
+    move.l  (a0,d7.w), (a1)+
+
+    move.w  d0, d7
+    lsr.w   #1, d7
+    addq.w  #2, d7
+    and.w   #$F<<2, d7
+    move.l  (a0,d7.w), (a1)+
+
+;---------------------------------;
+; Animate spinning spikes palette ;
+;---------------------------------;
+
+    move.w  d0, d7
+    move.w  d7, d6
+    add.w   d6, d7
+    add.w   d6, d7
+    lsr.w   #1, d7
+    and.w   #$F<<1, d7
+    lea     (@SpinSpikePal), a0
+    move.w  (a0,d7.w), (RAM_PalBuffer+$5A)
+
+;-----------------------;
+; Update HScroll buffer ;
+;-----------------------;
+
+    moveq   #0, d0
+    move.w  (RAM_Scroll), d0
+    neg.w   d0
+    move.w  d0, d1
+    asr.w   #2, d1
+    lea     (RAM_HScrBuffer), a0
+
+    move.w  d0, (a0)+
+    move.w  d1, (a0)+
+
+;----------------;
+; Update HScroll ;
+;----------------;
+
+    FixedDMA RAM_HScrBuffer, $F800, 2*2
+
+;------------------;
+; Perform blinking ;
+;------------------;
+
+    moveq   #0, d0
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @BlinkFrame1
+    move.w  #224, d0
+@BlinkFrame1:
+    move.w  d0, (RAM_VScrBuffer)
+    move.w  #0, (RAM_VScrBuffer+2)
+
+;-------------------------;
+; Animate spinning spikes ;
+;-------------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+
+    moveq   #0, d7
+    move.w  d0, d7
+    ;add.l   d7, d7
+    and.w   #$7<<1, d7
+    lsl.l   #8, d7
+    add.l   #Gfx_SpinSpike, d7
+    VarSrcDMA VRAM_SpinSpike*$20, 16*$20
+
+;--------------------;
+; Animate the robots ;
+;--------------------;
+
+    moveq   #0, d7
+    move.w  d0, d7
+    and.w   #$7<<1, d7
+    lsl.l   #8, d7
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @RobotBlink
+    add.w   #8*16*$20, d7
+@RobotBlink:
+    add.l   #Gfx_SHRobotWalk, d7
+    VarSrcDMA VRAM_TrollWalk*$20, 16*$20
+
+    moveq   #0, d7
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @FlyBlink
+    move.w  #16*$20, d7
+    and.w   #2, d0
+    lsl.w   #4+4, d0
+    add.w   d0, d7
+@FlyBlink:
+    add.l   #Gfx_SHFlyRobotFly, d7
+    VarSrcDMA VRAM_DblCircleFly*$20, 16*$20
+    
+    moveq   #0, d7
+    move.w  (RAM_GameStatus), d7
+    and.w   #$0001, d7
+    lsl.w   #5, d7
+    lsl.w   #4, d7
+    add.l   #Gfx_SHRobotDead, d7
+    VarSrcDMA VRAM_TrollDead*$20, 16*$20
+    
+    moveq   #0, d7
+    move.w  (RAM_GameStatus), d7
+    and.w   #$0001, d7
+    lsl.w   #5, d7
+    lsl.w   #4, d7
+    add.l   #Gfx_SHFlyRobotDead, d7
+    VarSrcDMA VRAM_DblCircleDead*$20, 16*$20
+
+;----------------------;
+; Animate the parallax ;
+;----------------------;
+
+    move.l  #$11111111, d7
+    move.l  d7, d0
+    lea     (RAM_LevelStuff), a0
+    move.w  (RAM_Scroll), d2
+    neg.w   d2
+    add.w   #$20, d2
+    move.w  d2, d3
+
+    lsr.w   #1, d2
+    and.w   #$1C, d2
+    lsl.l   d2, d0
+
+    btst.l  #6, d3
+    beq.s   @NoAltParallax
+    eor.l   d7, d0
+@NoAltParallax:
+
+    move.l  d0, d1
+    eor.l   d7, d1
+
+    add.l   d7, d0
+    add.l   d7, d1
+
+    rept    4
+    move.l  d0, (a0)+
+    endr
+    rept    8
+    move.l  d1, (a0)+
+    endr
+    rept    4
+    move.l  d0, (a0)+
+    endr
+
+    add.l   #$DDDDDDDD, d0
+    add.l   #$DDDDDDDD, d1
+
+    rept    4
+    move.l  d0, (a0)+
+    endr
+    rept    8
+    move.l  d1, (a0)+
+    endr
+    rept    4
+    move.l  d0, (a0)+
+    endr
+
+    FixedDMA RAM_LevelStuff, VRAM_LightBG*$20, 4*$20
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------;
+; Palette cycle for the main blocks ;
+;-----------------------------------;
+
+@BlockPal:
+    dc.w    $00E, $E00
+    dc.w    $40E, $E04
+    dc.w    $60C, $C06
+    dc.w    $80C, $C08
+    dc.w    $A0A, $A0A
+    dc.w    $C08, $80C
+    dc.w    $C06, $60C
+    dc.w    $E04, $40E
+
+    dc.w    $E00, $00E
+    dc.w    $E04, $40E
+    dc.w    $C06, $60C
+    dc.w    $C08, $80C
+    dc.w    $A0A, $A0A
+    dc.w    $80C, $C08
+    dc.w    $60C, $C06
+    dc.w    $40E, $E04
+
+;---------------------------------------;
+; Palette cycle for the spinning spikes ;
+;---------------------------------------;
+
+@SpinSpikePal:
+    dc.w    $00E, $00C, $00A, $008
+    dc.w    $006, $004, $002, $000
+    dc.w    $000, $002, $004, $006
+    dc.w    $008, $00A, $00C, $00E
+
+;----------------------------------------------------------------------------

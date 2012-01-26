@@ -1,0 +1,50 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------;
+; To work around the DMA bug... ;
+;-------------------------------;
+
+    cnop 0, $200
+
+;---------------------------------;
+; Tile data for S/H flying robots ;
+;---------------------------------;
+
+;-----------------------------------;
+; Graphics for the flying animation ;
+;-----------------------------------;
+
+Gfx_SHFlyRobotFly:
+    incbin  "graphics/shflybot/fly1.bin"
+    incbin  "graphics/shflybot/fly2.bin"
+    incbin  "graphics/shflybot/fly3.bin"
+
+;---------------------------------;
+; Graphics for the dead animation ;
+;---------------------------------;
+
+Gfx_SHFlyRobotDead:
+    incbin  "graphics/shflybot/dead1.bin"
+    incbin  "graphics/shflybot/dead2.bin"
+
+;----------------------------------------------------------------------------

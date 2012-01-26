@@ -1,0 +1,105 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;---------------------;
+; Draw1up             ;
+;                     ;
+; Draws a 1-up object ;
+;---------------------;
+
+Draw1up:
+
+;-------------------------------------------------------------------------;
+; Check if we're visible for starters                                     ;
+; Spurious sprites cause sprite overflow                                  ;
+; Also the sprite may appear at X coordinate 0, which accidentally causes ;
+; the sprite cut feature to kick in...                                    ;
+;-------------------------------------------------------------------------;
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+
+    cmp.w   #-40, d0
+    ble.s   @End
+    cmp.w   #328, d0
+    bge.s   @End
+
+;------------------------------;
+; Calculate sprite coordinates ;
+;------------------------------;
+
+    move.w  Object_Y(a0), d1
+    add.w   #128+8, d0
+    add.w   #128+6, d1
+
+;----------------------------------------------------;
+; Calculate horizontal offset for animation purposes ;
+;----------------------------------------------------;
+
+    moveq   #12, d4
+    move.w  (RAM_GlobalAnim), d7
+    btst.l  #3, d7
+    beq.s   @OffsetSet
+    addq.w  #1, d4
+    subq.w  #1, d1
+    btst.l  #4, d7
+    beq.s   @OffsetSet
+    addq.w  #2, d1
+    subq.w  #2, d4
+@OffsetSet:
+
+;-----------------------;
+; Determine base sprite ;
+;-----------------------;
+
+    move.w  #$8000|(VRAM_1up), d2
+    cmp.b   #Level_Light, (RAM_Level)
+    bne.s   @NoDim
+    bclr.l  #15, d2
+@NoDim:
+
+;-----------------------;
+; Put sprites on screen ;
+;-----------------------;
+
+    sub.w   d4, d0
+    moveq   #%0101, d3
+    bsr     AddSprite
+
+    add.w   d4, d0
+    addq.w  #2, d1
+    addq.w  #4, d2
+    bsr     AddSprite
+
+    add.w   d4, d0
+    addq.w  #2, d1
+    addq.w  #4, d2
+    bsr     AddSprite
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

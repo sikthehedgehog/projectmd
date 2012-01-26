@@ -1,0 +1,260 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------;
+; Pointers to each level header ;
+;-------------------------------;
+
+LevelHeaders:
+    dc.l    @Level3D
+    dc.l    @LevelMotherboard
+    dc.l    @LevelLogic
+    dc.l    @LevelMemory
+    dc.l    @LevelShape
+    dc.l    @LevelVDP
+    dc.l    @BossBinary
+    dc.l    @LevelLight
+    dc.l    @LevelInternet
+    dc.l    @LevelTray
+    dc.l    @BossTray
+    dc.l    @LevelWaterlava
+
+;------------------------;
+; 3D-themed level header ;
+;------------------------;
+
+@Level3D:
+    dc.l    Layout_Level3D              ; Layout map address
+    dc.l    Coll_Level3D                ; Collision map address
+    dc.l    Item_Level3D                ; Item map address
+    dc.w    2, 5                        ; Start position (tile coordinates)
+    dc.w    Size_Level3D                ; Size of the level in tiles
+    dc.l    Gfx_Level3D                 ; 8x8 tile data address
+    dc.l    Tiles_Level3D               ; 32x32 tile data address
+    dc.l    Pal_Level3D                 ; Palette
+    dc.l    InitLevel_3D                ; Initialization function
+    dc.l    UpdateLevel_3D              ; Update function
+
+;---------------------------------;
+; Motherboard-themed level header ;
+;---------------------------------;
+
+@LevelMotherboard:
+    dc.l    Layout_LevelMotherboard     ; Layout map address
+    dc.l    Coll_LevelMotherboard       ; Collision map address
+    dc.l    Item_LevelMotherboard       ; Item map address
+    dc.w    1, 5                        ; Start position (tile coordinates)
+    dc.w    Size_LevelMotherboard       ; Size of the level in tiles
+    dc.l    Gfx_LevelMotherboard        ; 8x8 tile data address
+    dc.l    Tiles_LevelMotherboard      ; 32x32 tile data address
+    dc.l    Pal_LevelMotherboard        ; Palette
+    dc.l    InitLevel_Motherboard       ; Initialization function
+    dc.l    UpdateLevel_Motherboard     ; Update function
+
+;---------------------------;
+; Logic-themed level header ;
+;---------------------------;
+
+@LevelLogic:
+    dc.l    Layout_LevelLogic           ; Layout map address
+    dc.l    Coll_LevelLogic             ; Collision map address
+    dc.l    Item_LevelLogic             ; Item map address
+    dc.w    1, 4                        ; Start position (tile coordinates)
+    dc.w    Size_LevelLogic             ; Size of the level in tiles
+    dc.l    Gfx_LevelLogic              ; 8x8 tile data address
+    dc.l    Tiles_LevelLogic            ; 32x32 tile data address
+    dc.l    Pal_LevelLogic              ; Palette
+    dc.l    InitLevel_Logic             ; Initialization function
+    dc.l    UpdateLevel_Logic           ; Update function
+
+;----------------------------;
+; Memory-themed level header ;
+;----------------------------;
+
+@LevelMemory:
+    dc.l    Layout_LevelMemory          ; Layout map address
+    dc.l    Coll_LevelMemory            ; Collision map address
+    dc.l    Item_LevelMemory            ; Item map address
+    dc.w    2, 5                        ; Start position (tile coordinates)
+    ;dc.w    $19F, 0                        ; Start position (tile coordinates)
+    dc.w    Size_LevelMemory            ; Size of the level in tiles
+    dc.l    Gfx_LevelMemory             ; 8x8 tile data address
+    dc.l    Tiles_LevelMemory           ; 32x32 tile data address
+    dc.l    Pal_LevelMemory             ; Palette
+    dc.l    InitLevel_Memory            ; Initialization function
+    dc.l    UpdateLevel_Memory          ; Update function
+
+;---------------------------;
+; Shape-themed level header ;
+;---------------------------;
+
+@LevelShape:
+    dc.l    Layout_LevelShape           ; Layout map address
+    dc.l    Coll_LevelShape             ; Collision map address
+    dc.l    Item_LevelShape             ; Item map address
+    dc.w    4, 3                        ; Start position (tile coordinates)
+    dc.w    Size_LevelShape             ; Size of the level in tiles
+    dc.l    Gfx_LevelShape              ; 8x8 tile data address
+    dc.l    Tiles_LevelShape            ; 32x32 tile data address
+    dc.l    Pal_LevelShape              ; Palette
+    dc.l    InitLevel_Shape             ; Initialization function
+    dc.l    UpdateLevel_Shape           ; Update function
+
+;-------------------------;
+; VDP-themed level header ;
+;-------------------------;
+
+@LevelVDP:
+    dc.l    Layout_LevelVDP             ; Layout map address
+    dc.l    Coll_LevelVDP               ; Collision map address
+    dc.l    Item_LevelVDP               ; Item map address
+    dc.w    1, 3                        ; Start position (tile coordinates)
+    ;dc.w    $146, 4                        ; Start position (tile coordinates)
+    dc.w    Size_LevelVDP               ; Size of the level in tiles
+    dc.l    Gfx_LevelVDP                ; 8x8 tile data address
+    dc.l    Tiles_LevelVDP              ; 32x32 tile data address
+    dc.l    Pal_LevelVDP                ; Palette
+    dc.l    InitLevel_VDP               ; Initialization function
+    dc.l    UpdateLevel_VDP             ; Update function
+
+;-------------------------;
+; Binary Fury boss header ;
+;-------------------------;
+
+@BossBinary:
+    dc.l    Layout_BossBinary           ; Layout map address
+    dc.l    Coll_BossBinary             ; Collision map address
+    dc.l    Item_BossBinary             ; Item map address
+    dc.w    3, 5                        ; Start position (tile coordinates)
+    dc.w    Size_BossBinary             ; Size of the level in tiles
+    dc.l    Gfx_BossBinary              ; 8x8 tile data address
+    dc.l    Tiles_BossBinary            ; 32x32 tile data address
+    dc.l    Pal_BossBinary              ; Palette
+    dc.l    InitLevel_BossBinary        ; Initialization function
+    dc.l    UpdateLevel_BossBinary      ; Update function
+
+;---------------------------;
+; Light-themed level header ;
+;---------------------------;
+
+@LevelLight:
+    dc.l    Layout_LevelLight           ; Layout map address
+    dc.l    Coll_LevelLight             ; Collision map address
+    dc.l    Item_LevelLight             ; Item map address
+    dc.w    3, 4                        ; Start position (tile coordinates)
+    ;dc.w    $73, 4                        ; Start position (tile coordinates)
+    ;dc.w    $DF, 4                        ; Start position (tile coordinates)
+    ;dc.w    $150, 5                        ; Start position (tile coordinates)
+    dc.w    Size_LevelLight             ; Size of the level in tiles
+    dc.l    Gfx_LevelLight              ; 8x8 tile data address
+    dc.l    Tiles_LevelLight            ; 32x32 tile data address
+    dc.l    Pal_LevelLight              ; Palette
+    dc.l    InitLevel_Light             ; Initialization function
+    dc.l    UpdateLevel_Light           ; Update function
+
+;------------------------------;
+; Internet-themed level header ;
+;------------------------------;
+
+@LevelInternet:
+    dc.l    Layout_LevelInternet        ; Layout map address
+    dc.l    Coll_LevelInternet          ; Collision map address
+    dc.l    Item_LevelInternet          ; Item map address
+    dc.w    3, 4                        ; Start position (tile coordinates)
+    dc.w    Size_LevelInternet          ; Size of the level in tiles
+    dc.l    Gfx_LevelInternet           ; 8x8 tile data address
+    dc.l    Tiles_LevelInternet         ; 32x32 tile data address
+    dc.l    Pal_LevelInternet           ; Palette
+    dc.l    InitLevel_Internet          ; Initialization function
+    dc.l    UpdateLevel_Internet        ; Update function
+
+;-----------------------------;
+; CD tray-themed level header ;
+;-----------------------------;
+
+@LevelTray:
+    dc.l    Layout_LevelTray            ; Layout map address
+    dc.l    Coll_LevelTray              ; Collision map address
+    dc.l    Item_LevelTray              ; Item map address
+    dc.w    2, 4                        ; Start position (tile coordinates)
+    ;dc.w    $1C2, 4                        ; Start position (tile coordinates)
+    dc.w    Size_LevelTray              ; Size of the level in tiles
+    dc.l    Gfx_LevelTray               ; 8x8 tile data address
+    dc.l    Tiles_LevelTray             ; 32x32 tile data address
+    dc.l    Pal_LevelTray               ; Palette
+    dc.l    InitLevel_Tray              ; Initialization function
+    dc.l    UpdateLevel_Tray            ; Update function
+
+;-----------------------------;
+; Dangerous Gears boss header ;
+;-----------------------------;
+
+@BossTray:
+    dc.l    Layout_BossTray             ; Layout map address
+    dc.l    Coll_BossTray               ; Collision map address
+    dc.l    Item_BossTray               ; Item map address
+    dc.w    2, 5                        ; Start position (tile coordinates)
+    dc.w    Size_BossTray               ; Size of the level in tiles
+    dc.l    Gfx_LevelTray               ; 8x8 tile data address
+    dc.l    Tiles_LevelTray             ; 32x32 tile data address
+    dc.l    Pal_BossTray                ; Palette
+    dc.l    InitLevel_BossTray          ; Initialization function
+    dc.l    UpdateLevel_Tray            ; Update function
+
+;------------------------;
+; Waterlava level header ;
+;------------------------;
+
+@LevelWaterlava:
+    dc.l    Layout_LevelWaterlava       ; Layout map address
+    dc.l    Coll_LevelWaterlava         ; Collision map address
+    dc.l    Item_LevelWaterlava         ; Item map address
+    dc.w    3, 0                        ; Start position (tile coordinates)
+    dc.w    Size_LevelWaterlava         ; Size of the level in tiles
+    dc.l    Gfx_LevelWaterlava          ; 8x8 tile data address
+    dc.l    Tiles_LevelWaterlava        ; 32x32 tile data address
+    dc.l    Pal_LevelWaterlava_Lava     ; Palette
+    dc.l    InitLevel_Waterlava         ; Initialization function
+    dc.l    UpdateLevel_Waterlava       ; Update function
+
+;----------------------------------------------------------------------------
+
+;------------------------;
+; BGM IDs for each level ;
+;------------------------;
+
+BGMOrder:
+   dc.b  BGM_Level3D                    ; Infinite Field
+   dc.b  BGM_LevelMotherboard           ; Electronic Madness
+   dc.b  BGM_LevelLogic                 ; Gate Array
+   dc.b  BGM_LevelMemory                ; Frozen Memories
+   dc.b  BGM_LevelShape                 ; Crazy Shapes
+   dc.b  BGM_LevelVDP                   ; Pixelated World
+   dc.b  BGMStop                        ; Binary Fury
+   dc.b  BGM_LevelLight                 ; Bright Darkness
+   dc.b  BGM_LevelInternet              ; Ether Network
+   dc.b  BGM_LevelTray                  ; Mechanical Heart
+   dc.b  BGMStop                        ; Dangerous Gears
+   dc.b  BGM_LevelLava                  ; Waterlava
+   even
+
+;----------------------------------------------------------------------------

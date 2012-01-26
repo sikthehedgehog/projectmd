@@ -1,0 +1,48 @@
+palette ??? ??? ??? ??? ??? 0CE 0AC 08A C08 A06 804 602 400 ??? ??? ???
+setmask
+
+openout graphics/lvl_mem/bgscroll.bin
+openin concept/lvl_mem/bgscroll.bmp
+scroll 0 0 4 16
+closein
+closeout
+
+openout graphics/lvl_mem/gfx.tmp
+
+openin concept/lvl_mem/_background.bmp
+scroll 0 0 16 4
+scroll 0 4 3 1
+closein
+
+palette ??? CEE AEC 8CA 6A8 EEE EEC ECA CA8 A86 864 642 ??? ??? ??? ???
+setmask
+
+openin concept/lvl_mem/_tilemap_pal2.bmp
+scroll 0 0 16 8
+scroll 0 8 10 1
+closein
+
+palette ??? E88 CA8 AC8 8E8 8CA 8AC 88E A8C C8A ??? ??? ??? ??? ??? ???
+setmask
+
+openin concept/lvl_mem/_tilemap_pal4.bmp
+scroll 0 0 16 2
+scroll 0 2 10 1
+closein
+
+closeout
+
+openout graphics/lvl_mem/water.bin
+openin concept/lvl_mem/_water.bmp
+sprite 0 0 8 4
+closein
+closeout
+
+palette ??? CEE AEC 8CA 6A8 EEE EEC ECA CA8 A86 864 642 ??? ??? ??? ???
+setmask
+
+openout graphics/lvl_mem/platform.bin
+openin concept/lvl_mem/platform.bmp
+sprite 0 0 4 2
+closein
+closeout

@@ -1,0 +1,105 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------;
+; DrawBarrier            ;
+;                        ;
+; Draws a barrier object ;
+;------------------------;
+
+DrawBarrier:
+
+;-------------------------------------------------------------------------;
+; Check if we're visible for starters                                     ;
+; Spurious sprites cause sprite overflow                                  ;
+; Also the sprite may appear at X coordinate 0, which accidentally causes ;
+; the sprite cut feature to kick in...                                    ;
+;-------------------------------------------------------------------------;
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+
+    cmp.w   #-32, d0
+    ble.s   @End
+    cmp.w   #320+32, d0
+    bge.s   @End
+
+;--------------------------------------;
+; Calculate barrier sprite coordinates ;
+;--------------------------------------;
+
+    move.w  Object_Y(a0), d1
+    add.w   #128+12, d0
+    add.w   #128, d1
+    sub.w   Object_Misc(a0), d1
+
+;------------------------------;
+; Put barrier sprite on screen ;
+;------------------------------;
+
+    move.w  #VRAM_Barrier, d2
+    moveq   #%0011, d3
+    bsr     AddSprite
+
+;-------------------------------------------;
+; Calculate power source sprite coordinates ;
+;-------------------------------------------;
+
+    move.w  Object_X(a0), d0
+    move.w  Object_Y(a0), d1
+    sub.w   (RAM_Scroll), d0
+    add.w   #128-32, d0
+    add.w   #128, d1
+
+;-------------------------;
+; Determine sprite to use ;
+;-------------------------;
+
+    move.w  #VRAM_PowerSource, d2
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @NoFlicker
+    add.w   #16, d2
+@NoFlicker:
+    
+    tst.l   Object_Misc(a0)
+    beq.s   @NotPowered
+    move.w  (RAM_GlobalAnim), d3
+    lsl.w   #3, d3
+    and.w   #$20, d3
+    add.w   d3, d2
+@NotPowered:
+
+;-----------------------------------;
+; Put power source sprite on screen ;
+;-----------------------------------;
+
+    moveq   #%1111, d3
+    bsr     AddSprite
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

@@ -1,0 +1,64 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------;
+; To work around the DMA bug... ;
+;-------------------------------;
+
+    cnop 0, $200
+
+;--------------------------;
+; Tile data for S/H robots ;
+;--------------------------;
+
+;------------------------------------;
+; Graphics for the walking animation ;
+;------------------------------------;
+
+Gfx_SHRobotWalk:
+    incbin  "graphics/shrobot/walk1.bin"
+    incbin  "graphics/shrobot/walk2.bin"
+    incbin  "graphics/shrobot/walk3.bin"
+    incbin  "graphics/shrobot/walk4.bin"
+    incbin  "graphics/shrobot/walk5.bin"
+    incbin  "graphics/shrobot/walk6.bin"
+    incbin  "graphics/shrobot/walk7.bin"
+    incbin  "graphics/shrobot/walk8.bin"
+
+    incbin  "graphics/shrobot/walk1b.bin"
+    incbin  "graphics/shrobot/walk2b.bin"
+    incbin  "graphics/shrobot/walk3b.bin"
+    incbin  "graphics/shrobot/walk4b.bin"
+    incbin  "graphics/shrobot/walk5b.bin"
+    incbin  "graphics/shrobot/walk6b.bin"
+    incbin  "graphics/shrobot/walk7b.bin"
+    incbin  "graphics/shrobot/walk8b.bin"
+
+;---------------------------------;
+; Graphics for the dead animation ;
+;---------------------------------;
+
+Gfx_SHRobotDead:
+    incbin  "graphics/shrobot/dead1.bin"
+    incbin  "graphics/shrobot/dead2.bin"
+
+;----------------------------------------------------------------------------

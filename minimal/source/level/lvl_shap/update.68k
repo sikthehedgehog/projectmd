@@ -1,0 +1,261 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------------------------------------;
+; UpdateLevel_Shape                                ;
+;                                                  ;
+; Updates stuff specific to the shape-themed level ;
+;--------------------------------------------------;
+; BREAKS: all                                      ;
+;--------------------------------------------------;
+
+UpdateLevel_Shape:
+
+;----------------;
+; Animate lights ;
+;----------------;
+
+    move.w  (RAM_GlobalAnim), d0
+    move.w  d0, d1
+    add.w   d1, d1
+    and.w   #$1F<<2, d1
+    lea     (@LightPalettes), a0
+    lea     (a0,d1.w), a0
+    lea     (RAM_PalBuffer+$3C), a1
+    move.l  (a0), (a1)
+
+;--------------;
+; Animate text ;
+;--------------;
+
+    lea     (@TextPal), a0
+    lea     (RAM_PalBuffer+$62), a1
+    btst.l  #3, d0
+    beq.s   @NoAltTextPal
+    addq.l  #4, a0
+@NoAltTextPal:
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+
+;---------------------;
+; Animate bumper pads ;
+;---------------------;
+
+    lea     (@BumperPadPal), a0
+    lsr.w   #2, d0
+    and.w   #$3<<1, d0
+    lea     (a0,d0.w), a0
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+
+;-----------------------;
+; Update HScroll buffer ;
+;-----------------------;
+
+    moveq   #0, d0
+    move.w  (RAM_Scroll), d0
+    neg.w   d0
+    lea     (RAM_HScrBuffer), a0
+
+    move.w  (RAM_GameStatus), d1
+    and.w   #$0001, d1
+    moveq   #6-1, d7
+@BGLoop_Sky:
+    move.w  d0, (a0)+
+    move.w  d1, (a0)+
+    add.w   #7*2*2, a0
+    dbf     d7, @BGLoop_Sky
+
+    move.w  d0, d1
+    asr.w   #3, d1
+    moveq   #12-1, d7
+@BGLoop_Buildings:
+    move.w  d0, (a0)+
+    move.w  d1, (a0)+
+    add.w   #7*2*2, a0
+    dbf     d7, @BGLoop_Buildings
+
+    move.w  d0, d1
+    add.w   d0, d1
+    add.w   d0, d1
+    asr.w   #4, d1
+    moveq   #4-1, d7
+@BGLoop_Bottom1:
+    move.w  d0, (a0)+
+    move.w  d1, (a0)+
+    add.w   #7*2*2, a0
+    dbf     d7, @BGLoop_Bottom1
+
+    move.w  d0, d1
+    asr.w   #2, d1
+    moveq   #6-1, d7
+@BGLoop_Bottom2:
+    move.w  d0, (a0)+
+    move.w  d1, (a0)+
+    add.w   #7*2*2, a0
+    dbf     d7, @BGLoop_Bottom2
+
+;----------------;
+; Update HScroll ;
+;----------------;
+
+    FixedDMA RAM_HScrBuffer, $F800, 2*224*2
+
+;------------------;
+; Perform blinking ;
+;------------------;
+
+    moveq   #0, d0
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @BlinkFrame1
+    move.w  #224, d0
+@BlinkFrame1:
+    move.w  d0, (RAM_VScrBuffer)
+    move.w  #0, (RAM_VScrBuffer+2)
+
+;---------------------;
+; Animate the enemies ;
+;---------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+
+    moveq   #0, d7
+    move.w  d0, d7
+    and.w   #$F<<1, d7
+    lsl.l   #8, d7
+    add.l   #Gfx_ShapemanWalk, d7
+    VarSrcDMA VRAM_TrollWalk*$20, 16*$20
+
+    moveq   #0, d7
+    move.w  d0, d7
+    and.w   #$7<<1, d7
+    lsl.l   #8, d7
+    add.l   #Gfx_ShapefanFly, d7
+    VarSrcDMA VRAM_DblCircleFly*$20, 16*$20
+
+;---------------------;
+; Animate bumper pads ;
+;---------------------;
+
+    move.w  #$E000|VRAM_BumperPad, d0
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @NoBumperPadAnim
+    bset.l  #11, d0
+@NoBumperPadAnim:
+    move.w  d0, (RAM_BumperPadGfx)
+
+;--------------------------;
+; Animate fake layer (x_x) ;
+;--------------------------;
+
+    move.w  (RAM_Scroll), d0
+    add.w   #15, d0
+    asr.w   #4, d0
+    move.w  d0, d2
+    
+    and.w   #$7, d0
+    lsl.w   #8, d0
+    add.w   d0, d0
+    add.l   #Gfx_LevelShape_BGScroll, d0
+    
+    not.w   d2
+    and.l   #$7<<3, d2
+    lsl.w   #3, d2
+    
+    moveq   #8-1, d1
+    move.w  #(VRAM_Level+$17)*$20, d3
+@FakeLayerLoop:
+    move.l  d0, d6
+    add.l   d2, d6
+    move.w  d3, d7
+    VarSrcDestDMA 2*$20
+    add.w   #2*$20, d2
+    and.w   #7<<6, d2
+    add.w   #2*$20, d3
+    dbf     d1, @FakeLayerLoop
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------;
+; Palettes used to animate the lights ;
+;-------------------------------------;
+
+@LightPalettes:
+    dc.w    $000, $0E0
+    dc.w    $002, $0C0
+    dc.w    $004, $0A0
+    dc.w    $006, $080
+    dc.w    $008, $060
+    dc.w    $00A, $040
+    dc.w    $00C, $020
+    dc.w    $00E, $000
+
+    dc.w    $00E, $000
+    dc.w    $00C, $202
+    dc.w    $00A, $404
+    dc.w    $008, $606
+    dc.w    $006, $808
+    dc.w    $004, $A0A
+    dc.w    $002, $C0C
+    dc.w    $000, $E0E
+
+    dc.w    $000, $E0E
+    dc.w    $200, $C0C
+    dc.w    $400, $A0A
+    dc.w    $600, $808
+    dc.w    $800, $606
+    dc.w    $A00, $404
+    dc.w    $C00, $202
+    dc.w    $E00, $000
+
+    dc.w    $E00, $000
+    dc.w    $C00, $020
+    dc.w    $A00, $040
+    dc.w    $800, $060
+    dc.w    $600, $080
+    dc.w    $400, $0A0
+    dc.w    $200, $0C0
+    dc.w    $000, $0E0
+
+;-------------------------------;
+; Palettes used to animate text ;
+;-------------------------------;
+
+@TextPal:
+    dc.w    $0EE, $0CE
+    dc.w    $66E, $00E
+    dc.w    $0EE, $0CE
+
+;-----------------------------------;
+; Palette cycle used by bumper pads ;
+;-----------------------------------;
+
+@BumperPadPal:
+    dc.w    $0E0, $0C0, $0A0, $080, $0E0, $0C0, $0A0
+
+;----------------------------------------------------------------------------

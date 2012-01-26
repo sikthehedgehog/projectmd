@@ -1,0 +1,233 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;---------------------------------------------------------------;
+; This file contains the graphics data for the VDP-themed level ;
+;---------------------------------------------------------------;
+
+;----------------------------------------------------------------------------
+
+;---------------;
+; 8x8 tile data ;
+;---------------;
+
+Gfx_LevelVDP:
+    incbin "graphics/lvl_vdp/gfx.bin"
+    even
+
+;----------;
+; Platform ;
+;----------;
+
+    cnop    0, 4*8*$20
+Gfx_LevelVDP_Platform:
+    incbin  "graphics/lvl_vdp/platform.bin"
+
+;----------------------------------------------------------------------------
+
+;-----------------;
+; 32x32 tile data ;
+;-----------------;
+
+Tiles_LevelVDP:
+
+;--------------------------------------------;
+; To make my life easier and save text space ;
+;--------------------------------------------;
+
+@Begin equ Tiles_LevelVDP
+
+    rsset VRAM_Level
+    rs.b (4*4)+1+(2*2)+(3*3)+(4*4)
+@T2 rs.b (16*2)+5
+@T3 rs.b 8
+@T4 rs.b 5
+@N  rs.b 0
+
+;-----------;
+; Tile list ;
+;-----------;
+
+    dc.w    @Tile00-@Begin, @Tile00-@Begin
+    dc.w    @Tile01-@Begin, @Tile01-@Begin
+    dc.w    @Tile02-@Begin, @Tile02-@Begin
+    dc.w    @Tile03-@Begin, @Tile03-@Begin
+    dc.w    @Tile04-@Begin, @Tile04-@Begin
+    dc.w    @Tile05-@Begin, @Tile05-@Begin
+    dc.w    @Tile06-@Begin, @Tile06-@Begin
+    dc.w    @Tile07-@Begin, @Tile07-@Begin
+    dc.w    @Tile08-@Begin, @Tile08-@Begin
+    dc.w    @Tile09-@Begin, @Tile09-@Begin
+    dc.w    @Tile0A-@Begin, @Tile0A-@Begin
+    dc.w    @Tile0B-@Begin, @Tile0B-@Begin
+    dc.w    @Tile0C-@Begin, @Tile0C-@Begin
+    dc.w    @Tile0D-@Begin, @Tile0D-@Begin
+    dc.w    @Tile0E-@Begin, @Tile0E-@Begin
+
+;----------------------;
+; Tile $00: empty tile ;
+;----------------------;
+
+@Tile00:
+    dcb.w   4*4, $8000
+
+;------------------------;
+; Tile $01: generic wall ;
+;------------------------;
+
+@Tile01:
+    dc.w    @T2+$A000, @T2+$A001, @T2+$C000, @T2+$C001
+    dc.w    @T2+$A002, @T2+$A003, @T2+$C002, @T2+$C003
+    dc.w    @T2+$C000, @T2+$C001, @T2+$A000, @T2+$A001
+    dc.w    @T2+$C002, @T2+$C003, @T2+$A002, @T2+$A003
+
+;-------------------------;
+; Tile $02: generic floor ;
+;-------------------------;
+
+@Tile02:
+    dc.w    @T2+$A004, @T2+$A005, @T2+$A005, @T2+$A004
+    dc.w    @T2+$A005, @T2+$A003, @T2+$C002, @T2+$A005
+    dc.w    @T2+$C000, @T2+$C001, @T2+$A000, @T2+$A001
+    dc.w    @T2+$C002, @T2+$C003, @T2+$A002, @T2+$A003
+
+;---------------------------;
+; Tile $03: tree (top left) ;
+;---------------------------;
+
+@Tile03:
+    dc.w    $8000, $8000, $8000, @T2+$A006
+    dc.w    $8000, $8000, $8000, @T2+$A006
+    dc.w    $8000, $8000, @T3+$C000, @T3+$C001
+    dc.w    $8000, $8000, @T3+$C000, @T3+$C001
+
+;----------------------------;
+; Tile $04: tree (top right) ;
+;----------------------------;
+
+@Tile04:
+    dc.w    @T2+$A806, $8000, $8000, $8000
+    dc.w    @T2+$A806, $8000, $8000, $8000
+    dc.w    @T3+$C801, @T3+$C800, $8000, $8000
+    dc.w    @T3+$C801, @T3+$C800, $8000, $8000
+
+;------------------------------;
+; Tile $05: tree (bottom left) ;
+;------------------------------;
+
+@Tile05:
+    dc.w    $8000, @T2+$A007, @T2+$A008, @T2+$A004
+    dc.w    $8000, @T2+$A007, @T2+$A008, @T2+$A004
+    dc.w    @T3+$C002, @T3+$C003, @T3+$C001, @T3+$C001
+    dc.w    @T3+$C002, @T3+$C003, @T3+$C001, @T3+$C001
+
+;-------------------------------;
+; Tile $06: tree (bottom right) ;
+;-------------------------------;
+
+@Tile06:
+    dc.w    @T2+$A804, @T2+$A808, @T2+$A807, $8000
+    dc.w    @T2+$A804, @T2+$A808, @T2+$A807, $8000
+    dc.w    @T3+$C801, @T3+$C801, @T3+$C803, @T3+$C802
+    dc.w    @T3+$C801, @T3+$C801, @T3+$C803, @T3+$C802
+
+;----------------;
+; Tile $07: "NT" ;
+;----------------;
+
+@Tile07:
+    dc.w    @T2+$A009, @T2+$A00A, @T2+$A00D, @T2+$A80D
+    dc.w    @T2+$A00B, @T2+$A00C, @T2+$A00E, @T2+$A80E
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    $8000, $8000, $8000, $8000
+
+;----------------;
+; Tile $08: "SC" ;
+;----------------;
+
+@Tile08:
+    dc.w    @T2+$A00F, @T2+$A010, @T2+$A013, @T2+$A014
+    dc.w    @T2+$A011, @T2+$A012, @T2+$A015, @T2+$A016
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    $8000, $8000, $8000, $8000
+
+;----------------;
+; Tile $09: "PA" ;
+;----------------;
+
+@Tile09:
+    dc.w    @T2+$A017, @T2+$A018, @T2+$A01B, @T2+$A01C
+    dc.w    @T2+$A019, @T2+$A01A, @T2+$A01D, @T2+$A01E
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    $8000, $8000, $8000, $8000
+
+;----------------;
+; Tile $0A: "L " ;
+;----------------;
+
+@Tile0A:
+    dc.w    @T2+$A01F, $8000, $8000, $8000
+    dc.w    @T2+$A020, @T2+$A021, $8000, $8000
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    $8000, $8000, $8000, $8000
+
+;-----------------;
+; Tile $0B: noise ;
+;-----------------;
+
+@Tile0B:
+    dc.w    @N+$A000, @N+$A001, @N+$A002, @N+$A003
+    dc.w    @N+$A004, @N+$A005, @N+$A006, @N+$A007
+    dc.w    @N+$A008, @N+$A009, @N+$A00A, @N+$A00B
+    dc.w    @N+$A00C, @N+$A00D, @N+$A00E, @N+$A00F
+
+;--------------------;
+; Tile $0C: up arrow ;
+;--------------------;
+
+@Tile0C:
+    dc.w    $8000, @T4+$E000, @T4+$E800, $8000
+    dc.w    @T4+$E001, @T4+$E002, @T4+$E802, @T4+$E801
+    dc.w    $8000, @T4+$E003, @T4+$E803, $8000
+    dc.w    $8000, @T4+$E004, @T4+$E804, $8000
+
+;------------------;
+; Tile $0D: spikes ;
+;------------------;
+
+@Tile0D:
+    dc.w    @T3+$C004, @T3+$C804, @T2+$A022, @T2+$A822
+    dc.w    @T3+$C005, @T3+$C805, @T2+$A023, @T2+$A823
+    dc.w    @T3+$C006, @T3+$C806, @T2+$A024, @T2+$A824
+    dc.w    @T3+$C007, @T3+$C807, @T2+$A006, @T2+$A806
+
+;--------------------------;
+; Tile $0E: ceiling spikes ;
+;--------------------------;
+
+@Tile0E:
+    dc.w    @T3+$D007, @T3+$D807, @T2+$B006, @T2+$B806
+    dc.w    @T3+$D006, @T3+$D806, @T2+$B024, @T2+$B824
+    dc.w    @T3+$D005, @T3+$D805, @T2+$B023, @T2+$B823
+    dc.w    @T3+$D004, @T3+$D804, @T2+$B022, @T2+$B822
+
+;----------------------------------------------------------------------------

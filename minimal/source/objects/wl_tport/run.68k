@@ -1,0 +1,142 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------------;
+; RunWLTeleporter                           ;
+;                                           ;
+; Game logic code for Waterlava teleporters ;
+;-------------------------------------------;
+
+RunWLTeleporter:
+
+;-------------------;
+; Are we outbounds? ;
+;-------------------;
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+    cmp.w   #0-$40, d0
+    blt.s   @Outbounds
+    cmp.w   #320+$40, d0
+    ble.s   @CheckCol
+
+@Outbounds:
+    bra     DeleteObject
+
+;-------------------------------;
+; Is the player stepping on us? ;
+;-------------------------------;
+
+@CheckCol:
+    move.w  Player_Gravity(a3), d0
+    blt     @End
+
+    move.w  Object_X(a0), d0
+    move.w  Player_X(a3), d1
+    addq.w  #3, d1
+    cmp.w   d0, d1
+    blt     @End
+
+    add.w   #32, d0
+    subq.w  #7, d1
+    cmp.w   d0, d1
+    bgt     @End
+
+    move.w  Object_Y(a0), d0
+    move.w  Player_Y(a3), d1
+    add.w   #20-1, d0
+    cmp.w   d0, d1
+    blt     @End
+
+    addq.w  #8, d0
+    cmp.w   d0, d1
+    bgt     @End
+
+;---------------------;
+; Trigger teleporter? ;
+;---------------------;
+
+    move.w  Player_Status(a3), d7
+    btst.l  #PlayerStat_Ground, d7
+    bne     @DontTrigger
+
+    move.b  #SFX_Teleporter, (RAM_SFXToPlay)
+
+    move.l  #7<<16, (RAM_FadeStage)
+    move.l  (RAM_GlobalAnimSpd), d5
+    lsr.l   #1, d5
+    move.l  d5, (RAM_FadeSpeed)
+    bset.b  #GameStat_WhiteFade, (RAM_GameStatus+1)
+
+    move.w  (RAM_IngameStatus), d6
+    bchg.l  #IngameStat_World, d6
+    move.w  d6, (RAM_IngameStatus)
+
+    btst.l  #IngameStat_World, d6
+    beq.s   @UseLavaPal
+    lea     (Pal_LevelWaterlava_Water), a5
+	move.b	#BGM_LevelWater, (RAM_BGMToPlay)         ; Water
+	bra.s	@PrePal
+@UseLavaPal:
+    lea     (Pal_LevelWaterlava_Lava), a5
+	move.b	#BGM_LevelLava, (RAM_BGMToPlay)          ; lava
+@PrePal:
+    lea     (RAM_PalBuffer+$20), a6
+    moveq   #3-1, d5
+@LoadPal:
+    move.l  (a5)+, (a6)+
+    move.l  (a5)+, (a6)+
+    move.l  (a5)+, (a6)+
+    move.l  (a5)+, (a6)+
+    move.l  (a5)+, (a6)+
+    move.l  (a5)+, (a6)+
+    move.l  (a5)+, (a6)+
+    dbf     d5, @LoadPal
+
+    btst.l  #IngameStat_World, d6
+    bne.s   @NoTrollLoad
+    FixedDMA Gfx_TrollDead, VRAM_TrollDead*$20, 16*$20
+@NoTrollLoad:
+
+;---------------------------;
+; Make Stephany ride on us! ;
+;---------------------------;
+
+@DontTrigger:
+    subq.w  #8, d0
+    move.w  d0, Player_Y(a3)
+    move.w  #0, Player_Y+2(a3)
+
+    bset.l  #PlayerStat_Ride, d7
+    move.w  d7, Player_Status(a3)
+    move.w  #0, Player_Gravity(a3)
+    move.l  #0, Player_RideSpeed(a3)
+    move.l  #0, Player_RideGrav(a3)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

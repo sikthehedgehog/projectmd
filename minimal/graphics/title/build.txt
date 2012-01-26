@@ -1,0 +1,35 @@
+openout graphics/title/gfx.tmp
+
+palette ??? 0EE C0C A0A 0CE E00 C00 0AE 06A 00E 00A 0A0 080 060 040 ???
+setmask
+
+openin concept/title/patterns.bmp
+scroll 1 0 15 1
+scroll 0 1 16 2
+scroll 0 3 10 1
+closein
+
+palette ??? ??? ??? ??? ??? ??? ??? ??? 800 080 008 ??? ??? ??? CCC 000
+setmask
+
+openin concept/title/press.bmp
+sprite 0 4 10 2
+sprite 0 6 10 2
+closein
+
+openin concept/title/options.bmp
+sprite 0 0 2 2
+sprite 2 0 2 2
+sprite 4 0 2 2
+sprite 6 0 2 2
+sprite 0 2 2 2
+sprite 2 2 2 2
+sprite 4 2 1 2
+sprite 5 2 2 2
+closein
+
+openin concept/title/copyrght.bmp
+scroll 0 0 7 1
+closein
+
+closeout

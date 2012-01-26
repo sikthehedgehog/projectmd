@@ -1,0 +1,51 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------------;
+; Map data for the 3D-themed level ;
+;----------------------------------;
+
+;----------------------------------------------------------------------------
+
+;------------;
+; Layout map ;
+;------------;
+
+Layout_Level3D:
+    incbin  "levels/lvl_3d/layout.bin"
+Size_Level3D equ (*-Layout_Level3D)/8
+
+;---------------;
+; Collision map ;
+;---------------;
+
+Coll_Level3D:
+    incbin  "levels/lvl_3d/coll.bin"
+
+;----------;
+; Item map ;
+;----------;
+
+Item_Level3D:
+    incbin  "levels/lvl_3d/item.bin"
+
+;----------------------------------------------------------------------------

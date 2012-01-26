@@ -1,0 +1,117 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------------;
+; DoIntroCredits                            ;
+; Code for the credits screens in the intro ;
+;-------------------------------------------;
+; BREAKS: all                               ;
+; NOTES: use BRA not BSR                    ;
+;-------------------------------------------;
+
+DoIntroCredits:
+
+;-------------------;
+; Initialize fading ;
+;-------------------;
+
+    move.l  #7<<16, (RAM_FadeStage)
+    move.l  (RAM_GlobalAnimSpd), d0
+    asr.l   #2, d0
+    move.l  d0, (RAM_FadeSpeed)
+
+;--------------------------;
+; Load palette into buffer ;
+;--------------------------;
+
+    lea     (Pal_TextMode), a0
+    lea     (RAM_PalBuffer), a1
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.w  (a0)+, (a1)+
+
+;------------;
+; Clear CRAM ;
+;------------;
+
+    moveq   #0, d0
+    lea     ($C00000), a0
+    move.l  #$C0000000, 4(a0)
+    move.l  d0, (a0)
+    move.l  d0, (a0)
+    move.w  d0, (a0)
+
+;-------------;
+; Reset VSRAM ;
+;-------------;
+
+    move.l  #0, (RAM_VScrBuffer)
+
+;----------------------------------------------------------------------------
+
+;------------------------------;
+; Show message on screen a bit ;
+;------------------------------;
+
+    move.l  #240<<16, d0
+@MainLoop:
+
+;-----------------------;
+; Player wants to quit? ;
+;-----------------------;
+
+    bsr     ReadJoypad
+    move.b  (RAM_JoypadPress), d7
+    and.b   #$F0, d7
+    bne     @Quit
+
+;------------;
+; Next frame ;
+;------------;
+
+    move.l  d0, -(sp)
+    bsr     Fade
+    bsr     VSync
+    bsr     FlushVDPBuffer
+    move.l  (sp)+, d0
+    
+    sub.l   (RAM_GlobalAnimSpd), d0
+    bgt.s   @MainLoop
+
+;----------------------------------------------------------------------------
+
+;---------------------------------------;
+; End of subroutine, cutscene continues ;
+;---------------------------------------;
+
+    moveq   #0, d0
+    rts
+
+;---------------------------------------;
+; End of subroutine, cutscene ends here ;
+;---------------------------------------;
+
+@Quit:
+    moveq   #1, d0
+    rts
+
+;----------------------------------------------------------------------------

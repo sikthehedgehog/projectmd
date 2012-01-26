@@ -1,0 +1,119 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------------------------------;
+; Load1BPPTilesShadow                        ;
+;                                            ;
+; Loads tiles stored as 1BPP into VRAM       ;
+; A shadow effect is applied onto the tiles  ;
+; Yes, that's three colors with 1BPP data :P ;
+;                                            ;
+; Colors are used as follows:                ;
+;   Index #0 ... Background                  ;
+;   Index #1 ... Shadow                      ;
+;   Index #2 ... Foreground                  ;
+;--------------------------------------------;
+; INPUT                                      ;
+;   d0.w ... Number of tiles to load         ;
+;   a0.l ... Address of tile data            ;
+;--------------------------------------------;
+; BREAKS: d0, d1, d2, d3, d7, a0, a1         ;
+;--------------------------------------------;
+
+Load1BPPTilesShadow:
+
+;------------------------------;
+; Get address of VDP data port ;
+;------------------------------;
+
+    lea     ($C00000), a1
+
+;-------------------;
+; Process all tiles ;
+;-------------------;
+
+    add.w   d0, d0
+    add.w   d0, d0
+    add.w   d0, d0
+    subq.w  #1, d0
+@Loop:
+
+;--------------------;
+; Process all pixels ;
+;--------------------;
+
+    move.b  (a0)+, d1
+    moveq   #0, d2
+    moveq   #8-1, d7
+@InnerLoop:
+
+;----------------;
+; Get pixel info ;
+;----------------;
+
+    add.b   d1, d1
+
+;----------------;
+; Is it a space? ;
+;----------------;
+
+    bcs.s   @NotSpace
+    subq.w  #1, d2
+    bge.s   @PixelSet
+    moveq   #0, d2
+    bra.s   @PixelSet
+@NotSpace:
+
+;--------------;
+; Is it solid? ;
+;--------------;
+
+    moveq   #2, d2
+
+;------------;
+; Next pixel ;
+;------------;
+
+@PixelSet:
+    lsl.l   #4, d3
+    or.b    d2, d3
+    dbf     d7, @InnerLoop
+
+;------------------;
+; Send line to VDP ;
+;------------------;
+
+    move.l  d3, (a1)
+
+;-----------;
+; Next line ;
+;-----------;
+
+    dbf     d0, @Loop
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

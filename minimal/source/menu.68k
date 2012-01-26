@@ -1,0 +1,477 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------------------------;
+; Menu                                                       ;
+; Wrapper for MenuEx, without any special handler subroutine ;
+;------------------------------------------------------------;
+
+Menu:
+    lea     (@Handler), a2
+    bra.s   MenuEx
+    rts
+
+;-----------------;
+; Default handler ;
+;-----------------;
+
+@Handler:
+
+;---------;
+; No init ;
+;---------;
+
+    cmp.b   #$FF, d0
+    bne.s   @NotInit
+    rts
+@NotInit:
+
+;------------------------------;
+; User is OKing the selection? ;
+;------------------------------;
+
+    and.b   #$E0, d0
+    beq.s   @NotSelected
+    move.b  #1, (RAM_MenuQuit)
+@NotSelected:
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;---------------------------------------------------------------------;
+; MenuEx                                                              ;
+;                                                                     ;
+; This subroutine with a lame name is responsible of showing menus on ;
+; screen, and the behavior... etc. :P                                 ;
+;---------------------------------------------------------------------;
+; BREAKS: all                                                         ;
+;---------------------------------------------------------------------;
+
+MenuEx:
+
+;--------------------;
+; Store menu handler ;
+;--------------------;
+
+    move.l  a2, (RAM_MenuHandler)
+
+;------------------------;
+; Initialize game status ;
+;------------------------;
+
+    move.w  #%000, (RAM_GameStatus)
+    move.l  #0, (RAM_GlobalAnim)
+
+;-------------------;
+; Initialize fading ;
+;-------------------;
+
+    move.l  #7<<16, (RAM_FadeStage)
+    move.l  (RAM_GlobalAnimSpd), d0
+    asr.l   #1, d0
+    move.l  d0, (RAM_FadeSpeed)
+
+;----------------------;
+; Set up VDP registers ;
+;----------------------;
+
+    lea     ($C00004), a4
+    lea     ($C00000), a5
+
+    move.w  #$8230, (a4)    ; Tilemap A: $C000
+    move.w  #$8338, (a4)    ; Window: $E000
+    move.w  #$8405, (a4)    ; Tilemap B: $A000
+    move.w  #$857E, (a4)    ; Sprite table: $FC00
+    move.w  #$8B00, (a4)    ; No IRQ2, full VScroll, full HScroll
+    move.w  #$8D3E, (a4)    ; HScroll table: $F800
+    move.w  #$9011, (a4)    ; Tilemap size: 64x64
+    move.w  #$9100, (a4)    ; Make window plane visible
+    move.w  #$9204, (a4)
+
+;--------------------;
+; Clear sprite table ;
+;--------------------;
+
+    movem.l a0-a1/a4-a5, -(sp)
+    bsr     ClearSprites
+    bsr     UpdateSprites
+    bsr     FlushVDPBuffer
+    movem.l (sp)+, a0-a1/a4-a5
+
+;-------------;
+; Clear VSRAM ;
+;-------------;
+
+    move.l  #(-104)<<16, (RAM_VScrBuffer)
+
+;------------;
+; Clear CRAM ;
+;------------;
+
+    move.l  #$C0000000, (a4)
+    moveq   #0, d0
+    moveq   #($40/8)-1, d1
+@ClearCRAM:
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    dbf     d1, @ClearCRAM
+
+;---------------------------------;
+; Put palette into palette buffer ;
+;---------------------------------;
+
+    lea     (Pal_Menu), a2
+    lea     (RAM_PalBuffer), a3
+    move.l  (a2)+, (a3)+
+    move.l  (a2)+, (a3)+
+    move.l  (a2)+, (a3)+
+    move.l  (a2)+, (a3)+
+
+;-------------------------;
+; Load graphics into VRAM ;
+;-------------------------;
+
+    FixedDMA Gfx_MenuFont, $20, Gfx_MenuFont_Size
+    FixedDMA Gfx_MenuArrow, VRAM_MenuArrow*$20, 4*$20
+    FixedDMA Gfx_MenuBG, VRAM_MenuBG*$20, 11*$20
+
+;-----------------------;
+; Get number of options ;
+;-----------------------;
+
+    move.w  (a1), d0
+    move.b  d0, (RAM_NumOptions)
+
+;------------------------;
+; Clear plane A contents ;
+;------------------------;
+
+    moveq   #0, d0
+    move.w  #((64/16)*64)-1, d1
+    move.l  #$40000003, (a4)
+@ClearPlaneA:
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    dbf     d1, @ClearPlaneA
+
+;-----------------------;
+; Clear window contents ;
+;-----------------------;
+
+    move.w  #((64/16)*64)-1, d1
+    move.l  #$60000003, (a4)
+@ClearWindow:
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    dbf     d1, @ClearWindow
+
+;----------------------;
+; Draw menu background ;
+;----------------------;
+
+    bsr     DrawMenuBG
+
+;--------------------------;
+; Flush VDP command buffer ;
+;--------------------------;
+
+    bsr     FlushVDPBuffer
+
+;----------------;
+; Draw the title ;
+;----------------;
+
+    moveq   #2, d0
+    moveq   #64+1, d1
+    bsr     WriteMenuString
+
+;------------------;
+; Draw the options ;
+;------------------;
+
+    move.l  a1, a2
+    move.w  (a2)+, d2
+    subq.w  #1, d2
+    moveq   #5, d0
+    moveq   #0, d1
+@DrawOptionsFirst:
+    move.l  (a2)+, a0
+    bsr     WriteMenuString
+    addq.w  #2, d1
+    dbf     d2, @DrawOptionsFirst
+
+;-------------;
+; Set up menu ;
+;-------------;
+
+    move.b  #0, (RAM_CurrOption)
+    move.b  #0, (RAM_MenuQuit)
+    move.b  #0, (RAM_MenuHexStr+2)
+
+;---------------------------------;
+; Call handler for initialization ;
+;---------------------------------;
+
+    move.b  #$FF, d0
+    move.l  (RAM_MenuHandler), a6
+    jsr     (a6)
+
+;-----------------;
+; Turn on display ;
+;-----------------;
+
+    ;move.w  #$8154, ($C00004)
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------------;
+; Main loop: process user input and such :P ;
+; We quit when the user selects an option   ;
+;-------------------------------------------;
+
+@MainLoop:
+
+;---------------;
+; Clear sprites ;
+;---------------;
+
+    bsr     ClearSprites
+
+;---------------;
+; Update fading ;
+;---------------;
+
+    bsr     Fade
+
+;-------------------;
+; Read joypad input ;
+;-------------------;
+
+    bsr     ReadJoypad
+    move.b  (RAM_JoypadPress), d0
+    move.b  (RAM_CurrOption), d1
+    move.b  (RAM_NumOptions), d2
+
+;---------------------;
+; Select next option? ;
+;---------------------;
+
+    btst.l  #Joypad_Down, d0
+    beq.s   @NotNext
+
+    move.b  #SFX_Beep, (RAM_SFXToPlay)
+
+    addq.b  #1, d1
+    cmp.b   d1, d2
+    bne.s   @NotNext
+    moveq   #0, d1
+@NotNext:
+
+;-------------------------;
+; Select previous option? ;
+;-------------------------;
+
+    btst.l  #Joypad_Up, d0
+    beq.s   @NotPrevious
+
+    move.b  #SFX_Beep, (RAM_SFXToPlay)
+
+    tst.b   d1
+    bne.s   @NoPrevUnderflow
+    move.b  d2, d1
+@NoPrevUnderflow:
+    subq.b  #1, d1
+@NotPrevious:
+
+;-------------------;
+; User is quitting? ;
+;-------------------;
+
+    btst.l  #4, d0
+    bne     @GoBack
+
+;-------------------;
+; Call menu handler ;
+;-------------------;
+
+    movem.l d0-a6, -(sp)
+    move.l  (RAM_MenuHandler), a6
+    jsr     (a6)
+    movem.l (sp)+, d0-a6
+
+;------------------------------;
+; User is OKing the selection? ;
+;------------------------------;
+
+    tst.b   (RAM_MenuQuit)
+    bne     @Selected
+
+;-----------------------;
+; Update current option ;
+;-----------------------;
+
+    move.b  d1, (RAM_CurrOption)
+
+;-------------;
+; Scroll menu ;
+;-------------;
+
+    move.b  d1, d7
+    and.w   #$1F, d7
+    lsl.w   #3+1, d7
+    sub.w   #104, d7
+
+    add.w   (RAM_VScrBuffer), d7
+    addq.w  #1, d7
+    asr.w   #1, d7
+    move.w  d7, (RAM_VScrBuffer)
+
+;----------------------------------------------;
+; Put the arrow pointing to the current option ;
+;----------------------------------------------;
+
+    move.w  #128+16, d0
+    move.w  #128+104, d1
+    moveq   #VRAM_MenuArrow, d2
+    moveq   #%0101, d3
+    bsr     AddSprite
+
+;------------------------;
+; Animate the background ;
+;------------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+
+    moveq   #0, d7
+    move.w  d0, d7
+    and.w   #$F<<2, d7
+    lsl.w   #5+2-2, d7
+    add.l   #Gfx_MenuBG, d7
+    VarSrcDMA VRAM_MenuBG*$20, 4*$20
+
+    move.w  d0, d1
+    lsr.w   #1, d1
+    move.w  d1, (RAM_VScrBuffer+$02)
+    neg.w   d1
+    move.w  #0, (RAM_HScrBuffer+$00)
+    move.w  d1, (RAM_HScrBuffer+$02)
+    FixedDMA RAM_HScrBuffer, $F800, 2*2
+
+;-------------------;
+; Animate the arrow ;
+;-------------------;
+
+    and.w   #$7<<2, d0
+    lea     (Pal_MenuArrow), a5
+    lea     (a5,d0.w), a5
+    lea     (RAM_PalBuffer+(4*2)), a6
+
+    move.l  (a5), d0
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @NoAltArrowPal
+    swap    d0
+@NoAltArrowPal:
+    move.l  d0, (a6)
+
+;------------;
+; Next frame ;
+;------------;
+
+    jsr     (UpdateSound).w
+    bsr     UpdateSprites
+    bsr     VSync
+    bsr     FlushVDPBuffer
+
+    move.l  (RAM_GlobalAnim), d0
+    add.l   (RAM_GlobalAnimSpd), d0
+    move.l  d0, (RAM_GlobalAnim)
+    bchg.b  #GameStat_Blink, (RAM_GameStatus+1)
+
+    bra     @MainLoop
+
+;----------------------------------------------------------------------------
+
+;-----------------------------;
+; Used wants to go back, quit ;
+;-----------------------------;
+
+@GoBack:
+    move.b  #-1, (RAM_CurrOption)
+    move.b  #SFX_Cancel, (RAM_SFXToPlay)
+    bra.s   @Quitting
+
+;-------------------------------;
+; User selected something, quit ;
+;-------------------------------;
+
+@Selected:
+    move.b  #SFX_OK, (RAM_SFXToPlay)
+
+;-------------------;
+; Fade out first :P ;
+;-------------------;
+
+@Quitting:
+    move.l  #7<<16, (RAM_FadeStage)
+    move.w  #%10, (RAM_GameStatus)
+    jsr     (UpdateSound).w
+
+@FadeOut:
+    bsr     Fade
+    bsr     VSync
+    bsr     FlushVDPBuffer
+    move.w  (RAM_FadeStage), d0
+    bne.s   @FadeOut
+
+;-------------------------;
+; Hide window plane again ;
+;-------------------------;
+
+    move.w  #$9100, ($C00004)
+    move.w  #$9200, ($C00004)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

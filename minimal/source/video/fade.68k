@@ -1,0 +1,220 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------------------;
+; Fade                           ;
+;                                ;
+; Performs the fading operations ;
+; Updates CRAM as needed         ;
+;--------------------------------;
+; BREAKS: all                    ;
+;--------------------------------;
+
+Fade:
+
+;---------------------------------;
+; Check if there's anything to do ;
+;---------------------------------;
+
+    move.w  (RAM_FadeStage), d0
+    bne.s   @NeedsFading
+    FixedDMACRAM RAM_PalBuffer, 0, $40*2
+    rts
+@NeedsFading:
+
+;-------------;
+; Fading out? ;
+;-------------;
+
+    move.w  (RAM_GameStatus), d1
+    btst.l  #GameStat_FadeOut, d1
+    beq.s   @NotFadingOut
+    neg.w   d0
+    addq.w  #7, d0
+@NotFadingOut:
+
+;--------------------;
+; Process all colors ;
+;--------------------;
+
+    add.w   d0, d0
+    move.w  d0, d5
+    move.w  d0, d6
+    lsl.w   #4, d5
+    lsl.w   #8, d6
+
+    lea     (RAM_PalBuffer), a0
+    lea     (RAM_FadeBuffer), a1
+    moveq   #$40-1, d7
+
+;--------------------------------------------;
+; Check if we're doing a black or white fade ;
+;--------------------------------------------;
+
+    btst.l  #GameStat_WhiteFade, d1
+    bne     @WhiteLoop
+
+;----------------------;
+; Fading from/to black ;
+;----------------------;
+
+@BlackLoop:
+
+;-----------------------------;
+; Split color into components ;
+;-----------------------------;
+
+    move.w  (a0)+, d2
+    move.w  d2, d3
+    move.w  d2, d4
+    and.w   #$E00, d2
+    and.w   #$0E0, d3
+    and.w   #$00E, d4
+
+;-------------;
+; Process red ;
+;-------------;
+
+    sub.w   d0, d4
+    bge.s   @RedIsOK
+    moveq   #0, d4
+@RedIsOK:
+
+;---------------;
+; Process green ;
+;---------------;
+
+    sub.w   d5, d3
+    bge.s   @GreenIsOK
+    moveq   #0, d3
+@GreenIsOK:
+
+;--------------;
+; Process blue ;
+;--------------;
+
+    sub.w   d6, d2
+    bge.s   @BlueIsOK
+    moveq   #0, d2
+@BlueIsOK:
+
+;-------------------;
+; Store final color ;
+;-------------------;
+
+    or.w    d3, d2
+    or.w    d4, d2
+    move.w  d2, (a1)+
+
+;------------;
+; Next color ;
+;------------;
+
+    dbf     d7, @BlackLoop
+    bra     @LoopEnd
+
+;----------------------;
+; Fading from/to white ;
+;----------------------;
+
+@WhiteLoop:
+
+;-----------------------------;
+; Split color into components ;
+;-----------------------------;
+
+    move.w  (a0)+, d2
+    move.w  d2, d3
+    move.w  d2, d4
+    and.w   #$E00, d2
+    and.w   #$0E0, d3
+    and.w   #$00E, d4
+
+;-------------;
+; Process red ;
+;-------------;
+
+    add.w   d0, d4
+    cmp.w   #$E, d4
+    ble.s   @RedIsOK2
+    moveq   #$E, d4
+@RedIsOK2:
+
+;---------------;
+; Process green ;
+;---------------;
+
+    add.w   d5, d3
+    cmp.w   #$E0, d3
+    ble.s   @GreenIsOK2
+    move.w  #$E0, d3
+@GreenIsOK2:
+
+;--------------;
+; Process blue ;
+;--------------;
+
+    add.w   d6, d2
+    cmp.w   #$E00, d2
+    ble.s   @BlueIsOK2
+    move.w  #$E00, d2
+@BlueIsOK2:
+
+;-------------------;
+; Store final color ;
+;-------------------;
+
+    or.w    d3, d2
+    or.w    d4, d2
+    move.w  d2, (a1)+
+
+;------------;
+; Next color ;
+;------------;
+
+    dbf     d7, @WhiteLoop
+
+;----------------------;
+; Load altered palette ;
+;----------------------;
+
+@LoopEnd
+    FixedDMACRAM RAM_FadeBuffer, 0, $40*2
+
+;---------------------;
+; Update fading stage ;
+;---------------------;
+
+    move.l  (RAM_FadeStage), d0
+    sub.l   (RAM_FadeSpeed), d0
+    bge.s   @FadeNotOver
+    move.l  #0, d0
+@FadeNotOver:
+    move.l  d0, (RAM_FadeStage)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

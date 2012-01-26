@@ -1,0 +1,36 @@
+openout graphics/lvl_wl/gfx.tmp
+
+palette ??? 08C 06A 048 026 004 002 000 0CE 0AE 08E 06E 04E 00E 00C 00A
+setmask
+
+openin concept/lvl_wl/_tilemap_pal2.bmp
+scroll 0 0 16 3
+scroll 0 3 8 1
+closein
+
+palette ??? 0CE 0AE 08E 06E 04E 00E 6AC 48A 268 046 ??? ??? ??? ??? ???
+setmask
+
+openin concept/lvl_wl/_tilemap_pal3.bmp
+scroll 0 0 1 1
+closein
+
+closeout
+
+palette ??? 08C 06A 048 026 004 002 000 0CE 0AE 08E 06E 04E 00E 00C 00A
+setmask
+
+openout graphics/lvl_wl/platform.bin
+openin concept/lvl_wl/platform.bmp
+sprite 0 0 4 2
+closein
+closeout
+
+palette ??? 0CE 0AE 08E 06E 04E 00E 6AC 48A 268 046 ??? ??? ??? ??? ???
+setmask
+
+openout graphics/lvl_wl/lava.bin
+openin concept/lvl_wl/_lava.bmp
+scroll 0 0 4 1
+closein
+closeout

@@ -1,0 +1,298 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------;
+; EnginePlayer                                                         ;
+;                                                                      ;
+; It's the physics engine for the player                               ;
+; Registers are modified ready to use for when it returns to RunPlayer ;
+;----------------------------------------------------------------------;
+
+EnginePlayer:
+
+;------------------------------;
+; Get address of collision map ;
+;------------------------------;
+
+    move.l  (RAM_CollAddr), a1
+
+;--------------------------------;
+; Horizontal movement processing ;
+; Determine direction            ;
+;--------------------------------;
+
+    move.l  d5, d0
+    add.l   Player_RideSpeed(a0), d0
+
+    tst.l   d0
+    beq     @NoHMove
+    blt     @MoveLeft
+
+;------------;
+; Move right ;
+;------------;
+
+    move.l  d5, d0
+    btst.l  #PlayerStat_Swim, d3
+    beq.s   @NoSwimSlow_Right
+    asr.l   #1, d0
+@NoSwimSlow_Right:
+    add.l   d0, d7
+    add.l   Player_RideSpeed(a0), d7
+
+    move.l  d7, d0
+    move.l  d6, d1
+
+    swap    d0
+    addq.w  #7, d0
+    move.w  (RAM_MaxScroll), d2
+    add.w   #320, d2
+    cmp.w   d2, d0
+    bgt.s   @TooRight
+    and.w   #$FFE0, d0
+    asr.w   #2, d0
+
+    swap    d1
+    move.w  d1, d2
+    sub.w   #28, d2
+
+    tst.w   d1
+    bge.s   @NotTooUp1H
+    moveq   #0, d1
+@NotTooUp1H:
+    asr.w   #5, d1
+
+    tst.w   d2
+    bge.s   @NotTooUp1HB
+    moveq   #0, d2
+@NotTooUp1HB:
+    asr.w   #5, d2
+
+    add.w   d0, d1
+    add.w   d0, d2
+    move.b  (a1,d1.w), d0
+    or.b    (a1,d2.w), d0
+
+    btst.l  #0, d0
+    beq.s   @NoHMove
+
+@TooRight:
+    move.l  #$1000, d5
+    add.l   #$70000, d7
+    and.l   #$FFE00000, d7
+    sub.l   #$70000, d7
+    bra.s   @NoHMove
+
+;-----------;
+; Move left ;
+;-----------;
+
+@MoveLeft:
+    move.l  d5, d0
+    btst.l  #PlayerStat_Swim, d3
+    beq.s   @NoSwimSlow_Left
+    asr.l   #1, d0
+@NoSwimSlow_Left:
+    add.l   d0, d7
+    add.l   Player_RideSpeed(a0), d7
+
+    move.l  d7, d0
+    move.l  d6, d1
+
+    swap    d0
+    subq.w  #8, d0
+    blt.s   @TooLeft
+    and.w   #$FFE0, d0
+    asr.w   #2, d0
+
+    swap    d1
+    move.w  d1, d2
+    sub.w   #28, d2
+
+    tst.w   d1
+    bge.s   @NotTooUp2H
+    moveq   #0, d1
+@NotTooUp2H:
+    asr.w   #5, d1
+
+    tst.w   d2
+    bge.s   @NotTooUp2HB
+    moveq   #0, d2
+@NotTooUp2HB:
+    asr.w   #5, d2
+
+    add.w   d0, d1
+    add.w   d0, d2
+    move.b  (a1,d1.w), d0
+    or.b    (a1,d2.w), d0
+
+    btst.l  #0, d0
+    beq.s   @NoHMove
+
+@TooLeft:
+    move.l  #$1000, d5
+    and.l   #$FFE00000, d7
+    add.l   #$80000, d7
+
+;----------------------------;
+; End of horizontal movement ;
+;----------------------------;
+
+@NoHMove:
+
+;--------------------------------------;
+; Riding causes forced on-ground state ;
+;--------------------------------------;
+
+    bclr.l  #PlayerStat_Ground, d3
+    btst.l  #PlayerStat_Ride, d3
+    beq.s   @NotRiding
+    bset.l  #PlayerStat_Ground, d3
+    add.l   Player_RideGrav(a0), d6
+    bra     @NoVMove
+@NotRiding:
+
+;------------------------------;
+; Vertical movement processing ;
+; Determine direction          ;
+;------------------------------;
+
+    tst.l   d4
+    beq     @NoVMove
+    blt     @MoveUp
+
+;-----------;
+; Move down ;
+;-----------;
+
+    move.l  d4, d0
+    btst.l  #PlayerStat_Swim, d3
+    beq.s   @NoSwimSlow_Down
+    asr.l   #1, d0
+@NoSwimSlow_Down:
+    add.l   d0, d6
+
+    move.l  d7, d0
+    move.l  d6, d1
+
+    swap    d0
+    move.w  d0, d2
+    subq.w  #8, d0
+    addq.w  #6, d2
+    and.w   #$FFE0, d0
+    asr.w   #2, d0
+    and.w   #$FFE0, d2
+    asr.w   #2, d2
+
+    swap    d1
+    addq.w  #1, d1
+    bge.s   @NotTooUp1
+    moveq   #0, d1
+@NotTooUp1:
+    asr.w   #5, d1
+
+    add.w   d1, d0
+    add.w   d1, d2
+    move.b  (a1,d0.w), d0
+    or.b    (a1,d2.w), d0
+
+    btst.l  #1, d0
+    bne.s   @ThinFloor
+    btst.l  #0, d0
+    beq     @NoVMove
+
+@OnGround:
+    moveq   #0, d4
+    add.l   #$10000, d6
+    and.l   #$FFE00000, d6
+    sub.l   #$10000, d6
+    bset.l  #PlayerStat_Ground, d3
+    bra.s   @NoVMove
+
+@ThinFloor:
+    move.l  d6, d0
+    move.l  d6, d1
+    sub.l   d4, d1
+    add.l   #$10000, d0
+    and.l   #$1FFFFF, d0
+    and.l   #$1FFFFF, d1
+    cmp.l   d1, d0
+    ble.s   @OnGround
+    bra.s   @NoVMove
+
+;---------;
+; Move up ;
+;---------;
+
+@MoveUp:
+    move.l  d4, d0
+    btst.l  #PlayerStat_Swim, d3
+    beq.s   @NoSwimSlow_Up
+    asr.l   #1, d0
+@NoSwimSlow_Up:
+    add.l   d0, d6
+    add.l   Player_RideGrav(a0), d6
+
+    move.l  d7, d0
+    move.l  d6, d1
+
+    swap    d0
+    move.w  d0, d2
+    subq.w  #8, d0
+    addq.w  #6, d2
+    and.w   #$FFE0, d0
+    asr.w   #2, d0
+    and.w   #$FFE0, d2
+    asr.w   #2, d2
+
+    swap    d1
+    sub.w   #32, d1
+    bge.s   @NotTooUp2
+    moveq   #0, d1
+@NotTooUp2:
+    asr.w   #5, d1
+
+    add.w   d1, d0
+    add.w   d1, d2
+    move.b  (a1,d0.w), d0
+    or.b    (a1,d2.w), d0
+
+    btst.l  #0, d0
+    beq.s   @NoVMove
+
+    moveq   #0, d4
+    and.l   #$FFE00000, d6
+    add.l   #$1F0000, d6
+
+;--------------------------;
+; End of vertical movement ;
+;--------------------------;
+
+@NoVMove:
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

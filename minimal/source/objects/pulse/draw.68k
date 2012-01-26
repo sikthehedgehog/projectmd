@@ -1,0 +1,149 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------------;
+; DrawPulse                        ;
+;                                  ;
+; Draws an electrical pulse object ;
+;----------------------------------;
+
+DrawPulse:
+
+;----------------------------------------;
+; Check if we're visible for starters    ;
+; Spurious sprites cause sprite overflow ;
+;----------------------------------------;
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+
+    cmp.w   #-48, d0
+    ble.s   @End
+    cmp.w   #320, d0
+    bge.s   @End
+
+;------------------------------;
+; Calculate sprite coordinates ;
+;------------------------------;
+
+    move.w  Object_Y(a0), d1
+    add.w   #128, d0
+    add.w   #128+12, d1
+
+;--------------------;
+; Use normal sprite? ;
+;--------------------;
+
+    move.w  Object_Misc(a0), d7
+    bne.s   @Disappearing
+
+;----------------------;
+; Put sprite on screen ;
+;----------------------;
+
+    move.w  (RAM_PulseGfx), d2
+    moveq   #%1100, d3
+    bsr     AddSprite
+
+    add.w   #32, d0
+    addq.w  #4, d2
+    moveq   #%0100, d3
+    bsr     AddSprite
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------------;
+; Determine length of sprite when disappearing ;
+;----------------------------------------------;
+
+@Disappearing:
+    eor.w   #7, d7
+    addq.w  #1, d7
+    lsr.w   #1, d7
+    addq.w  #2, d7
+
+    cmp.w   #4, d7
+    ble.s   @SmallSprite
+    moveq   #3, d3
+    move.w  d7, d4
+    subq.w  #1, d4
+    bra.s   @LargeSprite
+@SmallSprite:
+    move.w  d7, d3
+    subq.w  #1, d3
+    moveq   #-1, d4
+@LargeSprite:
+
+    add.w   d3, d3
+    add.w   d3, d3
+    add.w   d4, d4
+    add.w   d4, d4
+
+;-------------------------;
+; Determine sprite to use ;
+;-------------------------;
+
+    subq.w  #2, d7
+    add.w   d7, d7
+    lea     (@Sprites), a6
+    move.w  (a6,d7.w), d2
+
+;--------------;
+; Draw sprites ;
+;--------------;
+
+    bsr     AddSprite
+
+    tst.w   d4
+    blt.s   @No2ndSprite
+    add.w   #32, d0
+    addq.w  #4, d2
+    move.w  d4, d3
+    bsr     AddSprite
+@No2ndSprite:
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;--------------------------------;
+; Sprites used when disappearing ;
+;--------------------------------;
+
+@Sprites:
+    dc.w    $8000|(VRAM_Pulse+6+5+4+3)
+    dc.w    $8000|(VRAM_Pulse+6+5+4)
+    dc.w    $8000|(VRAM_Pulse+6+5)
+    dc.w    $8000|(VRAM_Pulse+6)
+
+;----------------------------------------------------------------------------

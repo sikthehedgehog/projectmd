@@ -1,0 +1,180 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------;
+; Null sound effect     ;
+; Used as a placeholder ;
+;-----------------------;
+
+SFXData_Null:
+    dc.b    $FF
+
+;-------------------;
+; Jump sound effect ;
+;-------------------;
+
+SFXData_Jump:
+    incbin  "sound/sfxs/jump.esf"
+
+;--------------------------;
+; Get rhombus sound effect ;
+;--------------------------;
+
+SFXData_Rhombus_1:
+    incbin  "sound/sfxs/rhombus1.esf"
+SFXData_Rhombus_2:
+    incbin  "sound/sfxs/rhombus2.esf"
+SFXData_Rhombus_3:
+    incbin  "sound/sfxs/rhombus3.esf"
+SFXData_Rhombus_4:
+    incbin  "sound/sfxs/rhombus4.esf"
+
+;-----------------------;
+; Power-up sound effect ;
+;-----------------------;
+
+SFXData_PowerUp:
+    incbin  "sound/sfxs/powerup.esf"
+
+;--------------;
+; Attack enemy ;
+;--------------;
+
+SFXData_Attack:
+    incbin  "sound/sfxs/attack.esf"
+
+;-----------------------;
+; Getting hurt (normal) ;
+;-----------------------;
+
+SFXData_GetHurt:
+    incbin  "sound/sfxs/hurt.esf"
+
+;-----------------------------------;
+; Getting hurt by electrical hazard ;
+;-----------------------------------;
+
+SFXData_Electrocute:
+    incbin  "sound/sfxs/shock.esf"
+
+;-----------------;
+; Electric shield ;
+;-----------------;
+
+SFXData_ShockShield:
+    incbin  "sound/sfxs/shocksh.esf"
+
+;----------------------;
+; Big explosion effect ;
+;----------------------;
+
+SFXData_BigExplosion:
+    incbin  "sound/sfxs/bigboom.esf"
+
+;-------------------------;
+; Normal explosion effect ;
+;-------------------------;
+
+SFXData_Explosion:
+    incbin  "sound/sfxs/boom.esf"
+
+;------------------------;
+; GIANT explosion effect ;
+;------------------------;
+
+SFXData_GiantExplosion:
+    incbin  "sound/sfxs/hugeboom.esf"
+
+;-------------------;
+; Beep sound effect ;
+;-------------------;
+
+SFXData_Beep:
+    incbin  "sound/sfxs/beep.esf"
+
+;---------------;
+; Accept option ;
+;---------------;
+
+SFXData_OK:
+	dc.b $E2, $E4, $E5
+    incbin  "sound/sfxs/ok.esf"
+
+;--------;
+; Cancel ;
+;--------;
+
+SFXData_Cancel:
+    incbin  "sound/sfxs/cancel.esf"
+
+;-------------------;
+; Swim sound effect ;
+;-------------------;
+
+SFXData_Swim:
+    incbin  "sound/sfxs/swim.esf"
+
+;-----------------;
+; Fall into water ;
+;-----------------;
+
+SFXData_Splash:
+    incbin  "sound/sfxs/splash.esf"
+
+;-------------------------;
+; Checkpoint sound effect ;
+;-------------------------;
+
+SFXData_Checkpoint:
+    incbin  "sound/sfxs/chkpoint.esf"
+
+;-------------------;
+; 1-up sound effect ;
+;-------------------;
+
+SFXData_1up:
+    incbin  "sound/sfxs/1up.esf"
+
+;--------------------;
+; Capacitor explodes ;
+;--------------------;
+
+SFXData_Capacitor:
+    incbin  "sound/sfxs/capac.esf"
+
+;---------------------;
+; Bumper sound effect ;
+;---------------------;
+
+SFXData_Bumper:
+    incbin  "sound/sfxs/bumper.esf"
+SFXData_BumperPad:
+    incbin  "sound/sfxs/bumppad.esf"
+
+;----------------------;
+; Waterlava teleporter ;
+;----------------------;
+
+SFXData_Teleporter:
+    incbin  "sound/sfxs/teleport.esf"
+
+;----------------------------------------------------------------------------

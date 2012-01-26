@@ -1,0 +1,93 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;---------------------------------------------------------------;
+; This file contains the graphics data for the Binary Fury boss ;
+;---------------------------------------------------------------;
+
+;----------------------------------------------------------------------------
+
+;---------------;
+; 8x8 tile data ;
+;---------------;
+
+Gfx_BossBinary:
+    incbin  "graphics/lvl_bbin/gfx.bin"
+    even
+
+;-------------------;
+; Background layout ;
+;-------------------;
+
+Gfx_BossBinary_BGLayout:
+    incbin  "graphics/lvl_bbin/bglayout.bin"
+    even
+
+;----------------------------------------------------------------------------
+
+;-----------------;
+; 32x32 tile data ;
+;-----------------;
+
+Tiles_BossBinary:
+
+;--------------------------------------------;
+; To make my life easier and save text space ;
+;--------------------------------------------;
+
+@Begin equ Tiles_BossBinary
+
+    rsset VRAM_Level
+    rs.b    8
+@T2 rs.b    10
+
+;-----------;
+; Tile list ;
+;-----------;
+
+    dc.w    @Tile00-@Begin, @Tile00-@Begin
+    dc.w    @Tile01-@Begin, @Tile01B-@Begin
+
+;----------------------;
+; Tile $00: empty tile ;
+;----------------------;
+
+@Tile00:
+    dcb.w   4*4, $8000
+
+;-----------------;
+; Tile $01: floor ;
+;-----------------;
+
+@Tile01:
+    dc.w    @T2+$A000, @T2+$A008, @T2+$A000, @T2+$A008
+    dc.w    @T2+$A001, $8000, @T2+$A001, $8000
+    dc.w    @T2+$A002, @T2+$A009, @T2+$A002, @T2+$A009
+    dc.w    @T2+$A003, $8000, @T2+$A003, $8000
+
+@Tile01B:
+    dc.w    @T2+$A004, @T2+$A008, @T2+$A004, @T2+$A008
+    dc.w    @T2+$A005, $8000, @T2+$A005, $8000
+    dc.w    @T2+$A006, @T2+$A009, @T2+$A006, @T2+$A009
+    dc.w    @T2+$A007, $8000, @T2+$A007, $8000
+
+;----------------------------------------------------------------------------

@@ -1,0 +1,136 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;---------------------------------------------;
+; HurtPlayer                                  ;
+;                                             ;
+; Causes the player to get hurt               ;
+; It also checks that the player can get hurt ;
+;---------------------------------------------;
+; OUTPUT:                                     ;
+;   d6.w ... 0 = Didn't get hurt              ;
+;            1 = Got hurt                     ;
+;           -1 = INVINCIBLE OSHI--            ;
+;---------------------------------------------;
+; BREAKS: d7, a6                              ;
+;---------------------------------------------;
+
+HurtPlayer:
+
+;----------------------------;
+; Get address of player data ;
+;----------------------------;
+
+    lea     (RAM_Player), a6
+
+;-------------------;
+; Get player status ;
+;-------------------;
+
+    move.w  Player_Status(a6), d7
+
+;------------------;
+; Huh, invincible? ;
+;------------------;
+
+    btst.l  #PlayerStat_Shock, d7
+    bne.s   @Invincible
+    tst.w   Player_Invinc(a6)
+    beq.s   @NotInvincible
+@Invincible:
+    moveq   #-1, d6
+    rts
+@NotInvincible:
+
+;--------------------------------;
+; Make sure that it can get hurt ;
+;--------------------------------;
+
+    moveq   #0, d6
+
+    tst.b   Player_Flash(a6)
+    bne     @End
+    btst.l  #PlayerStat_Hurt, d7
+    bne     @End
+
+;----------------------------------;
+; Update player status accordingly ;
+;----------------------------------;
+
+    bset.l  #PlayerStat_Hurt, d7
+    bclr.l  #PlayerStat_Ground, d7
+    move.w  d7, Player_Status(a6)
+
+    move.b  Player_FlashLen(a6), Player_Flash(a6)
+    move.b  #0, Player_Exploding(a6)
+
+;-----------------------;
+; Push player backwards ;
+;-----------------------;
+
+    move.l  Player_MaxSpeed(a6), d6
+    asr.l   #2, d6
+    add.l   Player_MaxSpeed(a6), d6
+    asr.l   #1, d6
+    btst.l  #PlayerStat_Dir, d7
+    bne.s   @DontPushLeft
+    neg.l   d6
+@DontPushLeft:
+    move.l  d6, Player_Speed(a6)
+
+;---------------------;
+; Cause player to hop ;
+;---------------------;
+
+    move.l  Player_JumpForce(a6), d6
+    asr.l   #1, d6
+    move.l  d6, Player_Gravity(a6)
+
+;---------------------------;
+; Reduce player's energy :( ;
+;---------------------------;
+
+    sub.b   #1, Player_Energy(a6)
+
+;-----------------------;
+; Remove player's power ;
+;-----------------------;
+
+    move.b  #PlayerPow_None, Player_Power(a6)
+    move.l  #PalVal_StephanyNoPower, (RAM_PalBuffer+$04)
+    FixedDMACRAM RAM_PalBuffer+$04, $04, 2*2
+
+;-----------------------------;
+; Play default "get hurt" SFX ;
+;-----------------------------;
+
+    move.b  #SFX_GetHurt, (RAM_SFXToPlay)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    moveq   #1, d6
+@End:
+    rts
+
+;----------------------------------------------------------------------------

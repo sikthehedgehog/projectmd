@@ -1,0 +1,212 @@
+palette ??? EEE ??? ??? 8AE 68E 000 0EE EA6 E60 08E 00E 00A 0E0 0A0 060
+setmask
+
+openout graphics/objects/rhombus1.bin openin concept/objects/rhombus1.bmp sprite 0 0 2 2 closein closeout
+openout graphics/objects/rhombus2.bin openin concept/objects/rhombus2.bmp sprite 0 0 2 2 closein closeout
+openout graphics/objects/rhombus3.bin openin concept/objects/rhombus3.bmp sprite 0 0 2 2 closein closeout
+openout graphics/objects/rhombus4.bin openin concept/objects/rhombus4.bmp sprite 0 0 2 2 closein closeout
+openout graphics/objects/rhombus5.bin openin concept/objects/rhombus5.bmp sprite 0 0 2 2 closein closeout
+
+openout graphics/objects/ray1.bin openin concept/objects/ray1.bmp sprite 0 0 2 3 closein closeout
+openout graphics/objects/ray2.bin openin concept/objects/ray2.bmp sprite 0 0 2 3 closein closeout
+openout graphics/objects/ray3.bin openin concept/objects/ray3.bmp sprite 0 0 2 3 closein closeout
+openout graphics/objects/ray4.bin openin concept/objects/ray4.bmp sprite 0 0 2 3 closein closeout
+openout graphics/objects/bomb1.bin openin concept/objects/bomb1.bmp sprite 0 0 3 3 closein closeout
+openout graphics/objects/bomb2.bin openin concept/objects/bomb2.bmp sprite 0 0 3 3 closein closeout
+openout graphics/objects/bomb3.bin openin concept/objects/bomb3.bmp sprite 0 0 3 3 closein closeout
+openout graphics/objects/heart.bin openin concept/objects/heart.bmp sprite 0 0 4 2 closein closeout
+openout graphics/objects/djump1.bin openin concept/objects/djump1.bmp sprite 0 0 2 2 closein closeout
+openout graphics/objects/djump2.bin openin concept/objects/djump2.bmp sprite 0 0 2 2 closein closeout
+openout graphics/objects/djump3.bin openin concept/objects/djump3.bmp sprite 0 0 2 2 closein closeout
+openout graphics/objects/djump4.bin openin concept/objects/djump4.bmp sprite 0 0 2 2 closein closeout
+openout graphics/objects/djump5.bin openin concept/objects/djump5.bmp sprite 0 0 2 2 closein closeout
+openout graphics/objects/djump6.bin openin concept/objects/djump6.bmp sprite 0 0 2 2 closein closeout
+openout graphics/objects/djump7.bin openin concept/objects/djump7.bmp sprite 0 0 2 2 closein closeout
+openout graphics/objects/djump8.bin openin concept/objects/djump8.bmp sprite 0 0 2 2 closein closeout
+
+openout graphics/objects/1up.bin openin concept/objects/1up.bmp sprite 0 0 6 2 closein closeout
+
+openout graphics/objects/spark.bin openin concept/objects/spark.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/cspark.bin openin concept/objects/cspark.bmp sprite 0 0 2 2 closein closeout
+
+openout graphics/objects/thinblk.bin openin concept/objects/thinblk.bmp sprite 0 0 4 1 closein closeout
+
+openout graphics/objects/flamethw.bin openin concept/objects/flamethw.bmp sprite 0 0 4 2 closein closeout
+openout graphics/objects/fball1.bin openin concept/objects/fball1.bmp sprite 0 0 1 1 closein closeout
+openout graphics/objects/fball2.bin openin concept/objects/fball2.bmp sprite 0 0 2 2 closein closeout
+openout graphics/objects/fball3.bin openin concept/objects/fball3.bmp sprite 0 0 2 2 closein closeout
+openout graphics/objects/fball4.bin openin concept/objects/fball4.bmp sprite 0 0 3 3 closein closeout
+openout graphics/objects/fball5.bin openin concept/objects/fball5.bmp sprite 0 0 3 3 closein closeout
+openout graphics/objects/fball6.bin openin concept/objects/fball6.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/fball7.bin openin concept/objects/fball7.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/fball8.bin openin concept/objects/fball8.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/fball9.bin openin concept/objects/fball9.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/fball10.bin openin concept/objects/fball10.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/objects/pulse.bin openin concept/objects/pulse.bmp sprite 0 0 6 1 closein closeout
+openout graphics/objects/pulsdie1.bin openin concept/objects/pulsdie1.bmp sprite 0 0 5 1 closein closeout
+openout graphics/objects/pulsdie2.bin openin concept/objects/pulsdie2.bmp sprite 0 0 4 1 closein closeout
+openout graphics/objects/pulsdie3.bin openin concept/objects/pulsdie3.bmp sprite 0 0 3 1 closein closeout
+openout graphics/objects/pulsdie4.bin openin concept/objects/pulsdie4.bmp sprite 0 0 2 1 closein closeout
+openout graphics/objects/pulsgen1.bin openin concept/objects/pulsgen1.bmp sprite 0 0 1 1 closein closeout
+openout graphics/objects/pulsgen2.bin openin concept/objects/pulsgen2.bmp sprite 0 0 2 2 closein closeout
+openout graphics/objects/pulsgen3.bin openin concept/objects/pulsgen3.bmp sprite 0 0 3 3 closein closeout
+openout graphics/objects/pulsgen4.bin openin concept/objects/pulsgen4.bmp sprite 0 0 4 2 closein closeout
+
+openout graphics/objects/captopex.bin openin concept/objects/captopex.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/objects/chkpnt1.bin openin concept/objects/chkpnt1.bmp sprite 0 1 4 2 closein closeout
+openout graphics/objects/chkpnt2.bin openin concept/objects/chkpnt2.bmp sprite 0 1 4 2 closein closeout
+openout graphics/objects/chkpnt3.bin openin concept/objects/chkpnt3.bmp sprite 0 1 4 2 closein closeout
+openout graphics/objects/chkpnt4.bin openin concept/objects/chkpnt4.bmp sprite 0 1 4 2 closein closeout
+openout graphics/objects/chkpnt5.bin openin concept/objects/chkpnt5.bmp sprite 0 1 4 2 closein closeout
+openout graphics/objects/chkpnt6.bin openin concept/objects/chkpnt6.bmp sprite 0 1 4 2 closein closeout
+openout graphics/objects/chkpnt7.bin openin concept/objects/chkpnt7.bmp sprite 0 1 4 2 closein closeout
+openout graphics/objects/chkpnt8.bin openin concept/objects/chkpnt8.bmp sprite 0 1 4 2 closein closeout
+openout graphics/objects/chkpnt9.bin openin concept/objects/chkpnt9.bmp sprite 0 1 4 2 closein closeout
+openout graphics/objects/chkpnt10.bin openin concept/objects/chkpnt10.bmp sprite 0 1 4 2 closein closeout
+openout graphics/objects/chkpnt11.bin openin concept/objects/chkpnt11.bmp sprite 0 1 4 2 closein closeout
+openout graphics/objects/chkpnt12.bin openin concept/objects/chkpnt12.bmp sprite 0 1 4 2 closein closeout
+openout graphics/objects/chkpnt13.bin openin concept/objects/chkpnt13.bmp sprite 0 1 4 2 closein closeout
+openout graphics/objects/chkpnt14.bin openin concept/objects/chkpnt14.bmp sprite 0 1 4 2 closein closeout
+openout graphics/objects/chkpnt15.bin openin concept/objects/chkpnt15.bmp sprite 0 1 4 2 closein closeout
+openout graphics/objects/chkpnt16.bin openin concept/objects/chkpnt16.bmp sprite 0 1 4 2 closein closeout
+openout graphics/objects/chkpnt17.bin openin concept/objects/chkpnt17.bmp sprite 0 1 4 2 closein closeout
+
+openout graphics/objects/endbut.bin
+openin concept/objects/endbut1.bmp
+sprite 0 1 4 1
+sprite 0 3 4 1
+sprite 2 0 2 1
+sprite 2 2 2 1
+closein
+openin concept/objects/endbut2.bmp
+sprite 2 0 2 1
+sprite 2 2 2 1
+closein
+closeout
+
+openout graphics/objects/endbeam1.bin openin concept/objects/endbeam1.bmp sprite 1 0 1 4 closein closeout
+openout graphics/objects/endbeam2.bin openin concept/objects/endbeam2.bmp sprite 1 0 1 4 closein closeout
+openout graphics/objects/endbeam3.bin openin concept/objects/endbeam3.bmp sprite 0 0 2 4 closein closeout
+openout graphics/objects/endbeam4.bin openin concept/objects/endbeam4.bmp sprite 0 0 2 4 closein closeout
+
+openout graphics/objects/stars.bin
+openin concept/objects/stars.bmp
+sprite 0 0 2 2
+sprite 2 0 2 2
+sprite 4 0 2 2
+sprite 6 0 2 2
+sprite 0 2 2 2
+sprite 2 2 2 2
+sprite 4 2 2 2
+sprite 6 2 2 2
+closein
+closeout
+
+openout graphics/objects/laser.bin openin concept/objects/laser.bmp sprite 0 0 1 4 closein closeout
+
+openout graphics/objects/elecshld.bin
+openin concept/objects/elecshld.bmp
+sprite 0 0 3 4
+sprite 3 0 3 4
+closein
+closeout
+
+openout graphics/objects/icerock1.bin openin concept/objects/icerock1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/icerock2.bin openin concept/objects/icerock2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/icerock3.bin openin concept/objects/icerock3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/icerock4.bin openin concept/objects/icerock4.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/objects/barrier.bin openin concept/objects/barrier.bmp sprite 0 0 1 4 closein closeout
+
+openout graphics/objects/pwrsrc1.bin openin concept/objects/pwrsrc1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/pwrsrc1b.bin openin concept/objects/pwrsrc1b.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/pwrsrc2.bin openin concept/objects/pwrsrc2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/pwrsrc2b.bin openin concept/objects/pwrsrc2b.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/objects/vspark.bin
+openin concept/objects/vspark.bmp
+sprite 0 0 2 4
+sprite 0 4 2 3
+closein
+closeout
+
+palette ??? 2A4 080 060 AAA 888 666 444 000 0CC 0AC 08E 66E 00E 00C 00A
+setmask
+
+openout graphics/objects/captop.bin openin concept/objects/captop.bmp sprite 0 0 3 1 closein closeout
+
+palette ??? 0EE 0CE 0AC 08A 04A 028 ??? ??? ??? ??? ??? 0E8 0A2 080 060
+setmask
+
+openout graphics/objects/cable00.bin openin concept/objects/cable00.bmp sprite 0 0 1 1 closein closeout
+openout graphics/objects/cable10.bin openin concept/objects/cable10.bmp sprite 0 0 1 1 closein closeout
+openout graphics/objects/cable20.bin openin concept/objects/cable20.bmp sprite 0 0 1 1 closein closeout
+openout graphics/objects/cable30.bin openin concept/objects/cable30.bmp sprite 0 0 1 1 closein closeout
+openout graphics/objects/cable40.bin openin concept/objects/cable40.bmp sprite 0 0 1 1 closein closeout
+
+palette ??? CEE AEC 8CA 6A8 EEE EEC ECA CA8 A86 ??? ??? ??? ??? ??? ???
+setmask
+
+openout graphics/objects/stalact.bin
+openin concept/objects/stalact.bmp
+sprite 0 0 2 4
+sprite 2 0 2 4
+closein
+closeout
+
+palette ??? ??? ??? ??? ??? ??? ??? 6AC 48A 268 046 ??? ??? ??? ??? ???
+setmask
+
+openout graphics/objects/wl_tport.bin
+openin concept/objects/wl_tport.bmp
+sprite 0 0 4 2
+closein
+closeout
+
+palette ??? 08C 06A 048 026 004 002 000 0CE 0AE 08E 06E 04E 00E 00C 00A
+setmask
+
+openout graphics/objects/icefloor.bin
+openin concept/objects/icefloor.bmp
+sprite 0 0 4 1
+sprite 0 1 4 1
+closein
+closeout
+
+palette ??? E8E E6C C4A A28 806 CCE 68E 00E 00A 006 000 ??? ??? A8E 0E0
+setmask
+
+openout graphics/objects/bumper1.bin openin concept/objects/bumper1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/bumper2.bin openin concept/objects/bumper2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/bumper3.bin openin concept/objects/bumper3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/bumper4.bin openin concept/objects/bumper4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/bumper5.bin openin concept/objects/bumper5.bmp sprite 0 0 4 4 closein closeout
+
+palette ??? 0EE 0CE 66E 00E 0E0 0C0 0A0 080 ??? ??? ??? ??? ??? ??? ???
+setmask
+
+openout graphics/objects/bumppad.bin openin concept/objects/bumppad.bmp sprite 0 0 4 1 closein closeout
+
+palette ??? 2AA 4CC 6EE ??? ??? ??? ??? ??? ??? ??? ??? ??? ??? ??? ???
+setmask
+
+openout graphics/objects/lghtbulb.bin openin concept/objects/lghtbulb.bmp sprite 0 0 4 3 closein closeout
+
+palette ??? 2AA 4CC 6EE 0AE 08E 06C 04A E00 C00 ECC CAA A88 00E 004 006
+setmask
+
+openout graphics/objects/spinspk1.bin openin concept/objects/spinspk1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/spinspk2.bin openin concept/objects/spinspk2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/spinspk3.bin openin concept/objects/spinspk3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/spinspk4.bin openin concept/objects/spinspk4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/spinspk5.bin openin concept/objects/spinspk5.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/spinspk6.bin openin concept/objects/spinspk6.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/spinspk7.bin openin concept/objects/spinspk7.bmp sprite 0 0 4 4 closein closeout
+openout graphics/objects/spinspk8.bin openin concept/objects/spinspk8.bmp sprite 0 0 4 4 closein closeout
+
+palette ??? 020 040 060 666 888 AAA 04E 00E 00A 008 ??? 80E E08 60C C06
+setmask
+
+openout graphics/objects/vsparkb.bin openin concept/objects/vsparkb.bmp sprite 0 0 3 1 closein closeout

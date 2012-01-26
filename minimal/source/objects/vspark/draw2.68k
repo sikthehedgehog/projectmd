@@ -1,0 +1,105 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------;
+; DrawVSparkEmit2                          ;
+;                                          ;
+; Draws a vertical spark emitter (ceiling) ;
+;------------------------------------------;
+
+DrawVSparkEmit2:
+
+;-----------;
+; Draw base ;
+;-----------;
+
+    move.w  Object_X(a0), d0
+    move.w  Object_Y(a0), d1
+    add.w   #128+4, d0
+    add.w   #128, d1
+    sub.w   (RAM_Scroll), d0
+
+    move.w  #$3000|VRAM_VSparkBase, d2
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @NoBlink
+    bset.l  #11, d2
+@NoBlink:
+
+    moveq   #%1000, d3
+    bsr     AddSprite
+
+;----------------;
+; Spark visible? ;
+;----------------;
+
+    move.w  (RAM_GlobalAnim2), d0
+    sub.w   Object_X(a0), d0
+    and.w   #$80, d0
+    bne.s   @End
+
+;--------;
+; Blink! ;
+;--------;
+
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    bne.s   @End
+
+;---------------------------;
+; Check which sprite to use ;
+;---------------------------;
+
+    move.w  #$1000|VRAM_VSpark, d2
+    btst.b  #2, (RAM_GlobalAnim+1)
+    beq.s   @NoFlip
+    bset.l  #11, d2
+@NoFlip:
+
+;------------------------------;
+; Calculate sprite coordinates ;
+;------------------------------;
+
+    move.w  Object_X(a0), d0
+    move.w  Object_Y(a0), d1
+    add.w   #128+8, d0
+    add.w   #128+32, d1
+    sub.w   (RAM_Scroll), d0
+
+;----------------------;
+; Put sprite on screen ;
+;----------------------;
+
+    moveq   #%0111, d3
+    bsr     AddSprite
+
+    sub.w   #24, d1
+    addq.w  #8, d2
+    moveq   #%0110, d3
+    bsr     AddSprite
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

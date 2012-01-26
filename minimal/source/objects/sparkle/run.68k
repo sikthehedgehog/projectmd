@@ -1,0 +1,78 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------------------------;
+; RunSparkle                           ;
+;                                      ;
+; Game logic code for rhombus sparkles ;
+;--------------------------------------;
+
+RunSparkle:
+    move.l  (RAM_GlobalAnimSpd), d0
+    move.w  Object_MapPos(a0), d1
+
+;-------------------;
+; Move horizontally ;
+;-------------------;
+
+    move.l  Object_X(a0), d2
+    btst.l  #0, d1
+    bne.s   @MoveLeft
+    add.l   d0, d2
+    bra.s   @MovedX
+@MoveLeft:
+    sub.l   d0, d2
+@MovedX:
+    move.l  d2, Object_X(a0)
+
+;-----------------;
+; Move vertically ;
+;-----------------;
+
+    move.l  Object_Y(a0), d2
+    btst.l  #1, d1
+    bne.s   @MoveUp
+    add.l   d0, d2
+    bra.s   @MovedY
+@MoveUp:
+    sub.l   d0, d2
+@MovedY:
+    move.l  d2, Object_Y(a0)
+    
+;---------------------;
+; Check if we're done ;
+;---------------------;
+
+    move.l  Object_Misc(a0), d1
+    sub.l   d0, d1
+    move.l  d1, Object_Misc(a0)
+    bgt.s   @End
+    bra     DeleteObjectPermanent
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

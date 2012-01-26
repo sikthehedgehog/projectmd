@@ -1,0 +1,20 @@
+palette ??? EEE ??? ??? 8AE 68E 000 0EE EA6 E60 08E 00E 00A 0E0 0A0 060
+setmask
+
+openout graphics/xor/spin1.bin openin concept/xor/spin1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/xor/spin2.bin openin concept/xor/spin2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/xor/spin3.bin openin concept/xor/spin3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/xor/spin4.bin openin concept/xor/spin4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/xor/spin5.bin openin concept/xor/spin5.bmp sprite 0 0 4 4 closein closeout
+openout graphics/xor/spin6.bin openin concept/xor/spin6.bmp sprite 0 0 4 4 closein closeout
+openout graphics/xor/spin7.bin openin concept/xor/spin7.bmp sprite 0 0 4 4 closein closeout
+openout graphics/xor/spin8.bin openin concept/xor/spin8.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/xor/dead.bin
+openin concept/xor/dead.bmp
+sprite 0 0 2 2
+sprite 2 0 2 2
+sprite 0 2 2 2
+sprite 2 2 2 2
+closein
+closeout

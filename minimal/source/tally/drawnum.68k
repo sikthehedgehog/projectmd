@@ -1,0 +1,115 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+; INPUT
+;   d0.w ... X coordinate
+;   d1.w ... Y coorindate
+;   d2.l ... Number to print
+; BREAKS: all
+
+DrawTallyNumber:
+
+;-----;
+; ... ;
+;-----;
+
+    lea     ($C00004), a4
+    lea     ($C00000), a5
+
+;-----------------;
+; Draw first line ;
+;-----------------;
+
+    move.l  d2, a0
+    moveq   #0, d7
+    move.w  d1, d7
+    lsl.w   #6, d7
+    add.w   d0, d7
+    add.w   d7, d7
+    swap    d7
+    or.l    #$40000003, d7
+    move.l  d7, (a4)
+    moveq   #0, d7
+    bsr     @DoIt
+
+;------------------;
+; Draw second line ;
+;------------------;
+
+    move.l  a0, d2
+    addq.w  #1, d1
+    moveq   #0, d7
+    move.w  d1, d7
+    lsl.w   #6, d7
+    add.w   d0, d7
+    add.w   d7, d7
+    swap    d7
+    or.l    #$40000003, d7
+    move.l  d7, (a4)
+    moveq   #1, d7
+
+;-------------------------------;
+; Actual code that prints stuff ;
+;-------------------------------;
+
+@DoIt:
+
+;---------------------;
+; Skip leading zeroes ;
+;---------------------;
+
+    moveq   #7-1, d6
+@SkipZeroes:
+    rol.l   #4, d2
+    move.w  d2, d3
+    and.w   #$F, d3
+    bne.s   @NoZeroes
+    move.l  #0, (a5)
+    dbf     d6, @SkipZeroes
+    rol.l   #4, d2
+@NoZeroes:
+
+;-------------;
+; Draw digits ;
+;-------------;
+
+    addq.w  #1, d6
+@Loop:
+    move.w  d2, d3
+    and.w   #$F, d3
+    add.w   d3, d3
+    add.w   d3, d3
+    add.w   #VRAM_TallyFont, d3
+    add.w   d7, d3
+    move.w  d3, (a5)
+    addq.w  #2, d3
+    move.w  d3, (a5)
+    rol.l   #4, d2
+    dbf     d6, @Loop
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

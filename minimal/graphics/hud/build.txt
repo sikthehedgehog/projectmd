@@ -1,0 +1,48 @@
+palette ??? ??? ??? ??? ??? ??? 000 ??? ??? ??? ??? ??? ??? 0E0 0A0 060
+setmask
+
+openout graphics/hud/numbers.bin
+openin concept/hud/numbers.bmp
+sprite 0 0 10 2
+closein
+closeout
+
+openout graphics/hud/energy.bin
+openin concept/hud/energy.bmp
+sprite 0 0 4 2
+closein
+closeout
+
+openout graphics/hud/cross.bin
+openin concept/hud/cross.bmp
+sprite 0 0 1 2
+closein
+closeout
+
+openout graphics/hud/border.bin
+openin concept/hud/border.bmp
+sprite 0 0 1 2
+sprite 0 0 1 2
+closein
+closeout
+
+openin concept/hud/pause.bmp
+openout graphics/hud/pcont.bin
+sprite 0 0 8 2
+sprite 0 6 8 2
+sprite 0 12 8 2
+closeout
+openout graphics/hud/prest.bin
+sprite 0 2 8 2
+sprite 0 8 8 2
+sprite 0 14 8 2
+closeout
+openout graphics/hud/pexit.bin
+sprite 2 4 4 2
+sprite 2 10 4 2
+sprite 2 16 4 2
+closeout
+openout graphics/hud/pausebg.bin
+sprite 0 4 2 2
+closeout
+closein

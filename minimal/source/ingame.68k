@@ -1,0 +1,736 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------------;
+; Initialization function for the in-game mode ;
+;----------------------------------------------;
+
+InGameInit:
+
+;-------------;
+; Clear stuff ;
+;-------------;
+
+    move.l  #0, (RAM_Score)
+    move.b  #$03, (RAM_Lives)
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------;
+; Function for the main in-game mode     ;
+; Here is where the actual game happens! ;
+;----------------------------------------;
+
+InGame:
+    
+;-----------;
+; Start BGM ;
+;-----------;
+
+    moveq   #0, d0
+    move.b  (RAM_Level), d0
+    lea     (BGMOrder), a0
+    move.b  (a0,d0.w), (RAM_BGMToPlay)
+    bsr     UpdateSound
+
+;-----------------;
+; Show title card ;
+;-----------------;
+
+    moveq   #0, d0
+    move.b  (RAM_Level), d0
+    add.w   d0, d0
+    add.w   d0, d0
+    add.w   d0, d0
+    lea     (@TitleList), a1
+    lea     (a1,d0.w), a1
+
+    move.l  (a1)+, a0
+    move.l  (a1), a1
+    bsr     LEDScreen
+
+;------------------------------------;
+; Initialize first-time level status ;
+;------------------------------------;
+
+    move.w  #-1, (RAM_CheckPoint)
+    move.l  #0, (RAM_LevelTime)
+@NoLevelInit:
+
+;--------------------;
+; Reset status flags ;
+;--------------------;
+
+    move.w  #%000, (RAM_GameStatus)
+    move.w  #%0100001, (RAM_IngameStatus)
+
+;------------------;
+; Set no hit flag? ;
+;------------------;
+
+    tst.l   (RAM_LevelTime)
+    bne.s   @DontSetNoHit
+    bset.b  #IngameStat_NoHit, (RAM_IngameStatus+1)
+@DontSetNoHit:
+
+;-------------------;
+; Initialize fading ;
+;-------------------;
+
+    move.l  #7<<16, (RAM_FadeStage)
+    move.l  (RAM_GlobalAnimSpd), d0
+    asr.l   #1, d0
+    move.l  d0, (RAM_FadeSpeed)
+
+;----------------------;
+; Set up VDP registers ;
+;----------------------;
+
+    lea     ($C00004), a0
+
+    move.w  #$8230, (a0)    ; Tilemap A: $C000
+    move.w  #$8407, (a0)    ; Tilemap B: $E000
+    move.w  #$857E, (a0)    ; Sprite table: $FC00
+    move.w  #$8B00, (a0)    ; No IRQ2, full VScroll, full HScroll
+    move.w  #$8D3E, (a0)    ; HScroll table: $F800
+    move.w  #$9011, (a0)    ; Tilemap size: 64x64
+
+;--------------------;
+; Clear sprite table ;
+;--------------------;
+
+    bsr     ClearSprites
+    bsr     UpdateSprites
+    bsr     FlushVDPBuffer
+
+;----------------------------------------;
+; Clear VScroll (since it's always at 0) ;
+;----------------------------------------;
+
+    move.l  #$40000010, ($C00004)
+    move.l  #0, ($C00000)
+    move.l  #0, (RAM_VScrBuffer)
+
+;------------;
+; Clear CRAM ;
+;------------;
+
+    move.l  #$C0000000, (a4)
+    moveq   #0, d0
+    moveq   #($40/8)-1, d1
+@ClearCRAM:
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    dbf     d1, @ClearCRAM
+
+;--------------------------------;
+; Reset global animation counter ;
+;--------------------------------;
+
+    move.l  #0, (RAM_GlobalAnim)
+    move.l  #0, (RAM_GlobalAnim2)
+
+;------------------;
+; Initialize level ;
+;------------------;
+
+    bsr     InitLevel
+
+;-------------------;
+; Initialize player ;
+;-------------------;
+
+    bsr     InitPlayer
+
+;----------------;
+; Initialize HUD ;
+;----------------;
+
+    bsr     InitHUD
+
+;------------------------------------------;
+; Load graphics for common in-game objects ;
+;------------------------------------------;
+
+    bsr     FlushVDPBuffer
+
+    FixedDMA Gfx_Player_Idle1, VRAM_Player*$20, 16*$20
+    FixedDMA Gfx_Rhombus, VRAM_Rhombus*$20, 5*4*$20
+    FixedDMA Gfx_RayPowerup, VRAM_RayPowerup*$20, 4*6*$20
+    FixedDMA Gfx_BombPowerup, VRAM_BombPowerup*$20, 3*9*$20
+    FixedDMA Gfx_LovePowerup, VRAM_LovePowerup*$20, 4*$20*2
+    FixedDMA Gfx_DJumpPowerup, VRAM_DJumpPowerup*$20, 4*$20*8
+    FixedDMA Gfx_Player_Heart, VRAM_Player_Heart*$20, 4*$20*8
+    FixedDMA Gfx_1up, VRAM_1up*$20, 4*$20*3
+    FixedDMA Gfx_Spark, VRAM_Spark*$20, 16*$20
+    FixedDMA Gfx_ThinBlock, VRAM_ThinBlock*$20, 4*$20
+    FixedDMA Gfx_EndButton, VRAM_EndButton*$20, (4+2+2)*2*$20
+    FixedDMA Gfx_EndBeam, VRAM_EndBeam*$20, (1+1+2+2)*4*$20
+    FixedDMA Gfx_Stars, VRAM_Stars*$20, 4*8*$20
+    FixedDMA Gfx_ElectricShield, VRAM_ElectricShield*$20, 24*$20
+
+    bsr     FlushVDPBuffer
+
+;----------------------------------------------;
+; Put main sprites palette into palette buffer ;
+;----------------------------------------------;
+
+    lea     (Pal_MainSprites), a0
+    lea     (RAM_PalBuffer), a1
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+
+;--------------------------;
+; Flush VDP command buffer ;
+;--------------------------;
+
+    bsr     FlushVDPBuffer
+
+;-----------------;
+; Turn on display ;
+;-----------------;
+
+    ;move.w  #$8154, ($C00004)
+
+;----------------------------------------------------------------------------
+
+;-----------;
+; Main loop ;
+;-----------;
+
+@MainLoop:
+
+;---------------;
+; Update fading ;
+;---------------;
+
+    bsr     Fade
+
+;-------------------;
+; Read joypad input ;
+;-------------------;
+
+    bsr     ReadJoypad
+
+;------------------------------------;
+; Pause the game when pressing Start ;
+;------------------------------------;
+
+    btst.b  #7, (RAM_JoypadPress)
+    beq.s   @DontPause
+    bchg.b  #IngameStat_Pause, (RAM_IngameStatus+1)
+    bne.s   @DontPause
+    move.b  #SFXStop, (RAM_SFXToPlay)
+@DontPause:
+
+;----------------;
+; Debug controls ;
+;----------------;
+
+    btst.b  #IngameStat_Pause, (RAM_IngameStatus+1)
+    beq.s   @NoDebugControls
+    btst.b  #6, (RAM_JoypadPress)
+    beq.s   @NoDebugControls
+    
+    move.w  #$8114, ($C00004)
+    move.w  #$8C81, ($C00004)
+    move.b  #GameMode_LvlSelect, (RAM_GameMode)
+    move.b  #BGM_LevelSelect, (RAM_BGMToPlay)
+    jmp     SwitchMode
+@NoDebugControls:
+
+;---------------------;
+; Clear sprite buffer ;
+;---------------------;
+
+    bsr     ClearSprites
+
+;----------------;
+; Run game logic ;
+;----------------;
+
+    btst.b  #IngameStat_Pause, (RAM_IngameStatus+1)
+    bne.s   @Paused
+    bsr     RunPlayer
+    bsr     RunObjects
+    bra.s   @LogicDone
+@Paused:
+    bsr     DrawPauseMenu
+    bsr     RunObjects
+@LogicDone:
+
+    move.b  (RAM_Player+Player_Energy), d0
+    cmp.b   #3, d0
+    beq.s   @DontUnsetNoHit
+    bclr.b  #IngameStat_NoHit, (RAM_IngameStatus+1)
+@DontUnsetNoHit:
+
+;-----------------------------;
+; Calculate scroll coordinate ;
+;-----------------------------;
+
+    move.w  (RAM_Player+Player_X), d0
+    sub.w   #160, d0
+
+    bge.s   @NotTooLeft
+    moveq   #0, d0
+@NotTooLeft:
+
+    move.w  (RAM_MaxScroll), d1
+    cmp.w   d1, d0
+    ble.s   @NotTooRight
+    move.w  d1, d0
+@NotTooRight:
+
+;------------------------;
+; Update level if needed ;
+;------------------------;
+
+    move.w  d0, d1
+    move.w  (RAM_Scroll), d2
+    and.w   #$FFE0, d1
+    and.w   #$FFE0, d2
+    cmp.w   d2, d1
+    beq.s   @NoLevelUpdate
+    blt.s   @LevelUpdateLeft
+
+    move.w  d0, -(sp)
+    lsr.w   #5, d0
+    add.w   #11, d0
+    bsr     ProcessLevelColumn
+    move.w  (sp)+, d0
+    bra.s   @NoLevelUpdate
+
+@LevelUpdateLeft:
+    move.w  d0, -(sp)
+    lsr.w   #5, d0
+    subq.w  #1, d0
+    bsr     ProcessLevelColumn
+    move.w  (sp)+, d0
+
+@NoLevelUpdate:
+
+;---------------------;
+; Update scroll value ;
+;---------------------;
+
+    move.w  d0, (RAM_Scroll)
+
+;------------------------;
+; Determine some sprites ;
+;------------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+    move.w  (RAM_GameStatus), d3
+
+    move.w  d0, d1
+    lsr.w   #2, d1
+    and.w   #7, d1
+    add.w   d1, d1
+    lea     (@RhombusPattern), a6
+    move.w  (a6,d1.w), d1
+    btst.l  #GameStat_Blink, d3
+    beq.s   @NoRhombusFlip
+    bset.l  #11, d1
+@NoRhombusFlip:
+    cmp.b   #Level_Light, (RAM_Level)
+    bne.s   @NoRhombusDarken
+    bclr.l  #15, d1
+@NoRhombusDarken:
+    move.w  d1, (RAM_RhombusGfx)
+
+    move.w  #$8000|VRAM_Pulse, d1
+    btst.l  #2, d0
+    beq.s   @DontFlipPulse
+    bset.l  #12, d1
+@DontFlipPulse:
+    move.w  d1, (RAM_PulseGfx)
+
+    move.w  #$8000|VRAM_RayPowerup, d1
+    move.w  d0, d2
+    and.w   #$3E, d2
+    cmp.w   #$08, d2
+    bge.s   @NoRayShine
+    lea     (@RayPattern), a6
+    move.w  (a6,d2.w), d1
+@NoRayShine:
+    cmp.b   #Level_Light, (RAM_Level)
+    bne.s   @NoRayDarken
+    bclr.l  #15, d1
+@NoRayDarken:
+    move.w  d1, (RAM_RayGfx)
+
+    move.w  #$8000|VRAM_BombPowerup, d1
+    btst.l  #GameStat_Blink, d3
+    bne.s   @BombBlink
+    add.w   #9, d1
+    btst.l  #2, d0
+    beq.s   @BombBlink
+    add.w   #9, d1
+@BombBlink:
+    cmp.b   #Level_Light, (RAM_Level)
+    bne.s   @NoBombDarken
+    bclr.l  #15, d1
+@NoBombDarken:
+    move.w  d1, (RAM_BombGfx)
+
+    move.w  #$8000|VRAM_DJumpPowerup, d1
+    btst.l  #GameStat_Blink, d3
+    bne.s   @DJumpBlink
+    bset.l  #11, d1
+@DJumpBlink:
+    move.w  d0, d2
+    and.w   #$7<<2, d2
+    add.w   d2, d1
+    cmp.b   #Level_Light, (RAM_Level)
+    bne.s   @NoDJumpDarken
+    bclr.l  #15, d1
+@NoDJumpDarken:
+    move.w  d1, (RAM_DJumpGfx)
+
+    move.w  #$8000|VRAM_ThinBlock, d1
+    btst.l  #GameStat_Blink, d3
+    beq.s   @DontFlipThinBlock
+    bset.l  #11, d1
+@DontFlipThinBlock:
+    move.w  d1, (RAM_ThinBlockGfx)
+
+    move.w  #$A000|VRAM_Stalactite, d1
+    btst.l  #GameStat_Blink, d3
+    beq.s   @DontFlipStalactite
+    addq.w  #8, d1
+@DontFlipStalactite:
+    move.w  d1, (RAM_StalactiteGfx)
+
+    move.w  d0, d1
+    add.w   d1, d1
+    add.w   d1, d1
+    add.w   d1, d1
+    and.w   #$3<<4, d1
+    add.w   #$8000|VRAM_IceRock, d1
+    move.w  d1, (RAM_IceRockGfx)
+
+    move.w  d0, d1
+    lea     (@StarsPattern), a0
+    lea     (RAM_StarsGfx+8), a1
+    and.w   #$0F<<1, d1
+    move.w  (a0,d1.w), -(a1)
+    addq.w  #8, d1
+    and.w   #$0F<<1, d1
+    move.w  (a0,d1.w), -(a1)
+    addq.w  #8, d1
+    and.w   #$0F<<1, d1
+    move.w  (a0,d1.w), -(a1)
+    addq.w  #8, d1
+    and.w   #$0F<<1, d1
+    move.w  (a0,d1.w), -(a1)
+
+;---------------------;
+; Animate checkpoints ;
+;---------------------;
+
+    btst.b  #IngameStat_AnimChk, (RAM_IngameStatus+1)
+    bne.s   @AnimateCheckPoint
+    moveq   #0, d0
+@AnimateCheckPoint:
+
+    add.w   d0, d0
+    add.w   d0, d0
+    and.w   #$1F<<2, d0
+    lea     (@CheckPointPattern), a0
+    lea     (a0,d0.w), a0
+    moveq   #0, d7
+    move.w  (a0)+, d7
+    add.l   #Gfx_CheckPoint, d7
+    VarSrcDMA VRAM_CheckPoint*$20, 8*$20
+
+    move.w  (a0)+, (RAM_CheckPointGfx)
+
+;------------;
+; Draw stuff ;
+;------------;
+
+    bsr     DrawHUD
+    bsr     DrawPlayer
+    bsr     DrawObjects
+
+;--------------------------------;
+; Level-specific update function ;
+;--------------------------------;
+
+    move.l  (RAM_UpdateFunc), a0
+    jsr     (a0)
+
+;----------------------;
+; Update sprite buffer ;
+;----------------------;
+
+    bsr     UpdateSprites
+
+;------------;
+; Next frame ;
+;------------;
+
+    bsr     VSync
+    bsr     FlushVDPBuffer
+    jsr     (UpdateSound).w
+
+    bchg.b  #GameStat_Blink, (RAM_GameStatus+1)
+
+    move.w  (RAM_IngameStatus), d7
+    btst.l  #IngameStat_Pause, d7
+    bne.s   @DontAnimWhilePaused
+
+    move.l  (RAM_GlobalAnimSpd), d1
+    add.l   d1, (RAM_GlobalAnim)
+
+    move.l  (RAM_LevelTime), d0
+    add.l   d1, d0
+    bge.s   @NoTimeFix
+    move.l  #$7FFFFFFF, d0
+@NoTimeFix:
+    move.l  d0, (RAM_LevelTime)
+
+    tst.b   (RAM_Player+Player_PowerDelay)
+    bne.s   @DontIncGlobalAnim2
+    add.l   d1, (RAM_GlobalAnim2)
+@DontIncGlobalAnim2:
+@DontAnimWhilePaused:
+
+    btst.l  #IngameStat_Quit, d7
+    beq.s   @DontQuit
+    tst.w   (RAM_FadeStage)
+    bne.s   @DontQuit
+    bra.s   @Quit
+@DontQuit:
+
+    bra.w   @MainLoop
+
+;----------------------------------------------------------------------------
+
+;-----------------------;
+; Quitting in-game mode ;
+;-----------------------;
+
+@Quit:
+
+;-----------------;
+; Disable display ;
+;-----------------;
+
+    move.w  #$8114, ($C00004)
+    move.w  #$8C81, ($C00004)
+
+;------------;
+; Game over? ;
+;------------;
+
+    tst.b   (RAM_Lives)
+    beq.s   @GameOver
+
+;-------------------------;
+; Jump into new game mode ;
+;-------------------------;
+
+    move.b  #GameMode_InGame, (RAM_GameMode)
+    tst.b   (RAM_Player+Player_Energy)
+    beq     @NoLevelInit
+    move.b  #GameMode_Tally, (RAM_GameMode)
+@NotFinished:
+    jmp     SwitchMode
+
+;----------------------------------------------------------------------------
+
+;--------------;
+; Game over :| ;
+;--------------;
+
+@GameOver:
+
+;-------------;
+; Show screen ;
+;-------------;
+
+	move.b  #BGM_GameOver, (RAM_BGMToPlay) 
+    lea     (@GameOverStr1), a0
+    lea     (@GameOverStr2), a1
+    bsr     LEDScreen
+
+;--------------;
+; Restart game ;
+;--------------;
+
+    move.b  #GameMode_Intro, (RAM_GameMode)
+    jmp     SwitchMode
+
+;----------------------------------------------------------------------------
+
+;---------------------------;
+; Rhombus animation pattern ;
+;---------------------------;
+
+@RhombusPattern:
+    dc.w    $8000|VRAM_Rhombus
+    dc.w    $8000|(VRAM_Rhombus+4)
+    dc.w    $8000|(VRAM_Rhombus+8)
+    dc.w    $8000|(VRAM_Rhombus+12)
+    dc.w    $8000|(VRAM_Rhombus+16)
+    dc.w    $8000|(VRAM_Rhombus+12)
+    dc.w    $8000|(VRAM_Rhombus+8)
+    dc.w    $8000|(VRAM_Rhombus+4)
+
+;--------------------------------;
+; Ray power-up animation pattern ;
+;--------------------------------;
+
+@RayPattern:
+    dc.w    $8000|VRAM_RayPowerup
+    dc.w    $8000|(VRAM_RayPowerup+6)
+    dc.w    $8000|(VRAM_RayPowerup+12)
+    dc.w    $8000|(VRAM_RayPowerup+18)
+
+;-------------------------;
+; Stars animation pattern ;
+;-------------------------;
+
+@StarsPattern:
+    dc.w    $8000|VRAM_Stars
+    dc.w    $8000|(VRAM_Stars+4)
+    dc.w    $8000|(VRAM_Stars+8)
+    dc.w    $8000|(VRAM_Stars+12)
+    dc.w    $8000|(VRAM_Stars+16)
+    dc.w    $8000|(VRAM_Stars+20)
+    dc.w    $8000|(VRAM_Stars+24)
+    dc.w    $8000|(VRAM_Stars+28)
+    dc.w    $8000|(VRAM_Stars+28)
+    dc.w    $8000|(VRAM_Stars+24)
+    dc.w    $8000|(VRAM_Stars+20)
+    dc.w    $8000|(VRAM_Stars+16)
+    dc.w    $8000|(VRAM_Stars+12)
+    dc.w    $8000|(VRAM_Stars+8)
+    dc.w    $8000|(VRAM_Stars+4)
+    dc.w    $8000|VRAM_Stars
+
+;------------------------------;
+; Checkpoint animation pattern ;
+;------------------------------;
+
+@CheckPointPattern:
+    dc.w    8*$20*0, $8000|VRAM_CheckPoint
+    dc.w    8*$20*1, $8000|VRAM_CheckPoint
+    dc.w    8*$20*2, $8000|VRAM_CheckPoint
+    dc.w    8*$20*3, $8000|VRAM_CheckPoint
+    dc.w    8*$20*4, $8000|VRAM_CheckPoint
+    dc.w    8*$20*5, $8000|VRAM_CheckPoint
+    dc.w    8*$20*6, $8000|VRAM_CheckPoint
+    dc.w    8*$20*7, $8000|VRAM_CheckPoint
+
+    dc.w    8*$20*8, $8000|VRAM_CheckPoint
+    dc.w    8*$20*7, $8800|VRAM_CheckPoint
+    dc.w    8*$20*6, $8800|VRAM_CheckPoint
+    dc.w    8*$20*5, $8800|VRAM_CheckPoint
+    dc.w    8*$20*4, $8800|VRAM_CheckPoint
+    dc.w    8*$20*3, $8800|VRAM_CheckPoint
+    dc.w    8*$20*2, $8800|VRAM_CheckPoint
+    dc.w    8*$20*1, $8800|VRAM_CheckPoint
+
+    dc.w    8*$20*0, $8800|VRAM_CheckPoint
+    dc.w    8*$20*9, $8800|VRAM_CheckPoint
+    dc.w    8*$20*10, $8800|VRAM_CheckPoint
+    dc.w    8*$20*11, $8800|VRAM_CheckPoint
+    dc.w    8*$20*12, $8800|VRAM_CheckPoint
+    dc.w    8*$20*13, $8800|VRAM_CheckPoint
+    dc.w    8*$20*14, $8800|VRAM_CheckPoint
+    dc.w    8*$20*15, $8800|VRAM_CheckPoint
+
+    dc.w    8*$20*16, $8000|VRAM_CheckPoint
+    dc.w    8*$20*15, $8000|VRAM_CheckPoint
+    dc.w    8*$20*14, $8000|VRAM_CheckPoint
+    dc.w    8*$20*13, $8000|VRAM_CheckPoint
+    dc.w    8*$20*12, $8000|VRAM_CheckPoint
+    dc.w    8*$20*11, $8000|VRAM_CheckPoint
+    dc.w    8*$20*10, $8000|VRAM_CheckPoint
+    dc.w    8*$20*9, $8000|VRAM_CheckPoint
+
+;----------------------------------------------------------------------------
+
+;--------------------;
+; Title card strings ;
+;--------------------;
+
+@TitleList:
+    dc.l    @Title_3D1,                 @Title_3D2
+    dc.l    @Title_Motherboard1,        @Title_Motherboard2
+    dc.l    @Title_Logic1,              @Title_Logic2
+    dc.l    @Title_Memory1,             @Title_Memory2
+    dc.l    @Title_Shape1,              @Title_Shape2
+    dc.l    @Title_VDP1,                @Title_VDP2
+    dc.l    @Title_BossBinary1,         @Title_BossBinary2
+    dc.l    @Title_Light1,              @Title_Light2
+    dc.l    @Title_Internet1,           @Title_Internet2
+    dc.l    @Title_Tray1,               @Title_Tray2
+    dc.l    @Title_BossTray1,               @Title_BossTray2
+    dc.l    @Title_Waterlava1,          @Title_Waterlava2
+
+@Title_3D1:                 dc.b ' INFINITE',0
+@Title_3D2:                 dc.b '      FIELD',0
+@Title_Motherboard1:        dc.b 'ELECTRONIC',0
+@Title_Motherboard2:        dc.b '     MADNESS',0
+@Title_Logic1:              dc.b '  GATE',0
+@Title_Logic2:              dc.b '     ARRAY',0
+@Title_Memory1:             dc.b ' FROZEN',0
+@Title_Memory2:             dc.b '   MEMORIES',0
+@Title_Shape1:              dc.b '  CRAZY',0
+@Title_Shape2:              dc.b '    SHAPES',0
+@Title_VDP1:                dc.b 'PIXELATED',0
+@Title_VDP2:                dc.b '       WORLD',0
+@Title_BossBinary1:         dc.b '  BINARY',0
+@Title_BossBinary2:         dc.b '      FURY',0
+@Title_Light1:              dc.b ' BRIGHT',0
+@Title_Light2:              dc.b '   DARKNESS',0
+@Title_Internet1:           dc.b ' ETHER',0
+@Title_Internet2:           dc.b '    NETWORK',0
+@Title_Tray1:               dc.b 'MECHANICAL',0
+@Title_Tray2:               dc.b '       HEART',0
+@Title_BossTray1:           dc.b ' DANGEROUS',0
+@Title_BossTray2:           dc.b '      GEARS',0
+@Title_Waterlava1:          dc.b '   WATER',0
+@Title_Waterlava2:          dc.b '     LAVA',0
+
+    even
+
+;-------------------;
+; Game Over strings ;
+;-------------------;
+
+@GameOverStr1:      dc.b '   GAME',0
+@GameOverStr2:      dc.b '     OVER',0
+
+;----------------------------------------------------------------------------

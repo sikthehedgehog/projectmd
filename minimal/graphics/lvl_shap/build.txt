@@ -1,0 +1,56 @@
+palette 000 00E 04E 0C0 0A0 080 060 040 EA6 C84 A62 840 620 008 06E 08E
+
+openout graphics/lvl_shap/bgscroll.bin
+openin concept/lvl_shap/bgscroll.bmp
+sprite 0 0 8 2
+sprite 0 2 8 2
+sprite 0 4 8 2
+sprite 0 6 8 2
+sprite 0 8 8 2
+sprite 0 10 8 2
+sprite 0 12 8 2
+sprite 0 14 8 2
+closein
+closeout
+
+openout graphics/lvl_shap/gfx.tmp
+
+openin concept/lvl_shap/_background.bmp
+scroll 0 0 16 1
+scroll 0 1 7 1
+scroll 8 1 8 1
+scroll 8 1 8 1
+closein
+
+palette ??? E8E E6C C4A A28 806 CCE 68E 00E 00A 006 000 ??? ??? A8E 0E0
+setmask
+
+openin concept/lvl_shap/_tilemap_pal2.bmp
+scroll 0 0 16 2
+scroll 0 2 10 1
+closein
+
+palette ??? 00E 04E 0C0 0A0 080 060 040 EA6 C84 A62 840 620 008 06E 08E
+setmask
+
+openin concept/lvl_shap/_tilemap_pal3.bmp
+scroll 0 0 2 1
+closein
+
+palette ??? 0EE 0CE 66E 00E 0E0 0C0 080 060 ??? ??? ??? ??? ??? ??? ???
+setmask
+
+openin concept/lvl_shap/_tilemap_pal4.bmp
+scroll 0 0 2 1
+closein
+
+closeout
+
+palette ??? E8E E6C C4A A28 806 CCE 68E 00E 00A 006 000 ??? ??? A8E 0E0
+setmask
+
+openout graphics/lvl_shap/platform.bin
+openin concept/lvl_shap/platform.bmp
+sprite 0 0 4 2
+closein
+closeout

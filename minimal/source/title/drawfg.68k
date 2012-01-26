@@ -1,0 +1,102 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------;
+; Draws the title screen foreground ;
+;-----------------------------------;
+
+DrawTitleFG:
+
+;------------------------;
+; Clear plane A contents ;
+;------------------------;
+
+    moveq   #0, d0
+    move.w  #((64/16)*32)-1, d1
+    move.l  #$40000003, (a4)
+@ClearPlaneA:
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    dbf     d1, @ClearPlaneA
+
+;----------------;
+; Draw "PROJECT" ;
+;----------------;
+
+    lea     (TitlePatterns), a0
+    move.w  #$8000, d3
+    moveq   #3-1, d1
+    move.l  #$42080003, d2
+@DrawProjectV:
+    moveq   #(7*4)-1, d0
+    move.l  d2, (a4)
+@DrawProjectH:
+    move.b  (a0)+, d3
+    move.w  d3, (a5)
+    dbf     d0, @DrawProjectH
+    add.l   #$00800000, d2
+    dbf     d1, @DrawProjectV
+
+;-----------;
+; Draw "MD" ;
+;-----------;
+
+    moveq   #4-1, d1
+    move.l  #$44340003, d2
+@DrawMDV:
+    moveq   #10-1, d0
+    move.l  d2, (a4)
+@DrawMDH:
+    move.b  (a0)+, d3
+    move.w  d3, (a5)
+    dbf     d0, @DrawMDH
+    add.l   #$00800000, d2
+    dbf     d1, @DrawMDV
+
+;----------------;
+; Draw copyright ;
+;----------------;
+
+    move.l  #$4D3A0003, (a4)
+    move.w  #$A000|(VRAM_TitleCopy+0), (a5)     ; (C)
+    move.w  #$A000|(VRAM_TitleCopy+1), (a5)     ; 2
+    move.w  #$A000|(VRAM_TitleCopy+2), (a5)     ; 0
+    move.w  #$A000|(VRAM_TitleCopy+3), (a5)     ; 1
+    move.w  #$A000|(VRAM_TitleCopy+1), (a5)     ; 2
+    move.w  #$0000, (a5)                        ;
+    move.w  #$A000|(VRAM_TitleCopy+4), (a5)     ; S
+    move.w  #$A000|(VRAM_TitleCopy+5), (a5)     ; I
+    move.w  #$A000|(VRAM_TitleCopy+6), (a5)     ; K
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

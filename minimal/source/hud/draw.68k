@@ -1,0 +1,205 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------;
+; DrawHUD                 ;
+;                         ;
+; Draws the HUD on screen ;
+;-------------------------;
+; BREAKS: all             ;
+;-------------------------;
+
+DrawHUD:
+
+;-------------------------------;
+; Update HUD graphics if needed ;
+;-------------------------------;
+
+    move.w  (RAM_IngameStatus), d0
+
+    btst.l  #IngameStat_Score, d0
+    beq.s   @NoScoreUpdate
+    bsr     UpdateScoreHUD
+    bclr.l  #IngameStat_Score, d0
+@NoScoreUpdate:
+
+    btst.l  #IngameStat_Lives, d0
+    beq.s   @NoLivesUpdate
+    bsr     UpdateLivesHUD
+    bclr.l  #IngameStat_Lives, d0
+@NoLivesUpdate:
+
+    move.w  d0, (RAM_IngameStatus)
+
+;-------------;
+; Draw health ;
+;-------------;
+
+    moveq   #0, d0
+    move.b  (RAM_Player+Player_Energy), d0
+    lea     (@EnergyPatterns), a0
+    add.w   d0, d0
+    add.w   d0, d0
+    lea     (a0,d0.w), a0
+
+    move.w  #128+8, d0
+    move.w  #128+8, d1
+    move.w  #$8000|VRAM_HUDBorder, d2
+    moveq   #%0001, d3
+    bsr     AddSprite
+
+    addq.w  #8, d0
+    move.w  (a0)+, d2
+    moveq   #%1101, d3
+    bsr     AddSprite
+    add.w   #32, d0
+    move.w  (a0), d2
+    moveq   #%0101, d3
+    bsr     AddSprite
+
+    add.w   #16, d0
+    move.w  #$9800|VRAM_HUDBorder, d2
+    moveq   #%0001, d3
+    bsr     AddSprite
+
+;-------------------;
+; Draw score        ;
+; Get starting tile ;
+;-------------------;
+
+    moveq   #0, d4
+    move.b  (RAM_ScoreLen), d4
+    add.w   d4, d4
+
+    move.w  #$8000|VRAM_HUDScore, d5
+    add.w   d4, d5
+
+;-------------------------;
+; Get initial coordinates ;
+;-------------------------;
+
+    move.w  d4, d1
+    add.w   d1, d1
+    add.w   d1, d1
+    move.w  #128+304-8-(8*8), d0
+    add.w   d1, d0
+    move.w  #128+8, d1
+
+;------------------;
+; Draw left border ;
+;------------------;
+
+    move.w  #$8000|VRAM_HUDBorder, d2
+    moveq   #%0001, d3
+    bsr     AddSprite
+
+    addq.w  #8, d0
+    move.w  d5, d2
+
+;------------------;
+; Get sprite sizes ;
+;------------------;
+
+    lea     (@ScorePatterns), a0
+    move.b  (a0,d4.w), d3
+    addq.w  #1, d4
+    move.b  (a0,d4.w), d5
+
+;-------------------;
+; Draw first sprite ;
+;-------------------;
+
+    bsr     AddSprite
+
+;------------------------------;
+; Draw second sprite if needed ;
+;------------------------------;
+
+    move.b  d5, d3
+    blt.s   @No2ndSprite
+    add.w   #32, d0
+    addq.w  #8, d2
+    bsr     AddSprite
+@No2ndSprite:
+
+;-------------------;
+; Draw right border ;
+;-------------------;
+
+    move.w  #128+320-16, d0
+    move.w  #$9800|VRAM_HUDBorder, d2
+    moveq   #%0001, d3
+    bsr     AddSprite
+
+;--------------------;
+; Draw lives counter ;
+;--------------------;
+
+    move.w  #$80+8, d0
+    move.w  #$80+224-24, d1
+    move.w  #$8000|VRAM_HUDBorder, d2
+    moveq   #%0001, d3
+    bsr     AddSprite
+
+    addq.w  #8, d0
+    move.w  #$8000|VRAM_HUDLives, d2
+    moveq   #%1001, d3
+    bsr     AddSprite
+
+    add.w   #24, d0
+    move.w  #$9800|VRAM_HUDBorder, d2
+    moveq   #%0001, d3
+    bsr     AddSprite
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------------------------------;
+; Values used to determine the sprites to render in the energy HUD ;
+;------------------------------------------------------------------;
+
+@EnergyPatterns:
+    dc.w    $8000|VRAM_HUDEnergy+8, $8000|VRAM_HUDEnergy+8    ; x0
+    dc.w    $8000|VRAM_HUDEnergy+4, $8000|VRAM_HUDEnergy+8    ; x1
+    dc.w    $8000|VRAM_HUDEnergy, $8000|VRAM_HUDEnergy+8      ; x2
+    dc.w    $8000|VRAM_HUDEnergy, $8000|VRAM_HUDEnergy        ; x3
+
+;-----------------------------------------------------------------;
+; Values used to determine the sprites to render in the score HUD ;
+;-----------------------------------------------------------------;
+
+@ScorePatterns:
+    dc.b    %1101, %1101        ; 8 digits
+    dc.b    %1101, %1001        ; 7 digits
+    dc.b    %1101, %0101        ; 6 digits
+    dc.b    %1101, %0001        ; 5 digits
+    dc.b    %1101, -1           ; 4 digits
+    dc.b    %1001, -1           ; 3 digits
+    dc.b    %0101, -1           ; 2 digits
+    dc.b    %0001, -1           ; 1 digit
+
+;----------------------------------------------------------------------------

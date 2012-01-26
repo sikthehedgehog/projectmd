@@ -1,0 +1,29 @@
+ _____ _____ _____     _ _____ _____ _____     ____ ____ ____
+|  _  |  _  |  _  |   | |  ___|  _  |_   _|   |  _ ' _  |  _ \
+| |_| | |_| | | | |   | | |__ | | |_| | |     | | | | | | | | |
+|  ___|    _| | | |_  | |  __|| |  _  | |     | | | | | | | | |
+| |   | |\ \| |_| | |_| | |___| |_| | | |     | | |_| | | |_| |
+|_|   |_| \_|_____|_____|_____|_____| |_|     |_|     |_|____/
+
+This is the minimal release of Project MD. This is enough source code to
+comply with the GPL, but it's practically impossible to edit the data (unless
+you happen to have suitable tools separately or you like to do hex editing).
+Will provide a full release of the data source files later.
+
+Sadly, you need asm68k to build this, which is proprietary software :/ Other
+assemblers won't work without lots of modifications to the source code (since
+each assembler insists on having its own variant of the syntax), so for now
+this will have to do. Whenever I get time to make a new assembler to replace
+asm68k, I will do it so it can be built with 100% free software.
+
+The build script is for *nix only, sorry, no Windows script :/ You can still
+use it to tell what steps to take to build it, though.
+
+By the way: the compressed files are actually in SLZ format. Project MD was
+developed before SLZ existed, and in fact this is the earliest implementation
+of it (as such, also expect decompression to be slower than in the 68000
+source code provided in mdtools). If you need to replace the data of a
+compressed blob, use SLZ.
+
+The Echo sound engine is a blob in this release. You can get the source code
+for the newest version from http://echo.mdscene.net/

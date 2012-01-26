@@ -1,0 +1,112 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------------;
+; LEDScreenWrite                               ;
+;                                              ;
+; Writes a string in the LED screen            ;
+;----------------------------------------------;
+; INPUT                                        ;
+;   d0.w ... Position in VRAM (as VDP command) ;
+;   a0.l ... String to write                   ;
+;   a4.l ... $C00004                           ;
+;   a5.l ... $C00000                           ;
+;----------------------------------------------;
+
+LEDScreenWrite:
+
+;-------;
+; Loop! ;
+;-------;
+
+@Loop:
+
+;------------------;
+; Get character... ;
+;------------------;
+
+    moveq   #0, d7
+    move.b  (a0)+, d7
+
+;----------------;
+; End of string? ;
+;----------------;
+
+    beq.s   @End
+
+;-------------------------------;
+; Get address of character data ;
+;-------------------------------;
+
+    sub.w   #$20, d7
+    add.w   d7, d7
+    lea     (LEDTable), a2
+    movea.w (a2,d7.w), a2
+    add.l   #LEDPatterns, a2
+
+;----------------;
+; Write all rows ;
+;----------------;
+
+    move.l  d0, d1
+    moveq   #4-1, d2
+@RowLoop:
+    move.l  d1, (a4)
+
+    moveq   #3-1, d3
+    moveq   #6, d4
+@RowILoop:
+    moveq   #0, d5
+    move.b  (a2), d5
+    move.b  1(a2), d6
+    lsr.b   d4, d5
+    lsr.b   d4, d6
+    and.b   #$3, d5
+    and.b   #$3, d6
+    add.b   d6, d6
+    add.b   d6, d6
+    or.b    d6, d5
+    addq.w  #1, d5
+    move.w  d5, (a5)
+
+    subq.w  #2, d4
+    dbf     d3, @RowILoop
+
+    add.l   #$00800000, d1
+    addq.l  #2, a2
+    dbf     d2, @RowLoop
+
+;----------------;
+; Next character ;
+;----------------;
+
+    add.l   #$00060000, d0
+    bra.s   @Loop
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

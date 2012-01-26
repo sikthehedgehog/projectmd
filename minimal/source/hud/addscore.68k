@@ -1,0 +1,90 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------------;
+; AddScore                                ;
+;                                         ;
+; Increases the score by the given amount ;
+;-----------------------------------------;
+; INPUT                                   ;
+;   d0.l ... Score to add (in BCD!)       ;
+;-----------------------------------------;
+; BREAKS: a6                              ;
+;-----------------------------------------;
+
+AddScore:
+    movem.l d0-d7, -(sp)
+
+;-----------------------------;
+; Split score to add in bytes ;
+;-----------------------------;
+
+    move.b  d0, d3
+    lsr.l   #8, d0
+    move.b  d0, d2
+    lsr.l   #8, d0
+    move.b  d0, d1
+    lsr.l   #8, d0
+
+;-------------------;
+; Get current score ;
+;-------------------;
+
+    lea     (RAM_Score), a6
+    move.b  (a6)+, d4
+    move.b  (a6)+, d5
+    move.b  (a6)+, d6
+    move.b  (a6)+, d7
+
+;----------------------;
+; Perform the addition ;
+;----------------------;
+
+    and.b   #$00, ccr
+    abcd.b  d3, d7
+    abcd.b  d2, d6
+    abcd.b  d1, d5
+    abcd.b  d0, d4
+
+;--------------;
+; Update score ;
+;--------------;
+
+    move.b  d7, -(a6)
+    move.b  d6, -(a6)
+    move.b  d5, -(a6)
+    move.b  d4, -(a6)
+
+;----------------;
+; Update the HUD ;
+;----------------;
+
+    bset.b  #IngameStat_Score, (RAM_IngameStatus+1)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    movem.l (sp)+, d0-d7
+    rts
+
+;----------------------------------------------------------------------------

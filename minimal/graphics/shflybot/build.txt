@@ -1,0 +1,24 @@
+palette ??? ??? ??? 000 ??? ??? ??? ??? ??? ??? ??? ??? ??? EEE AAA 666
+setmask
+
+openout graphics/shflybot/fly1.bin openin concept/shflybot/base.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shflybot/fly2.bin openin concept/shflybot/fly1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shflybot/fly3.bin openin concept/shflybot/fly2.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/shflybot/dead1.bin
+openin concept/shflybot/dead1.bmp
+sprite 0 0 2 2
+sprite 2 0 2 2
+sprite 0 2 2 2
+sprite 2 2 2 2
+closein
+closeout
+
+openout graphics/shflybot/dead2.bin
+openin concept/shflybot/dead2.bmp
+sprite 0 0 2 2
+sprite 2 0 2 2
+sprite 0 2 2 2
+sprite 2 2 2 2
+closein
+closeout

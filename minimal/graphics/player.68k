@@ -1,0 +1,412 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------;
+; To work around the DMA bug... ;
+;-------------------------------;
+
+    cnop 0, $200
+
+;------------------------------;
+; Tile data for player sprites ;
+;------------------------------;
+
+Gfx_Player_Start:
+
+Gfx_Player_Idle1:       incbin "graphics/player/idle1.bin"
+Gfx_Player_Idle2:       incbin "graphics/player/idle2.bin"
+Gfx_Player_Idle3:       incbin "graphics/player/idle3.bin"
+Gfx_Player_Idle4:       incbin "graphics/player/idle4.bin"
+Gfx_Player_Idle5:       incbin "graphics/player/idle5.bin"
+Gfx_Player_Wait1:       incbin "graphics/player/wait1.bin"
+Gfx_Player_Wait2:       incbin "graphics/player/wait2.bin"
+Gfx_Player_Wait3:       incbin "graphics/player/wait3.bin"
+Gfx_Player_Wait4:       incbin "graphics/player/wait4.bin"
+
+Gfx_Player_Run1:        incbin "graphics/player/run1.bin"
+Gfx_Player_Run2:        incbin "graphics/player/run2.bin"
+Gfx_Player_Run3:        incbin "graphics/player/run3.bin"
+Gfx_Player_Run4:        incbin "graphics/player/run4.bin"
+Gfx_Player_Run5:        incbin "graphics/player/run5.bin"
+Gfx_Player_Run6:        incbin "graphics/player/run6.bin"
+Gfx_Player_Run7:        incbin "graphics/player/run7.bin"
+Gfx_Player_Run8:        incbin "graphics/player/run8.bin"
+Gfx_Player_Run9:        incbin "graphics/player/run9.bin"
+Gfx_Player_Run10:       incbin "graphics/player/run10.bin"
+Gfx_Player_Run11:       incbin "graphics/player/run11.bin"
+Gfx_Player_Run12:       incbin "graphics/player/run12.bin"
+
+Gfx_Player_Jump1:       incbin "graphics/player/jump1.bin"
+Gfx_Player_Jump2:       incbin "graphics/player/jump2.bin"
+Gfx_Player_Jump3:       incbin "graphics/player/jump3.bin"
+Gfx_Player_Jump4:       incbin "graphics/player/jump4.bin"
+Gfx_Player_Jump5:       incbin "graphics/player/jump5.bin"
+Gfx_Player_Jump6:       incbin "graphics/player/jump6.bin"
+Gfx_Player_Jump7:       incbin "graphics/player/jump7.bin"
+
+Gfx_Player_Crouch1:     incbin "graphics/player/crouch1.bin"
+Gfx_Player_Crouch2:     incbin "graphics/player/crouch2.bin"
+Gfx_Player_Crouch3:     incbin "graphics/player/crouch3.bin"
+Gfx_Player_Crouch4:     incbin "graphics/player/crouch4.bin"
+Gfx_Player_Crouch5:     incbin "graphics/player/crouch5.bin"
+Gfx_Player_Crouch6:     incbin "graphics/player/crouch6.bin"
+Gfx_Player_Crouch7:     incbin "graphics/player/crouch7.bin"
+
+Gfx_Player_Hurt1:       incbin "graphics/player/hurt1.bin"
+Gfx_Player_Hurt2:       incbin "graphics/player/hurt2.bin"
+Gfx_Player_Hurt3:       incbin "graphics/player/hurt3.bin"
+Gfx_Player_Hurt4:       incbin "graphics/player/hurt4.bin"
+Gfx_Player_Hurt5:       incbin "graphics/player/hurt5.bin"
+Gfx_Player_Hurt6:       incbin "graphics/player/hurt6.bin"
+
+Gfx_Player_Death1:      incbin "graphics/player/death1.bin"
+Gfx_Player_Death2:      incbin "graphics/player/death2.bin"
+Gfx_Player_Death3:      incbin "graphics/player/death3.bin"
+Gfx_Player_Death4:      incbin "graphics/player/death4.bin"
+Gfx_Player_Death5:      incbin "graphics/player/death5.bin"
+Gfx_Player_Death6:      incbin "graphics/player/death6.bin"
+Gfx_Player_Death7:      incbin "graphics/player/death7.bin"
+Gfx_Player_Death8:      incbin "graphics/player/death8.bin"
+
+Gfx_Player_OnGoal1:     incbin "graphics/player/ongoal1.bin"
+Gfx_Player_OnGoal2:     incbin "graphics/player/ongoal2.bin"
+Gfx_Player_OnGoal3:     incbin "graphics/player/ongoal3.bin"
+
+Gfx_Player_Shock1:      incbin "graphics/player/shock1.bin"
+Gfx_Player_Shock2:      incbin "graphics/player/shock2.bin"
+
+Gfx_Player_Explode1:    incbin "graphics/player/explode1.bin"
+Gfx_Player_Explode2:    incbin "graphics/player/explode2.bin"
+Gfx_Player_Explode3:    incbin "graphics/player/explode3.bin"
+Gfx_Player_Explode4:    incbin "graphics/player/explode4.bin"
+Gfx_Player_Explode5:    incbin "graphics/player/explode5.bin"
+Gfx_Player_Explode6:    incbin "graphics/player/explode6.bin"
+Gfx_Player_Explode7:    incbin "graphics/player/explode7.bin"
+
+Gfx_Player_Kiss1:       incbin "graphics/player/kiss1.bin"
+Gfx_Player_Kiss2:       incbin "graphics/player/kiss2.bin"
+Gfx_Player_Kiss3:       incbin "graphics/player/kiss3.bin"
+Gfx_Player_Kiss4:       incbin "graphics/player/kiss4.bin"
+Gfx_Player_Kiss5:       incbin "graphics/player/kiss5.bin"
+Gfx_Player_Kiss6:       incbin "graphics/player/kiss6.bin"
+Gfx_Player_Kiss7:       incbin "graphics/player/kiss7.bin"
+Gfx_Player_Kiss8:       incbin "graphics/player/kiss8.bin"
+Gfx_Player_Kiss9:       incbin "graphics/player/kiss9.bin"
+Gfx_Player_Kiss10:      incbin "graphics/player/kiss10.bin"
+
+Gfx_Player_Love1:       incbin "graphics/player/love1.bin"
+Gfx_Player_Love2:       incbin "graphics/player/love2.bin"
+Gfx_Player_Love3:       incbin "graphics/player/love3.bin"
+Gfx_Player_Love4:       incbin "graphics/player/love4.bin"
+Gfx_Player_Love5:       incbin "graphics/player/love5.bin"
+Gfx_Player_Love6:       incbin "graphics/player/love6.bin"
+Gfx_Player_Love7:       incbin "graphics/player/love7.bin"
+Gfx_Player_Love8:       incbin "graphics/player/love8.bin"
+Gfx_Player_Love9:       incbin "graphics/player/love9.bin"
+Gfx_Player_Love10:      incbin "graphics/player/love10.bin"
+
+Gfx_Player_Heart:       incbin "graphics/player/heart.bin"
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------------------------;
+; Data for a frame in an animation                    ;
+;-----------------------------------------------------;
+; INPUT                                               ;
+;   sprite ..... Address of tiles to use              ;
+;   ntsctime ... Duration of frame in NTSC            ;
+;   paltime .... Duration of frame in PAL             ;
+;   next ....... Address of next frame in animation   ;
+;-----------------------------------------------------;
+
+FrameData macro sprite, ntsctime, paltime, next
+    dc.w    ((sprite)-Gfx_Player_Start)/($20*16)
+    dc.w    ntsctime
+    dc.w    paltime
+    dc.w    (next)-PlayerAnim
+    endm
+
+;----------------;
+; Animation data ;
+;----------------;
+
+PlayerAnim:
+
+;-----------------;
+; Animation: idle ;
+;-----------------;
+
+;@Idle1:     FrameData Gfx_Player_Idle1, 6, 5, @Idle2
+;@Idle2:     FrameData Gfx_Player_Idle2, 6, 5, @Idle3
+;@Idle3:     FrameData Gfx_Player_Idle3, 12, 10, @Idle4
+;@Idle4:     FrameData Gfx_Player_Idle2, 6, 5, @Idle5
+;@Idle5:     FrameData Gfx_Player_Idle1, 6, 5, @Idle6
+;@Idle6:     FrameData Gfx_Player_Idle4, 6, 5, @Idle7
+;@Idle7:     FrameData Gfx_Player_Idle5, 12, 10, @Idle8
+;@Idle8:     FrameData Gfx_Player_Idle4, 6, 5, @Idle1
+
+    rept    8
+    FrameData Gfx_Player_Idle1, 6, 5, *+2
+    FrameData Gfx_Player_Idle2, 6, 5, *+2
+    FrameData Gfx_Player_Idle3, 12, 10, *+2
+    FrameData Gfx_Player_Idle2, 6, 5, *+2
+    FrameData Gfx_Player_Idle1, 6, 5, *+2
+    FrameData Gfx_Player_Idle4, 6, 5, *+2
+    FrameData Gfx_Player_Idle5, 12, 10, *+2
+    FrameData Gfx_Player_Idle4, 6, 5, *+2
+    endr
+
+@Wait1:     FrameData Gfx_Player_Wait1, 3, 3, @Wait2
+
+@Wait2:     FrameData Gfx_Player_Wait2, 60, 50, @Wait3
+@Wait3:     FrameData Gfx_Player_Wait3, 6, 5, @Wait4
+@Wait4:     FrameData Gfx_Player_Wait4, 6, 5, @Wait5
+@Wait5:     FrameData Gfx_Player_Wait3, 6, 5, @Wait6
+@Wait6:     FrameData Gfx_Player_Wait2, 6, 5, @Wait3
+
+;---------------------------------;
+; Animation: idle (love power-up) ;
+;---------------------------------;
+
+    rept    8
+    FrameData Gfx_Player_Idle1, 6, 5, *+2
+    FrameData Gfx_Player_Idle2, 6, 5, *+2
+    FrameData Gfx_Player_Idle3, 12, 10, *+2
+    FrameData Gfx_Player_Idle2, 6, 5, *+2
+    FrameData Gfx_Player_Idle1, 6, 5, *+2
+    FrameData Gfx_Player_Idle4, 6, 5, *+2
+    FrameData Gfx_Player_Idle5, 12, 10, *+2
+    FrameData Gfx_Player_Idle4, 6, 5, *+2
+    endr
+@Love1:     FrameData Gfx_Player_Love1, 3, 3, @Love2
+
+@Love2:     FrameData Gfx_Player_Love2, 6, 5, @Love3
+@Love3:     FrameData Gfx_Player_Love3, 3, 3, @Love4
+@Love4:     FrameData Gfx_Player_Love4, 3, 2, @Love5
+@Love5:     FrameData Gfx_Player_Love5, 6, 5, @Love6
+@Love6:     FrameData Gfx_Player_Love6, 3, 3, @Love7
+
+@Love7:     FrameData Gfx_Player_Love2, 6, 5, @Love8
+@Love8:     FrameData Gfx_Player_Love7, 3, 3, @Love9
+@Love9:     FrameData Gfx_Player_Love8, 3, 2, @Love10
+@Love10:    FrameData Gfx_Player_Love9, 6, 5, @Love11
+@Love11:    FrameData Gfx_Player_Love10, 3, 3, @Love2
+
+;----------------;
+; Animation: run ;
+;----------------;
+
+@Run1:      FrameData Gfx_Player_Run7, 3, 3, @Run2
+@Run2:      FrameData Gfx_Player_Run8, 3, 2, @Run3
+@Run3:      FrameData Gfx_Player_Run9, 3, 3, @Run4
+@Run4:      FrameData Gfx_Player_Run10, 3, 2, @Run5
+@Run5:      FrameData Gfx_Player_Run11, 3, 3, @Run6
+@Run6:      FrameData Gfx_Player_Run12, 3, 2, @Run7
+@Run7:      FrameData Gfx_Player_Run1, 3, 3, @Run8
+@Run8:      FrameData Gfx_Player_Run2, 3, 2, @Run9
+@Run9:      FrameData Gfx_Player_Run3, 3, 3, @Run10
+@Run10:     FrameData Gfx_Player_Run4, 3, 2, @Run11
+@Run11:     FrameData Gfx_Player_Run5, 3, 3, @Run12
+@Run12:     FrameData Gfx_Player_Run6, 3, 2, @Run1
+
+@Run1S:     FrameData Gfx_Player_Run7, 6, 5, @Run2S
+@Run2S:     FrameData Gfx_Player_Run8, 6, 5, @Run3S
+@Run3S:     FrameData Gfx_Player_Run9, 6, 5, @Run4S
+@Run4S:     FrameData Gfx_Player_Run10, 6, 5, @Run5S
+@Run5S:     FrameData Gfx_Player_Run11, 6, 5, @Run6S
+@Run6S:     FrameData Gfx_Player_Run12, 6, 5, @Run7S
+@Run7S:     FrameData Gfx_Player_Run1, 6, 5, @Run8S
+@Run8S:     FrameData Gfx_Player_Run2, 6, 5, @Run9S
+@Run9S:     FrameData Gfx_Player_Run3, 6, 5, @Run10S
+@Run10S:    FrameData Gfx_Player_Run4, 6, 5, @Run11S
+@Run11S:    FrameData Gfx_Player_Run5, 6, 5, @Run12S
+@Run12S:    FrameData Gfx_Player_Run6, 6, 5, @Run1S
+
+;--------------------;
+; Animation: falling ;
+;--------------------;
+
+@Fall1:     FrameData Gfx_Player_Jump3, 3, 2, @Fall2
+@Fall2:     FrameData Gfx_Player_Jump4, 3, 3, @Fall3
+@Fall3:     FrameData Gfx_Player_Jump5, 3, 2, @Fall4
+@Fall4:     FrameData Gfx_Player_Jump6, 6, 5, @Fall5
+@Fall5:     FrameData Gfx_Player_Jump7, 6, 5, @Fall4
+
+;--------------------;
+; Animation: jumping ;
+;--------------------;
+
+@Jump1:     FrameData Gfx_Player_Jump1, 6, 5, @Jump2
+@Jump2:     FrameData Gfx_Player_Jump2, 6, 5, @Jump1
+
+;----------------------;
+; Animation: crouching ;
+;----------------------;
+
+@Crouch1:   FrameData Gfx_Player_Crouch1, 3, 2, @Crouch2
+@Crouch2:   FrameData Gfx_Player_Crouch2, 3, 3, @Crouch3
+@Crouch3:   FrameData Gfx_Player_Crouch3, 3, 2, @Crouch4
+@Crouch4:   FrameData Gfx_Player_Crouch4, 3, 3, @Crouch5
+@Crouch5:   FrameData Gfx_Player_Crouch5, 3, 2, @Crouch6
+@Crouch6:   FrameData Gfx_Player_Crouch6, 3, 3, @Crouch7
+@Crouch7:   FrameData Gfx_Player_Crouch7, -1, -1, @Crouch7
+
+;-------------------------;
+; Animation: getting hurt ;
+;-------------------------;
+
+@Hurt1:     FrameData Gfx_Player_Hurt1, 3, 3, @Hurt2
+@Hurt2:     FrameData Gfx_Player_Hurt2, 3, 2, @Hurt3
+@Hurt3:     FrameData Gfx_Player_Hurt3, 3, 3, @Hurt4
+@Hurt4:     FrameData Gfx_Player_Hurt4, 3, 2, @Hurt5
+@Hurt5:     FrameData Gfx_Player_Hurt5, 6, 5, @Hurt6
+@Hurt6:     FrameData Gfx_Player_Hurt6, 6, 5, @Hurt5
+
+;------------------;
+; Animation: dying ;
+;------------------;
+
+@Death1:    FrameData Gfx_Player_Death1, 90, 75, @Death2
+@Death2:    FrameData Gfx_Player_Death2, 3, 3, @Death3
+@Death3:    FrameData Gfx_Player_Death3, 3, 2, @Death4
+@Death4:    FrameData Gfx_Player_Death4, 3, 3, @Death5
+@Death5:    FrameData Gfx_Player_Death5, 3, 2, @Death6
+@Death6:    FrameData Gfx_Player_Death6, 3, 3, @Death7
+@Death7:    FrameData Gfx_Player_Death7, 3, 2, @Death8
+@Death8:    FrameData Gfx_Player_Death8, -1, -1, @Death8
+
+;----------------------------------------------------;
+; Animation: when being taken away by the end button ;
+;----------------------------------------------------;
+
+@OnGoal1:   FrameData Gfx_Player_OnGoal1, 3, 2, @OnGoal2
+@OnGoal2:   FrameData Gfx_Player_OnGoal2, 3, 3, @OnGoal3
+@OnGoal3:   FrameData Gfx_Player_OnGoal1, 3, 2, @OnGoal4
+@OnGoal4:   FrameData Gfx_Player_OnGoal3, 3, 3, @OnGoal5
+@OnGoal5:   FrameData Gfx_Player_OnGoal1, 3, 2, @OnGoal6
+@OnGoal6:   FrameData Gfx_Player_OnGoal2, 3, 3, @OnGoal7
+@OnGoal7:   FrameData Gfx_Player_OnGoal1, 3, 2, @OnGoal8
+@OnGoal8:   FrameData Gfx_Player_OnGoal3, 3, 3, @OnGoal9
+@OnGoal9:   FrameData Gfx_Player_OnGoal1, 3, 2, @OnGoal10
+@OnGoal10:  FrameData Gfx_Player_OnGoal2, 3, 3, @OnGoal11
+@OnGoal11:  FrameData Gfx_Player_OnGoal1, 3, 2, @OnGoal12
+@OnGoal12:  FrameData Gfx_Player_OnGoal3, 3, 3, @OnGoal13
+@OnGoal13:  FrameData Gfx_Player_OnGoal1, 3, 2, @OnGoal14
+@OnGoal14:  FrameData Gfx_Player_OnGoal2, 3, 3, @OnGoal15
+@OnGoal15:  FrameData Gfx_Player_OnGoal1, 3, 2, @OnGoal16
+@OnGoal16:  FrameData Gfx_Player_OnGoal3, 3, 3, @OnGoal17
+@OnGoal17:  FrameData Gfx_Player_OnGoal1, 3, 2, @OnGoal18
+@OnGoal18:  FrameData Gfx_Player_OnGoal2, 3, 3, @OnGoal19
+@OnGoal19:  FrameData Gfx_Player_OnGoal1, 3, 2, @OnGoal20
+@OnGoal20:  FrameData Gfx_Player_OnGoal3, 3, 3, @OnGoal21
+@OnGoal21:  FrameData Gfx_Player_OnGoal1, 3, 2, @OnGoal22
+@OnGoal22:  FrameData Gfx_Player_OnGoal2, 3, 3, @OnGoal23
+@OnGoal23:  FrameData Gfx_Player_OnGoal1, 3, 2, @OnGoal24
+@OnGoal24:  FrameData Gfx_Player_OnGoal3, 3, 3, @OnGoal25
+@OnGoal25:  FrameData Gfx_Player_OnGoal1, 3, 2, @OnGoal26
+@OnGoal26:  FrameData Gfx_Player_OnGoal2, 3, 3, @OnGoal27
+@OnGoal27:  FrameData Gfx_Player_OnGoal1, 3, 2, @OnGoal28
+@OnGoal28:  FrameData Gfx_Player_OnGoal3, 3, 3, @OnGoal29
+@OnGoal29:  FrameData Gfx_Player_OnGoal1, 3, 2, @OnGoal30
+@OnGoal30:  FrameData Gfx_Player_OnGoal2, 3, 3, @OnGoal31
+@OnGoal31:  FrameData Gfx_Player_OnGoal1, 3, 2, @OnGoal32
+@OnGoal32:  FrameData Gfx_Player_OnGoal3, 3, 3, @Death8
+
+;----------------------------------;
+; Animation: using electric shield ;
+;----------------------------------;
+
+@Shock1:    FrameData Gfx_Player_Shock1, 6, 5, @Shock2
+@Shock2:    FrameData Gfx_Player_Shock2, 6, 5, @Shock1
+
+;----------------------;
+; Animation: exploding ;
+;----------------------;
+
+@Explode1:  FrameData Gfx_Player_Explode1, 3, 3, @Explode2
+@Explode2:  FrameData Gfx_Player_Explode2, 3, 2, @Explode3
+@Explode3:  FrameData Gfx_Player_Explode3, 3, 3, @Explode4
+@Explode4:  FrameData Gfx_Player_Explode4, 3, 2, @Explode5
+@Explode5:  FrameData Gfx_Player_Explode5, 3, 3, @Explode6
+@Explode6:  FrameData Gfx_Player_Explode6, 3, 2, @Explode7
+@Explode7:  FrameData Gfx_Player_Explode7, -1, -1, @Explode7
+
+;-----------------------;
+; Animation: kissing :3 ;
+;-----------------------;
+
+@Kiss1:     FrameData Gfx_Player_Kiss1, 3, 3, @Kiss2
+@Kiss2:     FrameData Gfx_Player_Kiss2, 3, 2, @Kiss3
+@Kiss3:     FrameData Gfx_Player_Kiss3, 3, 3, @Kiss4
+@Kiss4:     FrameData Gfx_Player_Kiss4, 3, 2, @Kiss5
+@Kiss5:     FrameData Gfx_Player_Kiss5, 3, 3, @Kiss6
+@Kiss6:     FrameData Gfx_Player_Kiss6, 3, 2, @Kiss7
+@Kiss7:     FrameData Gfx_Player_Kiss7, 3, 3, @Kiss8
+@Kiss8:     FrameData Gfx_Player_Kiss8, 30, 25, @Kiss9
+@Kiss9:     FrameData Gfx_Player_Kiss9, 3, 2, @Kiss10
+@Kiss10:    FrameData Gfx_Player_Kiss10, 3, 3, @Crouch7
+
+;----------------------------;
+; We don't need this anymore ;
+;----------------------------;
+
+    purge   FrameData
+
+;----------------------------------------------------;
+; Used to determine animation start addresses        ;
+; I don't want to write two lines for every entry :P ;
+;----------------------------------------------------;
+
+AnimData macro size
+@Value\@: rs.w (size)*4
+    dc.w @Value\@
+    endm
+
+;---------------------------------------------;
+; Pointers to the beginning of each animation ;
+; (relative to PlayerAnim)                    ;
+;---------------------------------------------;
+
+    rsreset
+PlayerAnimList:
+    AnimData (8*8)+6    ; Idle
+    AnimData (8*8)+11   ; Idle (love power-up)
+    AnimData 12         ; Walking
+    AnimData 12         ; Walking (slower)
+    AnimData 5          ; Falling
+    AnimData 2          ; Jumping
+    AnimData 6          ; Crouching (going down)
+    AnimData 1          ; Crouching (already down)
+    AnimData 6          ; Getting hurt
+    AnimData 8          ; Dying
+    AnimData 32         ; On goal
+    AnimData 2          ; Using electric shield
+    AnimData 7          ; Exploding
+    AnimData 10         ; Kissing
+
+;----------------------------;
+; We don't need this anymore ;
+;----------------------------;
+
+    purge   AnimData
+
+;----------------------------------------------------------------------------

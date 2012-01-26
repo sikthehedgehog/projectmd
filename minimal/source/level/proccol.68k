@@ -1,0 +1,122 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------;
+; ProcessLevelColumn                       ;
+; Processes a tile column into the tilemap ;
+; The column is drawn and objects created  ;
+;------------------------------------------;
+; INPUT                                    ;
+;   d0.w ... ID of column to process       ;
+;------------------------------------------;
+; BREAKS: all but d0 and d1                ;
+;------------------------------------------;
+
+ProcessLevelColumn:
+
+;--------------------------------------------------------------------;
+; Make sure that the column is within the level                      ;
+; (doesn't matter so much for drawing, but it does matter for object ;
+; creation - we don't want to create objects that don't exist!)      ;
+;--------------------------------------------------------------------;
+
+    tst.w   d0
+    blt     @End
+    cmp.w   (RAM_LevelSize), d0
+    bge     @End
+
+;-------------;
+; Draw column ;
+;-------------;
+
+    movem.l d0-d1, -(sp)
+    bsr     DrawLevelColumn
+    movem.l (sp)+, d0-d1
+
+;------------------;
+; Scan for objects ;
+;------------------;
+
+    move.w  d0, d3
+    add.w   d3, d3
+    add.w   d3, d3
+    add.w   d3, d3
+
+    lea     (RAM_ObjectMap), a1
+    lea     (a1,d0.w), a1
+    move.b  (a1), d5
+
+    move.w  d0, d4
+    move.l  (RAM_ItemAddr), a0
+    add.w   d4, d4
+    add.w   d4, d4
+    add.w   d4, d4
+    lea     (a0,d4.w), a0
+
+    move.l  (RAM_LastObject), a2
+
+    moveq   #7-1, d4
+@ScanObjects:
+    moveq   #0, d2
+    move.b  (a0)+, d2
+    beq.s   @NoObject
+
+    btst.l  #7, d5
+    beq.s   @NoObject
+
+    subq.w  #1, d2
+    move.w  d2, (a2)+
+
+    move.w  d4, d2
+    addq.w  #1, d2
+    or.w    d3, d2
+    move.w  d2, (a2)+
+
+    move.w  d3, d2
+    add.w   d2, d2
+    add.w   d2, d2
+    move.w  d2, (a2)+
+    move.w  #0, (a2)+
+
+    moveq   #7-1, d2
+    sub.w   d4, d2
+    lsl.w   #5, d2
+    move.w  d2, (a2)+
+    move.w  #0, (a2)+
+
+    move.l  #0, (a2)+
+
+@NoObject:
+    add.b   d5, d5
+    dbf     d4, @ScanObjects
+
+    move.b  #0, (a1)
+    move.l  a2, (RAM_LastObject)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

@@ -1,0 +1,268 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------------------;
+; UpdateLevel_Waterlava                         ;
+;                                               ;
+; Updates stuff specific to the Waterlava level ;
+;-----------------------------------------------;
+; BREAKS: all                                   ;
+;-----------------------------------------------;
+
+UpdateLevel_Waterlava:
+
+    rsset VRAM_Level
+@T2 rs.b (16*3)+8
+@T3 rs.b 1
+@L  rs.b 0
+@P equ VRAM_Platform
+
+;-----------------------------------------------------;
+; Call the appropriate subroutine to update the world ;
+;-----------------------------------------------------;
+
+    btst.b  #IngameStat_World, (RAM_IngameStatus+1)
+    beq.s   @DoLava
+    bsr     @UpdateWater
+    bra.s   @DoWater
+@DoLava:
+    bsr     @UpdateLava
+@DoWater:
+
+;-----------------------;
+; Update HScroll buffer ;
+;-----------------------;
+
+    moveq   #0, d0
+    move.w  (RAM_Scroll), d0
+    neg.w   d0
+    move.w  d0, d1
+    asr.w   #4, d1
+    lea     (RAM_HScrBuffer), a0
+
+    move.w  d0, (a0)+
+    move.w  d1, (a0)+
+
+;----------------;
+; Update HScroll ;
+;----------------;
+
+    FixedDMA RAM_HScrBuffer, $F800, 2*2
+
+;------------------;
+; Perform blinking ;
+;------------------;
+
+    moveq   #0, d0
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @BlinkFrame1
+    move.w  #224, d0
+@BlinkFrame1:
+    move.w  d0, (RAM_VScrBuffer)
+    move.w  #0, (RAM_VScrBuffer+2)
+
+;-----------------------------------;
+; Animate the lava/water reflection ;
+;-----------------------------------;
+
+    lea     (RAM_LevelStuff), a0
+    lea     (Gfx_LevelWaterlava_Lava), a1
+    lea     (Sines), a2
+
+    move.w  (RAM_GlobalAnim), d1
+    add.w   d1, d1
+    moveq   #(8*4)-1, d7
+@ReflectionLoop:
+    and.w   #$FF<<1, d1
+    move.b  (a2,d1.w), d2
+    asr.w   #2, d2
+    and.w   #7, d2
+    add.w   d2, d2
+    add.w   d2, d2
+    move.l  (a1)+, d0
+    rol.l   d2, d0
+    move.l  d0, (a0)+
+    add.w   #$20*2, d1
+    dbf     d7, @ReflectionLoop
+
+    FixedDMA RAM_LevelStuff, @L*$20, 4*$20
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------;
+; Subroutine used to update the lava world ;
+;------------------------------------------;
+
+@UpdateLava:
+
+;-------------------;
+; Animate lavafalls ;
+;-------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+
+    move.w  d0, d1
+    and.w   #$7<<1, d1
+    lea     (@LavafallPal), a0
+    lea     (a0,d1.w), a0
+    lea     (RAM_PalBuffer+$30), a1
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+
+;---------------------;
+; Animate the enemies ;
+;---------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+
+    moveq   #0, d7
+    move.w  d0, d7
+    and.w   #$F<<1, d7
+    lsl.l   #8, d7
+    add.l   #Gfx_TrollWalk, d7
+    VarSrcDMA VRAM_TrollWalk*$20, 16*$20
+
+    moveq   #0, d7
+    move.w  d0, d7
+    and.w   #$3<<1, d7
+    lsl.l   #5+2-1, d7
+    add.l   #Gfx_LavaBatPieces, d7
+    move.l  d7, d5
+    VarSrcDMA VRAM_DblCircleDead*$20, 4*$20
+    move.l  d5, d7
+    VarSrcDMA (VRAM_DblCircleDead+4)*$20, 4*$20
+    move.l  d5, d7
+    VarSrcDMA (VRAM_DblCircleDead+8)*$20, 4*$20
+    move.l  d5, d7
+    VarSrcDMA (VRAM_DblCircleDead+12)*$20, 4*$20
+
+    and.w   #$7<<1, d0
+    moveq   #0, d7
+    lea     (Gfx_CrystalBatFly_Pattern), a0
+    move.w  (a0,d0.w), d7
+    add.l   #Gfx_LavaBatFly, d7
+    VarSrcDMA VRAM_DblCircleFly*$20, 16*$20
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;-------------------------------;
+; Palette used by the lavafalls ;
+;-------------------------------;
+
+@LavafallPal:
+    dc.w    $0CE, $0AE, $08E, $06E, $04E, $00E, $00C, $00A
+    dc.w    $0CE, $0AE, $08E, $06E, $04E, $00E, $00C
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------;
+; Subroutine used to update the lava world ;
+;------------------------------------------;
+
+@UpdateWater:
+
+;--------------------;
+; Animate waterfalls ;
+;--------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+
+    move.w  d0, d1
+    and.w   #$7<<1, d1
+    lea     (@WaterfallPal), a0
+    lea     (a0,d1.w), a0
+    lea     (RAM_PalBuffer+$30), a1
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+
+;----------------------------------;
+; Animate the crystallic creatures ;
+;----------------------------------;
+
+    moveq   #0, d7
+    move.w  d0, d7
+    and.w   #$F<<1, d7
+    lsl.l   #5+4-1, d7
+    add.l   #Gfx_CrystalCreatureWalk, d7
+    VarSrcDMA VRAM_TrollWalk*$20, 16*$20
+
+    moveq   #0, d7
+    move.w  d0, d7
+    and.w   #$3<<1, d7
+    lsl.l   #5+2-1, d7
+    add.l   #Gfx_CrystalCreaturePieces, d7
+    move.l  d7, d5
+    VarSrcDMA VRAM_DblCircleDead*$20, 4*$20
+    move.l  d5, d7
+    VarSrcDMA (VRAM_DblCircleDead+4)*$20, 4*$20
+    move.l  d5, d7
+    VarSrcDMA (VRAM_DblCircleDead+8)*$20, 4*$20
+    move.l  d5, d7
+    VarSrcDMA (VRAM_DblCircleDead+12)*$20, 4*$20
+
+    and.w   #$7<<1, d0
+    moveq   #0, d7
+    lea     (Gfx_CrystalBatFly_Pattern), a0
+    move.w  (a0,d0.w), d7
+    add.l   #Gfx_CrystalBatFly, d7
+    VarSrcDMA VRAM_DblCircleFly*$20, 16*$20
+
+;-------------------;
+; Animate ice floor ;
+;-------------------;
+
+    move.w  #$A000|VRAM_WLIceFloor, d0
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @NoIceFloorAnim
+    addq.w  #4, d0
+@NoIceFloorAnim:
+    move.w  d0, (RAM_WLIceFloorGfx)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;--------------------------------;
+; Palette used by the waterfalls ;
+;--------------------------------;
+
+@WaterfallPal:
+    dc.w    $E00, $C00, $A00, $800, $600, $400, $200, $000
+    dc.w    $E00, $C00, $A00, $800, $600, $400, $200
+
+;----------------------------------------------------------------------------

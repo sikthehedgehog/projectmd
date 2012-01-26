@@ -1,0 +1,66 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------;
+; Draws the title screen background ;
+;-----------------------------------;
+
+DrawTitleBG:
+
+;------------------------;
+; Clear plane B contents ;
+;------------------------;
+
+    move.l  #$80008000, d0
+    move.w  #((64/16)*16)-1, d1
+    move.l  #$60000003, (a4)
+@ClearPlaneB:
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    dbf     d1, @ClearPlaneB
+
+;-----------------------;
+; Draw 3D field pattern ;
+;-----------------------;
+
+    lea     (Gfx_Level3D_3DFieldPat), a0
+    move.w  #(64*12)-1, d1
+@DrawField:
+    move.w  (a0)+, d0
+    add.w   #$2000|VRAM_TitleBG, d0
+    bset.l  #15, d0
+    move.w  d0, (a5)
+    dbf     d1, @DrawField
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

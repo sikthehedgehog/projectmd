@@ -1,0 +1,133 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------------;
+; DrawObjects              ;
+;                          ;
+; Draws all active objects ;
+;--------------------------;
+; BREAKS: all              ;
+;--------------------------;
+
+DrawObjects:
+
+;----------------------------------------------;
+; Get addresses of object list and last object ;
+;----------------------------------------------;
+
+    move.l  (RAM_ObjectList), a0
+    move.l  (RAM_LastObject), a1
+
+;------------------------;
+; No objects to process? ;
+;------------------------;
+
+    cmp.l   a0, a1
+    beq.s   @End
+
+;--------------------------------;
+; Get address of subroutine list ;
+;--------------------------------;
+
+    lea     (@Functions), a2
+
+;---------------------;
+; Process all objects ;
+;---------------------;
+
+@Loop:
+    move.w  (a0), d0
+    add.w   d0, d0
+    add.w   d0, d0
+    move.l  (a2,d0.w), a6
+    jsr     (a6)
+    adda.w  #Object_Size, a0
+    cmp.l   a0, a1
+    bne.s   @Loop
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;------------------------------------------;
+; List of subroutines for each object type ;
+;------------------------------------------;
+
+@Functions:
+    dc.l    DrawRhombus             ; Rhombus
+    dc.l    DrawPulseGenerator      ; Pulse generator
+    dc.l    DrawSpark               ; Sparks
+    dc.l    DrawRay                 ; Ray power-up
+    dc.l    DrawThinBlock           ; Breakable thin block
+    dc.l    DrawBomb                ; Bomb power-up
+    dc.l    DrawTroll               ; Troll
+    dc.l    DrawFlamethrower        ; Flamethrower going up
+    dc.l    DrawFlamethrower2       ; Flamethrower going down
+    dc.l    DrawPlatform            ; Vertical platforms
+    dc.l    DrawCapacitorTop        ; Capacitors that go boom
+    dc.l    @Null                   ; Hanging cable base
+    dc.l    DrawSpark               ; Vertical sparks
+    dc.l    DrawHeart               ; Love power-up
+    dc.l    DrawEndButton           ; Button that ends the level
+    dc.l    DrawDblCircle           ; Double circle thingy
+    dc.l    DrawCheckPoint          ; Checkpoint
+    dc.l    DrawStalactite          ; Stalactite
+    dc.l    @Null                   ; Spikes behaviour
+    dc.l    DrawPlatform            ; Breakable platforms
+    dc.l    DrawStars               ; Invincibility item
+    dc.l    DrawLaser               ; Laser
+    dc.l    @Null                   ; Gear hazard area
+    dc.l    DrawIceRock             ; Falling ice rock
+    dc.l    DrawPlatform            ; Rail platforms
+    dc.l    DrawDJump               ; Double jump power-up
+    dc.l    Draw1up                 ; 1-up
+    dc.l    DrawWLTeleporter        ; Waterlava teleporter
+    dc.l    DrawWLIceBlock          ; Waterlava ice block
+    dc.l    DrawBumper              ; Bumper
+    dc.l    DrawBumperPad           ; Bumper pad
+    dc.l    DrawLightBulb           ; Light bulb
+    dc.l    DrawVSparkEmit          ; Vertical spark emitter (floor)
+    dc.l    DrawVSparkEmit2         ; Vertical spark emitter (ceiling)
+    dc.l    DrawSpinSpike           ; Spinning spikeball
+    dc.l    DrawBarrier             ; Barrier
+
+    dc.l    DrawPulse               ; Pulse
+    dc.l    DrawFlameball           ; Flameball going up
+    dc.l    DrawFlameball           ; Flameball going down
+    dc.l    DrawCablePiece          ; Piece of hanging cable
+    dc.l    DrawCableSpark          ; Hanging cable spark
+    dc.l    DrawPlatformPiece       ; Falling platform piece
+    dc.l    DrawFallingPiece        ; Generic falling piece
+    dc.l    DrawHeartBullet         ; Heart bullet
+    dc.l    DrawSparkle             ; Sparkle when getting a rhombus
+
+;-------------------------------------------;
+; Crappy null subroutine that draws nothing ;
+;-------------------------------------------;
+
+@Null:
+    rts
+
+;----------------------------------------------------------------------------

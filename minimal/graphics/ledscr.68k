@@ -1,0 +1,51 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------;
+; LED graphics ;
+;--------------;
+
+Gfx_LEDScreen:
+    incbin  "graphics/ledscr/led.bin"
+
+;-----------------;
+; Letter patterns ;
+;-----------------;
+
+LEDPatterns:
+    incbin  "graphics/ledscr/letters.bin"
+
+;------------------;
+; Conversion table ;
+;------------------;
+
+LEDTable:
+    dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000     ; $20..$27
+    dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000     ; $28..$2F
+    dc.w    $00D8,$00E0,$00E8,$00F0,$00F8,$0100,$0108,$0110     ; $30..$37
+    dc.w    $0118,$0120,$0128,$0000,$0000,$0000,$0000,$0000     ; $38..$3F
+    dc.w    $0000,$0008,$0010,$0018,$0020,$0028,$0030,$0038     ; $40..$47
+    dc.w    $0040,$0048,$0050,$0058,$0060,$0068,$0070,$0078     ; $48..$4F
+    dc.w    $0080,$0088,$0090,$0098,$00A0,$00A8,$00B0,$00B8     ; $50..$57
+    dc.w    $00C0,$00C8,$00D0,$0000,$0000,$0000,$0000,$0000     ; $58..$5F
+
+;----------------------------------------------------------------------------

@@ -1,0 +1,86 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------;
+; ReadJoypad                                                           ;
+;                                                                      ;
+; Reads the joypad buttons and updates their values on RAM accordingly ;
+; THIS SUBROUTINE MAY NOT BE CALLED FASTER THAN ONCE PER FRAME         ;
+; 6-pads will hate you if you attempt to do so, I warn you!            ;
+;----------------------------------------------------------------------;
+; BREAKS: d6, d7, a6                                                   ;
+;----------------------------------------------------------------------;
+
+ReadJoypad:
+
+;--------------------------;
+; Joypad data port address ;
+;--------------------------;
+
+    lea     ($A10003), a6
+
+;--------------;
+; Read buttons ;
+;--------------;
+
+    move.b  #$40, (a6)
+    nop
+    nop
+    move.b  (a6), d7
+    move.b  #$00, (a6)
+    andi.b  #$3F, d7
+    nop
+    move.b  (a6), d6
+    andi.b  #$30, d6
+
+;--------------------------------------;
+; Merge both reads into a single value ;
+;--------------------------------------;
+
+    add.b   d6, d6
+    add.b   d6, d6
+    or.b    d6, d7
+
+;-------------------------------------------------------------------;
+; Invert logic because the joypad returns 0 = pressed, 1 = released ;
+; We use it the other way because it makes more sense :P            ;
+;-------------------------------------------------------------------;
+
+    not.b   d7
+
+;-----------------------------------;
+; Determine pressed and held status ;
+;-----------------------------------;
+
+    move.b  (RAM_JoypadHold), d6
+    move.b  d7, (RAM_JoypadHold)
+    not.b   d6
+    and.b   d6, d7
+    move.b  d7, (RAM_JoypadPress)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

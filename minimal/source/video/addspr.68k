@@ -1,0 +1,106 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------;
+; AddSprite                                                      ;
+;                                                                ;
+; Puts a sprite into the sprite buffer (if there's enough space) ;
+;----------------------------------------------------------------;
+; INPUT                                                          ;
+;   d0.w ... X coordinate + 128                                  ;
+;   d1.w ... Y coordinate + 128                                  ;
+;   d2.w ... First tile and FXs                                  ;
+;   d3.b ... Size                                                ;
+;----------------------------------------------------------------;
+; BREAKS: d6, d7, a6                                             ;
+;----------------------------------------------------------------;
+
+AddSprite:
+
+;------------------------------;
+; Address of the sprite buffer ;
+;------------------------------;
+
+    lea     (RAM_SprBuffer), a6
+
+;-----------------------;
+; Get number of sprites ;
+;-----------------------;
+
+    move.b  (RAM_NumSprites), d7
+
+;---------------;
+; First sprite? ;
+;---------------;
+
+    beq.s   @First
+
+;-------------------;
+; Too many sprites? ;
+;-------------------;
+
+    cmp.b   #80, d7
+    beq.s   @End
+
+;----------------------------------------;
+; Get position of new sprite into buffer ;
+;----------------------------------------;
+
+    moveq   #0, d6
+    move.b  d7, d6
+    add.w   d6, d6
+    add.w   d6, d6
+    add.w   d6, d6
+    lea     (a6,d6.w), a6
+
+;--------------------------------;
+; Update link of previous sprite ;
+;--------------------------------;
+
+    move.b  d7, -5(a6)
+
+;-------------------------------;
+; Add sprite into sprite buffer ;
+;-------------------------------;
+
+@First:
+    move.w  d1, (a6)+
+    move.b  d3, (a6)+
+    move.b  #0, (a6)+
+    move.w  d2, (a6)+
+    move.w  d0, (a6)+
+
+;-----------------------;
+; Increase sprite count ;
+;-----------------------;
+
+    addq.b  #1, d7
+    move.b  d7, (RAM_NumSprites)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

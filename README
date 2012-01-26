@@ -1,0 +1,17 @@
+ _____ _____ _____     _ _____ _____ _____     ____ ____ ____
+|  _  |  _  |  _  |   | |  ___|  _  |_   _|   |  _ ' _  |  _ \
+| |_| | |_| | | | |   | | |__ | | |_| | |     | | | | | | | | |
+|  ___|    _| | | |_  | |  __|| |  _  | |     | | | | | | | | |
+| |   | |\ \| |_| | |_| | |___| |_| | | |     | | |_| | | |_| |
+|_|   |_| \_|_____|_____|_____|_____| |_|     |_|     |_|____/
+
+Official GitHub repo for Project MD. Here you will find the following stuff:
+
+- /bin ....... Prebuilt binaries
+- /minimal ... Minimal source release
+
+TO-DO: full source release that contains the source files to the data, not
+just the code. But that will take some time. The minimal release is still
+enough to build the game.
+
+Project MD uses the Echo sound engine: http://echo.mdscene.net/

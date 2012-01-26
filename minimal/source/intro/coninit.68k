@@ -1,0 +1,154 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;---------------------------------------------;
+; InitIntroConsole                            ;
+; Initializes the control scenes in the intro ;
+;---------------------------------------------;
+; BREAKS: all                                 ;
+;---------------------------------------------;
+
+InitIntroConsole:
+
+;--------------------;
+; Set up game status ;
+;--------------------;
+
+    move.w  #%001, (RAM_GameStatus)
+
+;----------------------;
+; Set up VDP registers ;
+;----------------------;
+
+    lea     ($C00004), a0
+    lea     ($C00000), a1
+
+    move.w  #$8114, (a0)    ; Disable display
+    move.w  #$8230, (a0)    ; Tilemap A: $C000
+    move.w  #$8407, (a0)    ; Tilemap B: $E000
+    move.w  #$857E, (a0)    ; Sprite table: $FC00
+    move.w  #$8B00, (a0)    ; No IRQ2, full VScroll, full HScroll
+    move.w  #$8D00, (a0)    ; HScroll table: $0000 (no HScroll!)
+    move.w  #$9001, (a0)    ; Tilemap size: 64x32
+
+;------------------------------;
+; Set up cursor blinking speed ;
+;------------------------------;
+
+    move.b  #6, d1
+    move.w  (a0), d0
+    btst.l  #0, d0
+    beq.s   @SpeedNTSC
+    move.b  #5, d1
+@SpeedNTSC:
+    move.b  d1, (RAM_ConBlinkSpd)
+    move.b  d1, (RAM_ConBlinkTime)
+
+;-------------------------;
+; Load graphics into VRAM ;
+;-------------------------;
+
+    FixedDMA Gfx_TextMode, $20, Gfx_TextMode_Size
+
+;------------------------;
+; Clear plane A contents ;
+;------------------------;
+
+    move.l  #$00010001, d0
+    move.w  #((64/16)*32)-1, d1
+    move.l  #$40000003, (a0)
+@ClearPlaneA:
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    dbf     d1, @ClearPlaneA
+
+;---------------------------------------------;
+; Set up bars in plane B                      ;
+; They're used later for the scrolling screen ;
+;---------------------------------------------;
+
+    move.l  #$60000003, (a0)
+    move.l  #$80018001, d0
+    moveq   #0, d2
+
+    moveq   #(64/16)-1, d1
+@ClearPlaneBTop:
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    dbf     d1, @ClearPlaneBTop
+
+    move.w  #((64/16)*26)-1, d1
+@ClearPlaneBMiddle:
+    move.l  d2, (a1)
+    move.l  d2, (a1)
+    move.l  d2, (a1)
+    move.l  d2, (a1)
+    move.l  d2, (a1)
+    move.l  d2, (a1)
+    move.l  d2, (a1)
+    move.l  d2, (a1)
+    dbf     d1, @ClearPlaneBMiddle
+
+    moveq   #(64/16)-1, d1
+@ClearPlaneBBottom:
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    dbf     d1, @ClearPlaneBBottom
+
+;--------------------;
+; Remove all sprites ;
+;--------------------;
+
+    bsr     ClearSprites
+    bsr     UpdateSprites
+
+;--------------------------;
+; Flush VDP command buffer ;
+;--------------------------;
+
+    bsr     FlushVDPBuffer
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

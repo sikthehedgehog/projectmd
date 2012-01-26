@@ -1,0 +1,106 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------;
+; DrawPlatform           ;
+;                        ;
+; Draws platform objects ;
+;------------------------;
+
+DrawPlatform:
+
+;-------------------------------------;
+; Check if we're visible for starters ;
+;-------------------------------------;
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+
+    cmp.w   #-64, d0
+    ble.s   @End
+    cmp.w   #320, d0
+    bge.s   @End
+
+;------------------------------;
+; Calculate sprite coordinates ;
+;------------------------------;
+
+    move.w  Object_Y(a0), d1
+    add.w   #128, d0
+    add.w   #128, d1
+
+;---------------------------------------------------------------;
+; Determine sprite to use (some levels use a different palette) ;
+;---------------------------------------------------------------;
+
+    move.w  #$A000|VRAM_Platform, d2
+    move.b  (RAM_Level), d7
+    cmp.b   #Level_3D, d7
+    bne.s   @NoAltPalette
+    move.w  #$C000|VRAM_Platform, d2
+@NoAltPalette:
+
+;--------------;
+; Draw sprite! ;
+;--------------;
+
+    moveq   #%1101, d3
+    bsr     AddSprite
+    add.w   #32, d0
+
+    move.b  (RAM_Level), d7
+    cmp.b   #Level_Waterlava, d7
+    beq.s   @NoFlip
+    bset.l  #11, d2
+@NoFlip:
+    bsr     AddSprite
+
+;--------------------------------;
+; Draw mirror in 3D-themed level ;
+;--------------------------------;
+
+    move.b  (RAM_Level), d7
+    cmp.b   #Level_3D, d7
+    bne.s   @NoMirror
+
+    move.w  Object_Y(a0), d1
+    sub.w   #192-16, d1
+    neg.w   d1
+    add.w   #192+128, d1
+
+    cmp.w   #128+224, d1
+    bge.s   @NoMirror
+
+    eor.w   #$B000, d2
+    bsr     AddSprite
+    sub.w   #32, d0
+    bsr     AddSprite
+@NoMirror:
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

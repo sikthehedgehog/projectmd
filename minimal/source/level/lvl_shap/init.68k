@@ -1,0 +1,80 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------------------;
+; InitLevel_Shape                                      ;
+;                                                      ;
+; Initializes stuff specific to the shape-themed level ;
+;------------------------------------------------------;
+; BREAKS: d6, d7, a5, a6                               ;
+;------------------------------------------------------;
+
+InitLevel_Shape:
+
+;----------------------;
+; Set per-tile HScroll ;
+;----------------------;
+
+    move.w  #$8B02, ($C00004)
+
+;------------------------------;
+; Load level-specific graphics ;
+;------------------------------;
+
+    FixedDMA Gfx_ShapemanWalk, VRAM_TrollWalk*$20, 16*$20
+    FixedDMA Gfx_ShapemanDead, VRAM_TrollDead*$20, 16*$20
+    FixedDMA Gfx_ShapefanFly, VRAM_DblCircleFly*$20, $10*$20
+    FixedDMA Gfx_ShapefanDead, VRAM_DblCircleDead*$20, $10*$20
+    FixedDMA Gfx_LevelShape_Platform, VRAM_Platform*$20, 8*$20
+    FixedDMA Gfx_Bumpers, VRAM_Bumper*$20, 5*16*$20
+    FixedDMA Gfx_BumperPad, VRAM_BumperPad*$20, 4*$20
+
+;-----------------;
+; Draw background ;
+;-----------------;
+
+    movem.l d0-d5/a0-a1, -(sp)
+    lea     (Gfx_LevelShape_BGLayout), a0
+    move.l  (RAM_ObjectList), a1
+    move.l  a1, a6
+    bsr     Decompress
+    movem.l (sp)+, d0-d5/a0-a1
+
+    move.l  #$60000003, ($C00004)
+    lea     ($C00000), a5
+    move.w  #(64*28)-1, d7
+@BGLoop:
+    moveq   #0, d6
+    move.b  (a6)+, d6
+    beq.s   @BGEmpty
+    add.w   #$4000|(VRAM_Level-1), d6
+@BGEmpty:
+    move.w  d6, (a5)
+    dbf     d7, @BGLoop
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

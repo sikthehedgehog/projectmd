@@ -1,0 +1,601 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------------------------------------;
+; This file contains the graphics data for the CD tray-themed level ;
+;-------------------------------------------------------------------;
+
+;----------------------------------------------------------------------------
+
+;---------------;
+; 8x8 tile data ;
+;---------------;
+
+Gfx_LevelTray:
+    incbin "graphics/lvl_tray/gfx.bin"
+    even
+
+;-------------------;
+; Background layout ;
+;-------------------;
+
+Gfx_LevelTray_BGLayout:
+    incbin  "graphics/lvl_tray/bglayout.bin"
+    even
+
+;-------;
+; Gears ;
+;-------;
+
+    cnop    0, 4096
+Gfx_LevelTray_Gears:
+    incbin "graphics/lvl_tray/gears.bin"
+
+;--------------------------------;
+; Tiles used for the fake layers ;
+;--------------------------------;
+
+Gfx_LevelTray_BGScroll1:
+    incbin  "graphics/lvl_tray/bgscrol1.bin"
+Gfx_LevelTray_BGScroll2:
+    incbin  "graphics/lvl_tray/bgscrol2.bin"
+
+;-------------------;
+; Platform graphics ;
+;-------------------;
+
+    cnop    0, 4*2*$20
+Gfx_LevelTray_Platform:
+    incbin  "graphics/lvl_tray/platform.bin"
+
+;----------------------------------------------------------------------------
+
+;-----------------;
+; 32x32 tile data ;
+;-----------------;
+
+Tiles_LevelTray:
+
+;--------------------------------------------;
+; To make my life easier and save text space ;
+;--------------------------------------------;
+
+@Begin equ Tiles_LevelTray
+
+    rsset VRAM_Level
+    rs.b 16+10
+@T2 rs.b (16*5)+8
+@T3 rs.b 16+7
+@G  rs.b 11
+@G2 rs.b 11
+
+;-----------;
+; Tile list ;
+;-----------;
+
+    dc.w    @Tile00-@Begin, @Tile00-@Begin
+    dc.w    @Tile01-@Begin, @Tile01B-@Begin
+    dc.w    @Tile02-@Begin, @Tile02-@Begin
+    dc.w    @Tile03-@Begin, @Tile03-@Begin
+    dc.w    @Tile04-@Begin, @Tile04-@Begin
+    dc.w    @Tile05-@Begin, @Tile05-@Begin
+    dc.w    @Tile06-@Begin, @Tile06-@Begin
+    dc.w    @Tile07-@Begin, @Tile07-@Begin
+    dc.w    @Tile08-@Begin, @Tile08B-@Begin
+    dc.w    @Tile09-@Begin, @Tile09B-@Begin
+    dc.w    @Tile0A-@Begin, @Tile0AB-@Begin
+    dc.w    @Tile0B-@Begin, @Tile0B-@Begin
+    dc.w    @Tile0C-@Begin, @Tile0C-@Begin
+    dc.w    @Tile0D-@Begin, @Tile0D-@Begin
+    dc.w    @Tile0E-@Begin, @Tile0E-@Begin
+    dc.w    @Tile0F-@Begin, @Tile0F-@Begin
+
+    dc.w    @Tile10-@Begin, @Tile10-@Begin
+    dc.w    @Tile11-@Begin, @Tile11-@Begin
+    dc.w    @Tile12-@Begin, @Tile12-@Begin
+    dc.w    @Tile13-@Begin, @Tile13B-@Begin
+    dc.w    @Tile14-@Begin, @Tile14B-@Begin
+    dc.w    @Tile15-@Begin, @Tile15B-@Begin
+    dc.w    @Tile16-@Begin, @Tile16B-@Begin
+    dc.w    @Tile17-@Begin, @Tile17B-@Begin
+    dc.w    @Tile18-@Begin, @Tile18B-@Begin
+    dc.w    @Tile19-@Begin, @Tile19B-@Begin
+    dc.w    @Tile1A-@Begin, @Tile1AB-@Begin
+    dc.w    @Tile1B-@Begin, @Tile1BB-@Begin
+    dc.w    @Tile1C-@Begin, @Tile1CB-@Begin
+    dc.w    @Tile1D-@Begin, @Tile1DB-@Begin
+    dc.w    @Tile1E-@Begin, @Tile1E-@Begin
+    dc.w    @Tile1F-@Begin, @Tile1F-@Begin
+
+    dc.w    @Tile20-@Begin, @Tile20-@Begin
+    dc.w    @Tile21-@Begin, @Tile21-@Begin
+    dc.w    @Tile22-@Begin, @Tile22B-@Begin
+    dc.w    @Tile23-@Begin, @Tile23B-@Begin
+    dc.w    @Tile24-@Begin, @Tile24-@Begin
+
+;----------------------;
+; Tile $00: empty tile ;
+;----------------------;
+
+@Tile00:
+    dcb.w   4*4, $8000
+
+;-----------------;
+; Tile $01: floor ;
+;-----------------;
+
+@Tile01:
+    dc.w    @T2+$A000, @T2+$A000, @T2+$A000, @T2+$A000
+    dc.w    @T2+$A001, @T2+$A001, @T2+$A001, @T2+$A001
+    dc.w    @T2+$A002, @T2+$A003, @T2+$A803, @T2+$A802
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+
+@Tile01B:
+    dc.w    @T2+$A800, @T2+$A800, @T2+$A800, @T2+$A800
+    dc.w    @T2+$A001, @T2+$A001, @T2+$A001, @T2+$A001
+    dc.w    @T2+$A002, @T2+$A003, @T2+$A803, @T2+$A802
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+
+;----------------------;
+; Tile $02: solid wall ;
+;----------------------;
+
+@Tile02:
+    dcb.w   4*4, @T2+$A004
+
+;------------------------------;
+; Tile $03: screwed wall piece ;
+;------------------------------;
+
+@Tile03:
+    dc.w    @T2+$A005, @T2+$A006, @T2+$A006, @T2+$A007
+    dc.w    @T2+$A008, @T2+$A004, @T2+$A004, @T2+$A009
+    dc.w    @T2+$A008, @T2+$A004, @T2+$A004, @T2+$A009
+    dc.w    @T2+$A00A, @T2+$A00B, @T2+$A00B, @T2+$A00C
+
+;-------------------------;
+; Tile $04: wall with "M" ;
+;-------------------------;
+
+@Tile04:
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+    dc.w    @T2+$A00D, @T2+$A00E, @T2+$A80E, @T2+$A80D
+    dc.w    @T2+$A00F, @T2+$A010, @T2+$A810, @T2+$A80F
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+
+;-------------------------;
+; Tile $05: wall with "E" ;
+;-------------------------;
+
+@Tile05:
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+    dc.w    @T2+$A00D, @T2+$A011, @T2+$A012, @T2+$A013
+    dc.w    @T2+$A00F, @T2+$B011, @T2+$B012, @T2+$B013
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+
+;-------------------------;
+; Tile $06: wall with "G" ;
+;-------------------------;
+
+@Tile06:
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+    dc.w    @T2+$A00D, @T2+$A011, @T2+$A012, @T2+$A013
+    dc.w    @T2+$A00F, @T2+$B011, @T2+$B811, @T2+$A80F
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+
+;-------------------------;
+; Tile $07: wall with "A" ;
+;-------------------------;
+
+@Tile07:
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+    dc.w    @T2+$A00D, @T2+$A011, @T2+$A811, @T2+$A80D
+    dc.w    @T2+$A00F, @T2+$A014, @T2+$A814, @T2+$A80F
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+
+;-------------------------;
+; Tile $08: vertical pipe ;
+;-------------------------;
+
+@Tile08:
+    dc.w    @T2+$A015, @T2+$A016, @T2+$A017, @T2+$A018
+    dc.w    @T2+$A015, @T2+$A016, @T2+$A017, @T2+$A018
+    dc.w    @T2+$A015, @T2+$A016, @T2+$A017, @T2+$A018
+    dc.w    @T2+$A015, @T2+$A016, @T2+$A017, @T2+$A018
+
+@Tile08B:
+    dc.w    @T2+$B015, @T2+$B016, @T2+$B017, @T2+$B018
+    dc.w    @T2+$B015, @T2+$B016, @T2+$B017, @T2+$B018
+    dc.w    @T2+$B015, @T2+$B016, @T2+$B017, @T2+$B018
+    dc.w    @T2+$B015, @T2+$B016, @T2+$B017, @T2+$B018
+
+;-------------------------------;
+; Tile $09: vertical pipe (top) ;
+;-------------------------------;
+
+@Tile09:
+    dc.w    @T2+$A02D, @T2+$A02E, @T2+$A02F, @T2+$A030
+    dc.w    @T2+$A01D, @T2+$A01E, @T2+$A01F, @T2+$A020
+    dc.w    @T2+$A019, @T2+$A01A, @T2+$A01B, @T2+$A01C
+    dc.w    @T2+$A015, @T2+$A016, @T2+$A017, @T2+$A018
+
+@Tile09B:
+    dc.w    @T2+$A029, @T2+$A02A, @T2+$A02B, @T2+$A02C
+    dc.w    @T2+$A025, @T2+$A026, @T2+$A027, @T2+$A028
+    dc.w    @T2+$A021, @T2+$A022, @T2+$A023, @T2+$A024
+    dc.w    @T2+$B015, @T2+$B016, @T2+$B017, @T2+$B018
+
+;----------------------------------;
+; Tile $0A: vertical pipe (bottom) ;
+;----------------------------------;
+
+@Tile0A:
+    dc.w    @T2+$A015, @T2+$A016, @T2+$A017, @T2+$A018
+    dc.w    @T2+$A01D, @T2+$A01E, @T2+$A01F, @T2+$A020
+    dc.w    @T2+$A019, @T2+$A01A, @T2+$A01B, @T2+$A01C
+    dc.w    @T2+$B029, @T2+$B02A, @T2+$B02B, @T2+$B02C
+
+@Tile0AB:
+    dc.w    @T2+$B015, @T2+$B016, @T2+$B017, @T2+$B018
+    dc.w    @T2+$A025, @T2+$A026, @T2+$A027, @T2+$A028
+    dc.w    @T2+$A021, @T2+$A022, @T2+$A023, @T2+$A024
+    dc.w    @T2+$B02D, @T2+$B02E, @T2+$B02F, @T2+$B030
+
+;--------------------------------;
+; Tile $0B: wall with vent holes ;
+;--------------------------------;
+
+@Tile0B:
+    dc.w    @T2+$A031, @T2+$A032, @T2+$A832, @T2+$A831
+    dc.w    @T2+$A031, @T2+$A032, @T2+$A832, @T2+$A831
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+
+;---------------------------;
+; Tile $0C: gray bars (top) ;
+;---------------------------;
+
+@Tile0C:
+    dc.w    @T2+$A033, @T2+$A033, @T2+$A033, @T2+$A033
+    dc.w    @T2+$A034, @T2+$A034, @T2+$A034, @T2+$A034
+    dc.w    @T2+$A034, @T2+$A034, @T2+$A034, @T2+$A034
+    dc.w    @T2+$A034, @T2+$A034, @T2+$A034, @T2+$A034
+
+;------------------------------;
+; Tile $0D: gray bars (bottom) ;
+;------------------------------;
+
+@Tile0D:
+    dc.w    @T2+$A034, @T2+$A034, @T2+$A034, @T2+$A034
+    dc.w    @T2+$A034, @T2+$A034, @T2+$A034, @T2+$A034
+    dc.w    @T2+$A034, @T2+$A034, @T2+$A034, @T2+$A034
+    dc.w    @T2+$A035, @T2+$A035, @T2+$A035, @T2+$A035
+
+;------------------;
+; Tile $0E: spikes ;
+;------------------;
+
+@Tile0E:
+    dc.w    @T2+$A036, @T2+$A036, @T2+$A036, @T2+$A036
+    dc.w    @T2+$A037, @T2+$A037, @T2+$A037, @T2+$A037
+    dc.w    @T2+$A038, @T2+$A038, @T2+$A038, @T2+$A038
+    dc.w    @T2+$A039, @T2+$A039, @T2+$A039, @T2+$A039
+
+;-------------------------------;
+; Tile $0F: CCW gear (top left) ;
+;-------------------------------;
+
+@Tile0F:
+    dc.w    $8000, @G+$C000, @G+$C001, @G+$C002
+    dc.w    @G+$C003, @G+$C004, @G+$C005, @G+$C006
+    dc.w    @G+$C007, @G+$C008, @T2+$C03A, @T2+$C03A
+    dc.w    @G+$C009, @G+$C00A, @T2+$C03A, @T2+$C03B
+
+;--------------------------------;
+; Tile $10: CCW gear (top right) ;
+;--------------------------------;
+
+@Tile10:
+    dc.w    @G2+$C802, @G2+$C801, @G2+$C800, $8000
+    dc.w    @G2+$C806, @G2+$C805, @G2+$C804, @G2+$C803
+    dc.w    @T2+$C03A, @T2+$C03A, @G2+$C808, @G2+$C807
+    dc.w    @T2+$C03C, @T2+$C03A, @G2+$C80A, @G2+$C809
+
+;----------------------------------;
+; Tile $11: CCW gear (bottom left) ;
+;----------------------------------;
+
+@Tile11:
+    dc.w    @G2+$D009, @G2+$D00A, @T2+$C03A, @T2+$C03D
+    dc.w    @G2+$D007, @G2+$D008, @T2+$C03A, @T2+$C03A
+    dc.w    @G2+$D003, @G2+$D004, @G2+$D005, @G2+$D006
+    dc.w    $8000, @G2+$D000, @G2+$D001, @G2+$D002
+
+;-----------------------------------;
+; Tile $12: CCW gear (bottom right) ;
+;-----------------------------------;
+
+@Tile12:
+    dc.w    @T2+$C03E, @T2+$C03A, @G+$D80A, @G+$D809
+    dc.w    @T2+$C03A, @T2+$C03A, @G+$D808, @G+$D807
+    dc.w    @G+$D806, @G+$D805, @G+$D804, @G+$D803
+    dc.w    @G+$D802, @G+$D801, @G+$D800, $8000
+
+;----------------------------;
+; Tile $13: drum body (left) ;
+;----------------------------;
+
+@Tile13:
+    dc.w    @T2+$A03F, @T2+$A040, @T2+$A041, @T2+$A042
+    dc.w    @T2+$A03F, @T2+$A040, @T2+$A041, @T2+$A042
+    dc.w    @T2+$A03F, @T2+$A040, @T2+$A041, @T2+$A042
+    dc.w    @T2+$A03F, @T2+$A040, @T2+$A041, @T2+$A042
+
+@Tile13B:
+    dc.w    @T2+$B03F, @T2+$B040, @T2+$B041, @T2+$B042
+    dc.w    @T2+$B03F, @T2+$B040, @T2+$B041, @T2+$B042
+    dc.w    @T2+$B03F, @T2+$B040, @T2+$B041, @T2+$B042
+    dc.w    @T2+$B03F, @T2+$B040, @T2+$B041, @T2+$B042
+
+;-----------------------------;
+; Tile $14: drum body (right) ;
+;-----------------------------;
+
+@Tile14:
+    dc.w    @T2+$A842, @T2+$A841, @T2+$A840, @T2+$A83F
+    dc.w    @T2+$A842, @T2+$A841, @T2+$A840, @T2+$A83F
+    dc.w    @T2+$A842, @T2+$A841, @T2+$A840, @T2+$A83F
+    dc.w    @T2+$A842, @T2+$A841, @T2+$A840, @T2+$A83F
+
+@Tile14B:
+    dc.w    @T2+$B842, @T2+$B841, @T2+$B840, @T2+$B83F
+    dc.w    @T2+$B842, @T2+$B841, @T2+$B840, @T2+$B83F
+    dc.w    @T2+$B842, @T2+$B841, @T2+$B840, @T2+$B83F
+    dc.w    @T2+$B842, @T2+$B841, @T2+$B840, @T2+$B83F
+
+;---------------------------;
+; Tile $15: drum top (left) ;
+;---------------------------;
+
+@Tile15:
+    dc.w    @T2+$A043, @T2+$A044, @T2+$A045, @T2+$A046
+    dc.w    @T2+$A03F, @T2+$A040, @T2+$A041, @T2+$A042
+    dc.w    @T2+$A03F, @T2+$A040, @T2+$A041, @T2+$A042
+    dc.w    @T2+$A03F, @T2+$A040, @T2+$A041, @T2+$A042
+
+@Tile15B:
+    dc.w    @T2+$A047, @T2+$A048, @T2+$A049, @T2+$A04A
+    dc.w    @T2+$B03F, @T2+$B040, @T2+$B041, @T2+$B042
+    dc.w    @T2+$B03F, @T2+$B040, @T2+$B041, @T2+$B042
+    dc.w    @T2+$B03F, @T2+$B040, @T2+$B041, @T2+$B042
+
+;----------------------------;
+; Tile $16: drum top (right) ;
+;----------------------------;
+
+@Tile16:
+    dc.w    @T2+$A84A, @T2+$A849, @T2+$A848, @T2+$A847
+    dc.w    @T2+$A842, @T2+$A841, @T2+$A840, @T2+$A83F
+    dc.w    @T2+$A842, @T2+$A841, @T2+$A840, @T2+$A83F
+    dc.w    @T2+$A842, @T2+$A841, @T2+$A840, @T2+$A83F
+
+@Tile16B:
+    dc.w    @T2+$A846, @T2+$A845, @T2+$A844, @T2+$A843
+    dc.w    @T2+$B842, @T2+$B841, @T2+$B840, @T2+$B83F
+    dc.w    @T2+$B842, @T2+$B841, @T2+$B840, @T2+$B83F
+    dc.w    @T2+$B842, @T2+$B841, @T2+$B840, @T2+$B83F
+
+;------------------;
+; Tile $17: bridge ;
+;------------------;
+
+@Tile17:
+    dc.w    @T2+$C04B, @T2+$C04B, @T2+$C04B, @T2+$C04B
+    dc.w    @T2+$C04C, @T2+$C04D, @T2+$D04C, @T2+$D04D
+    dc.w    @T2+$C04B, @T2+$C04B, @T2+$C04B, @T2+$C04B
+    dc.w    $8000, $8000, $8000, $8000
+
+@Tile17B:
+    dc.w    @T2+$C84B, @T2+$C84B, @T2+$C84B, @T2+$C84B
+    dc.w    @T2+$C04E, @T2+$C04F, @T2+$D04E, @T2+$D04F
+    dc.w    @T2+$C84B, @T2+$C84B, @T2+$C84B, @T2+$C84B
+    dc.w    $8000, $8000, $8000, $8000
+
+;----------------------------;
+; Tile $18: drum body (left) ;
+;----------------------------;
+
+@Tile18:
+    dc.w    @T2+$C03F, @T2+$C040, @T2+$C041, @T2+$C042
+    dc.w    @T2+$C03F, @T2+$C040, @T2+$C041, @T2+$C042
+    dc.w    @T2+$C03F, @T2+$C040, @T2+$C041, @T2+$C042
+    dc.w    @T2+$C03F, @T2+$C040, @T2+$C041, @T2+$C042
+
+@Tile18B:
+    dc.w    @T2+$D03F, @T2+$D040, @T2+$D041, @T2+$D042
+    dc.w    @T2+$D03F, @T2+$D040, @T2+$D041, @T2+$D042
+    dc.w    @T2+$D03F, @T2+$D040, @T2+$D041, @T2+$D042
+    dc.w    @T2+$D03F, @T2+$D040, @T2+$D041, @T2+$D042
+
+;-----------------------------;
+; Tile $19: drum body (right) ;
+;-----------------------------;
+
+@Tile19:
+    dc.w    @T2+$C842, @T2+$C841, @T2+$C840, @T2+$C83F
+    dc.w    @T2+$C842, @T2+$C841, @T2+$C840, @T2+$C83F
+    dc.w    @T2+$C842, @T2+$C841, @T2+$C840, @T2+$C83F
+    dc.w    @T2+$C842, @T2+$C841, @T2+$C840, @T2+$C83F
+
+@Tile19B:
+    dc.w    @T2+$D842, @T2+$D841, @T2+$D840, @T2+$D83F
+    dc.w    @T2+$D842, @T2+$D841, @T2+$D840, @T2+$D83F
+    dc.w    @T2+$D842, @T2+$D841, @T2+$D840, @T2+$D83F
+    dc.w    @T2+$D842, @T2+$D841, @T2+$D840, @T2+$D83F
+
+;---------------------------;
+; Tile $1A: drum top (left) ;
+;---------------------------;
+
+@Tile1A:
+    dc.w    @T2+$C043, @T2+$C044, @T2+$C045, @T2+$C046
+    dc.w    @T2+$C03F, @T2+$C040, @T2+$C041, @T2+$C042
+    dc.w    @T2+$C03F, @T2+$C040, @T2+$C041, @T2+$C042
+    dc.w    @T2+$C03F, @T2+$C040, @T2+$C041, @T2+$C042
+
+@Tile1AB:
+    dc.w    @T2+$C047, @T2+$C048, @T2+$C049, @T2+$C04A
+    dc.w    @T2+$D03F, @T2+$D040, @T2+$D041, @T2+$D042
+    dc.w    @T2+$D03F, @T2+$D040, @T2+$D041, @T2+$D042
+    dc.w    @T2+$D03F, @T2+$D040, @T2+$D041, @T2+$D042
+
+;----------------------------;
+; Tile $1B: drum top (right) ;
+;----------------------------;
+
+@Tile1B:
+    dc.w    @T2+$C84A, @T2+$C849, @T2+$C848, @T2+$C847
+    dc.w    @T2+$C842, @T2+$C841, @T2+$C840, @T2+$C83F
+    dc.w    @T2+$C842, @T2+$C841, @T2+$C840, @T2+$C83F
+    dc.w    @T2+$C842, @T2+$C841, @T2+$C840, @T2+$C83F
+
+@Tile1BB:
+    dc.w    @T2+$C846, @T2+$C845, @T2+$C844, @T2+$C843
+    dc.w    @T2+$D842, @T2+$D841, @T2+$D840, @T2+$D83F
+    dc.w    @T2+$D842, @T2+$D841, @T2+$D840, @T2+$D83F
+    dc.w    @T2+$D842, @T2+$D841, @T2+$D840, @T2+$D83F
+
+;-------------------;
+; Tile $1C: ceiling ;
+;-------------------;
+
+@Tile1C:
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+    dc.w    @T2+$A050, @T2+$A050, @T2+$A050, @T2+$A050
+
+@Tile1CB:
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+    dc.w    @T2+$A850, @T2+$A850, @T2+$A850, @T2+$A850
+
+;------------------------------------------;
+; Tile $1D: ceiling with ventilation holes ;
+;------------------------------------------;
+
+@Tile1D:
+    dc.w    @T2+$A031, @T2+$A032, @T2+$A832, @T2+$A831
+    dc.w    @T2+$A031, @T2+$A032, @T2+$A832, @T2+$A831
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+    dc.w    @T2+$A050, @T2+$A050, @T2+$A050, @T2+$A050
+
+@Tile1DB:
+    dc.w    @T2+$A031, @T2+$A032, @T2+$A832, @T2+$A831
+    dc.w    @T2+$A031, @T2+$A032, @T2+$A832, @T2+$A831
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+    dc.w    @T2+$A850, @T2+$A850, @T2+$A850, @T2+$A850
+
+;---------------------------;
+; Tile $1E: horizontal lane ;
+;---------------------------;
+
+@Tile1E:
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    @T2+$A051, @T2+$A051, @T2+$A051, @T2+$A051
+    dc.w    @T2+$A052, @T2+$A052, @T2+$A052, @T2+$A052
+    dc.w    $8000, $8000, $8000, $8000
+
+;-------------------------;
+; Tile $1F: vertical lane ;
+;-------------------------;
+
+@Tile1F:
+    dc.w    $8000, @T2+$A053, @T2+$A054, $8000
+    dc.w    $8000, @T2+$A053, @T2+$A054, $8000
+    dc.w    $8000, @T2+$A053, @T2+$A054, $8000
+    dc.w    $8000, @T2+$A053, @T2+$A054, $8000
+
+;---------------------------------------;
+; Tile $20: vertical lane for platforms ;
+;---------------------------------------;
+
+@Tile20:
+    dc.w    $8000, @T2+$A055, @T2+$A855, $8000
+    dc.w    $8000, @T2+$A055, @T2+$A855, $8000
+    dc.w    $8000, @T2+$A055, @T2+$A855, $8000
+    dc.w    $8000, @T2+$A055, @T2+$A855, $8000
+
+;-----------------------------------------;
+; Tile $21: horizontal lane for platforms ;
+;-----------------------------------------;
+
+@Tile21:
+    dc.w    @T2+$A056, @T2+$A056, @T2+$A056, @T2+$A056
+    dc.w    @T2+$B056, @T2+$B056, @T2+$B056, @T2+$B056
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    $8000, $8000, $8000, $8000
+
+;---------------------------------;
+; Tile $22: in-wall platform lane ;
+;---------------------------------;
+
+@Tile22:
+    dc.w    @T2+$A057, @T2+$A057, @T2+$A057, @T2+$A057
+    dc.w    @T2+$B857, @T2+$B857, @T2+$B857, @T2+$B857
+    dc.w    @T2+$A001, @T2+$A001, @T2+$A001, @T2+$A001
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+
+@Tile22B:
+    dc.w    @T2+$A857, @T2+$A857, @T2+$A857, @T2+$A857
+    dc.w    @T2+$B057, @T2+$B057, @T2+$B057, @T2+$B057
+    dc.w    @T2+$A001, @T2+$A001, @T2+$A001, @T2+$A001
+    dc.w    @T2+$A004, @T2+$A004, @T2+$A004, @T2+$A004
+
+;----------------------------;
+; Tile $23: support (bottom) ;
+;----------------------------;
+
+@Tile23:
+    dc.w    @T3+$C000, @T3+$C001, @T3+$C001, @T3+$C002
+    dc.w    @T3+$C000, @T3+$C003, @T3+$C004, @T3+$C002
+    dc.w    @T3+$C007, @T3+$C005, @T3+$C006, @T3+$C008
+    dc.w    @T3+$C009, @T3+$C00A, @T3+$C00B, @T3+$C00C
+
+@Tile23B:
+    dc.w    @T3+$C000, @T3+$C001, @T3+$C001, @T3+$C002
+    dc.w    @T3+$C000, @T3+$C003, @T3+$C004, @T3+$C002
+    dc.w    @T3+$C00D, @T3+$C005, @T3+$C006, @T3+$C00E
+    dc.w    @T3+$C00F, @T3+$C010, @T3+$C011, @T3+$C012
+
+;--------------------------;
+; Tile $24: support (main) ;
+;--------------------------;
+
+@Tile24:
+    dc.w    @T3+$C000, @T3+$C001, @T3+$C001, @T3+$C002
+    dc.w    @T3+$C000, @T3+$C013, @T3+$C014, @T3+$C002
+    dc.w    @T3+$C000, @T3+$C015, @T3+$C016, @T3+$C002
+    dc.w    @T3+$C000, @T3+$C001, @T3+$C001, @T3+$C002
+
+;----------------------------------------------------------------------------

@@ -1,0 +1,48 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------------------------------------;
+; FixedDMA                                                               ;
+;                                                                        ;
+; Performs a DMA transfer operation from ROM/RAM to VRAM                 ;
+; The operation is stored in the VDP command buffer                      ;
+; This macro is meant to be used when all source, destination and length ;
+; have constant values                                                   ;
+;------------------------------------------------------------------------;
+; INPUT                                                                  ;
+;   src .... Source address (ROM/RAM)                                    ;
+;   dest ... Destination address (VRAM)                                  ;
+;   len .... Length (in bytes)                                           ;
+;------------------------------------------------------------------------;
+; BREAKS: a6                                                             ;
+;------------------------------------------------------------------------;
+
+FixedDMA macro src, dest, len
+    move.l  (RAM_VDPBufPos), a6
+    move.l  #$94009300|(((len)<<7)&$7F0000)|(((len)>>1)&$FF), (a6)+
+    move.l  #$97009600|(((src)>>1)&$7F0000)|(((src)>>9)&$FF), (a6)+
+    move.w  #$9500|(((src)>>1)&$FF), (a6)+
+    move.l  #$40000080|(((dest)&$3FFF)<<16)|((dest)>>14), (a6)+
+    move.l  a6, (RAM_VDPBufPos)
+    endm
+
+;----------------------------------------------------------------------------

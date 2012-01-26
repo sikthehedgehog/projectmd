@@ -1,0 +1,96 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------;
+; Main options menu ;
+;-------------------;
+
+Options:
+
+;---------------;
+; Call the menu ;
+;---------------;
+
+    lea     (@Str_Title), a0
+    lea     (@Options), a1
+    bsr     Menu
+
+;--------------------------;
+; Go back to title screen? ;
+;--------------------------;
+
+    tst.b   (RAM_CurrOption)
+    bge.s   @NoBack
+@Quit:
+    move.w  #$8114, ($C00004)
+    move.b  #GameMode_Title, (RAM_GameMode)
+    move.b  #BGMStop, (RAM_BGMToPlay)
+    jmp     SwitchMode
+@NoBack:
+
+;----------------------------------------------;
+; Jump to the routine that handles this option ;
+;----------------------------------------------;
+
+    lea     (@Routines), a0
+    move.b  (RAM_CurrOption), d0
+    and.w   #$FF, d0
+    add.w   d0, d0
+    add.w   d0, d0
+    move.l  (a0,d0.w), a0
+    jmp     (a0)
+
+;----------------------------------------------------------------------------
+
+;------------;
+; Menu title ;
+;------------;
+
+@Str_Title:
+    dc.b    'OPTIONS', 0
+    even
+
+;--------------;
+; Menu options ;
+;--------------;
+
+@Options:
+    dc.w    3
+    dc.l    @Str_Sound
+    dc.l    @Str_Save
+    dc.l    @Str_Quit
+
+@Str_Sound:     dc.b 'MUSIC AND SFX', 0
+@Str_Save:      dc.b 'SAVEGAME OPTIONS', 0
+@Str_Quit:      dc.b 'EXIT', 0
+    even
+
+;--------------------------;
+; Routines for each option ;
+;--------------------------;
+
+@Routines:
+    dc.l    MusicAndSFXMenu     ; Music and SFX
+    dc.l    SavegameOptions     ; Savegame options
+    dc.l    @Quit               ; Exit
+
+;----------------------------------------------------------------------------

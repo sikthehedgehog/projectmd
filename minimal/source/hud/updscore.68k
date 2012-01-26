@@ -1,0 +1,84 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------;
+; UpdateScoreHUD                    ;
+;                                   ;
+; Updates the score text in the HUD ;
+;-----------------------------------;
+; BREAKS: all but d0                ;
+;-----------------------------------;
+
+UpdateScoreHUD:
+
+;-------------------;
+; Get current score ;
+;-------------------;
+
+    move.l  (RAM_Score), d1
+
+;-------------------------;
+; Skip all leading zeroes ;
+;-------------------------;
+
+    moveq   #0, d4
+    moveq   #7-1, d3
+    move.w  #VRAM_HUDScore*$20, d2
+
+@SkipLoop:
+    rol.l   #4, d1
+    move.b  d1, d6
+    and.b   #$F, d6
+    bne.s   @SkipEnd
+
+    addq.w  #1, d4
+    add.w   #$20*2, d2
+    dbf     d3, @SkipLoop
+
+@SkipEnd:
+    addq.w  #1, d3
+    move.b  d4, (RAM_ScoreLen)
+
+;-------------------------;
+; Loop through all digits ;
+;-------------------------;
+
+@Loop:
+    move.b  d1, d6
+    and.l   #$F, d6
+    lsl.l   #5+1, d6
+    add.l   #Gfx_HUDNumbers, d6
+
+    move.w  d2, d7
+    VarSrcDestDMA $20*2
+
+    add.w   #$20*2, d2
+    rol.l   #4, d1
+    dbf     d3, @Loop
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

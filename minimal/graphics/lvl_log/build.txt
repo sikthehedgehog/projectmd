@@ -1,0 +1,35 @@
+openout graphics/lvl_log/gfx.tmp
+
+palette ??? ??? ??? ??? ??? ??? ??? ??? ??? ??? EEE 888 CCC AAA 666 444
+setmask
+
+openin concept/lvl_log/_background.bmp
+scroll 0 0 4 1
+closein
+
+palette ??? E00 0A0 00E A0A 808 608 408 208 082 0A6 0CA 0EE EEE CAA A66
+setmask
+
+openin concept/lvl_log/_tilemap_pal2.bmp
+scroll 0 0 16 1
+scroll 0 1 11 1
+closein
+
+palette ??? EEE EA0 E80 08E 06E 0EE 6AA A66 E00 ??? ??? ??? ??? ??? ???
+setmask
+
+openin concept/lvl_log/_tilemap_pal3.bmp
+scroll 0 0 16 1
+scroll 0 1 4 1
+closein
+
+closeout
+
+palette ??? E00 0A0 00E A0A 808 608 408 208 082 0A6 0CA 0EE EEE CAA A66
+setmask
+
+openout graphics/lvl_log/platform.bin
+openin concept/lvl_log/platform.bmp
+sprite 0 0 4 2
+closein
+closeout

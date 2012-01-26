@@ -1,0 +1,50 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------;
+; To work around the DMA bug... ;
+;-------------------------------;
+
+    cnop 0, $200
+
+;--------------------------------;
+; Tile data for pixelated robots ;
+;--------------------------------;
+
+;------------------------------------;
+; Graphics for the walking animation ;
+;------------------------------------;
+
+Gfx_PixRobotWalk:
+    incbin  "graphics/pixrobot/walk1.bin"
+    incbin  "graphics/pixrobot/walk2.bin"
+    incbin  "graphics/pixrobot/walk3.bin"
+    incbin  "graphics/pixrobot/walk4.bin"
+
+;------;
+; Dead ;
+;------;
+
+Gfx_PixRobotDead:
+    incbin  "graphics/pixrobot/dead.bin"
+
+;----------------------------------------------------------------------------

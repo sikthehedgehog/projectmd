@@ -1,0 +1,298 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------;
+; 3D starfield scene from the intro      ;
+;----------------------------------------;
+; OUTPUT                                 ;
+;   d0.w ... 0 if cutscene must continue ;
+;            1 if cutscene should stop   ;
+;----------------------------------------;
+; BREAKS: all                            ;
+;----------------------------------------;
+
+IntroStarfield:
+
+;------------------------;
+; Initialize game status ;
+;------------------------;
+
+    move.w  #%100, (RAM_GameStatus)
+    move.l  #0, (RAM_GlobalAnim)
+
+;-------------------;
+; Initialize fading ;
+;-------------------;
+
+    move.l  #7<<16, (RAM_FadeStage)
+    move.l  (RAM_GlobalAnimSpd), d0
+    asr.l   #2, d0
+    move.l  d0, (RAM_FadeSpeed)
+
+;------------;
+; Set up VDP ;
+;------------;
+
+    lea     ($C00004), a4
+    lea     ($C00000), a5
+
+    move.w  #$8114, (a4)    ; Disable display
+    move.w  #$8238, (a4)    ; Tilemap A: $E000
+    move.w  #$8407, (a4)    ; Tilemap B: $E000
+    move.w  #$857E, (a4)    ; Sprite table: $FC00
+    move.w  #$8B00, (a4)    ; No IRQ2, full VScroll, full HScroll
+    move.w  #$8D00, (a4)    ; HScroll table: $0000 (no HScroll!)
+    move.w  #$9001, (a4)    ; Tilemap size: 64x32
+
+;--------------------;
+; Clear sprite table ;
+;--------------------;
+
+    movem.l a0-a1/a4-a5, -(sp)
+    bsr     ClearSprites
+    bsr     UpdateSprites
+    bsr     FlushVDPBuffer
+    movem.l (sp)+, a0-a1/a4-a5
+
+;-------------;
+; Clear VSRAM ;
+;-------------;
+
+    move.l  #0, (RAM_VScrBuffer)
+
+;------------;
+; Clear CRAM ;
+;------------;
+
+    move.l  #$C0000000, (a4)
+    move.l  #$0EEE0EEE, d0
+    moveq   #($40/8)-1, d1
+@ClearCRAM:
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    dbf     d1, @ClearCRAM
+
+;----------------------------------;
+; Load palette into palette buffer ;
+;----------------------------------;
+
+    lea     (Pal_Starfield), a0
+    lea     (RAM_PalBuffer), a1
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+
+;-------------------;
+; Load all graphics ;
+;-------------------;
+
+    FixedDMA Gfx_Starfield, $20, 9*$20
+
+;------------------------;
+; Clear tilemap contents ;
+;------------------------;
+
+    move.l  #$00010001, d0
+    move.w  #((64/16)*32)-1, d1
+    move.l  #$60000003, (a4)
+@ClearTilemap:
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    dbf     d1, @ClearTilemap
+
+;----------------------;
+; Initialize animation ;
+;----------------------;
+
+    move.l  #0, (RAM_StarfieldPos)
+
+    lea     (RAM_StarfieldData), a0
+    move.w  #256-1, d1
+@InitAnim:
+    bsr     Random
+    and.w   #%10111110, d0
+    move.w  d0, (a0)+
+    bsr     Random
+    and.w   #%10011110, d0
+    move.w  d0, (a0)+
+    dbf     d1, @InitAnim
+
+;    lea     (RAM_StarfieldData), a0
+;    move.w  #(256/8)-1, d2
+;@InitAnim:
+;    bsr     Random
+;    and.w   #%10111110, d0
+;    move.w  d0, d1
+;    bsr     Random
+;    and.w   #%10011110, d0
+;    rept    8
+;    move.w  d1, (a0)+
+;    move.w  d0, (a0)+
+;    endr
+;    dbf     d2, @InitAnim
+
+;----------------;
+; Enable display ;
+;----------------;
+
+    bsr     FlushVDPBuffer
+    ;move.w  #$8154, ($C00004)
+
+;----------------------------------------------------------------------------
+
+;-----------;
+; Main loop ;
+;-----------;
+
+@MainLoop:
+
+;-------;
+; Quit? ;
+;-------;
+
+    bsr     ReadJoypad
+    move.b  (RAM_JoypadPress), d0
+    and.b   #$F0, d0
+    bne     @Quit
+
+;-----------;
+; Do fading ;
+;-----------;
+
+    bsr     Fade
+
+;-------------------;
+; Clear all sprites ;
+;-------------------;
+
+    bsr     ClearSprites
+
+;-------------------;
+; Process all stars ;
+;-------------------;
+
+    lea     (StarfieldTable), a0
+    lea     (RAM_StarfieldData), a1
+
+    moveq   #0, d4
+@StarLoop:
+    move.w  d4, d2
+    add.w   (RAM_StarfieldPos), d2
+    and.w   #$FF<<2, d2
+    move.w  d2, d3
+    addq.w  #2, d3
+
+    move.w  (a1,d2.w), d0
+    move.w  (a1,d3.w), d1
+
+    moveq   #0, d5
+    btst.l  #7, d0
+    beq.s   @NoXFix
+    bclr.l  #7, d0
+    bset.l  #0, d5
+@NoXFix:
+    btst.l  #7, d1
+    beq.s   @NoYFix
+    bclr.l  #7, d1
+    bset.l  #1, d5
+@NoYFix:
+
+    move.w  d4, d3
+    lsl.w   #1+5, d3
+    add.w   d3, d0
+    add.w   d3, d1
+    move.w  (a0,d0.w), d0
+    move.w  (a0,d1.w), d1
+
+    btst.l  #0, d5
+    beq.s   @NoXSwap
+    neg.w   d0
+@NoXSwap:
+    btst.l  #1, d5
+    beq.s   @NoYSwap
+    neg.w   d1
+@NoYSwap:
+
+    move.w  d4, d2
+    lsr.w   #5, d2
+    eor.w   #7, d2
+    addq.w  #2, d2
+
+    add.w   #128+160-4, d0
+    add.w   #128+112-4, d1
+    moveq   #%0000, d3
+    bsr     AddSprite
+
+    addq.w  #4, d4
+    cmp.w   #$100, d4
+    bne     @StarLoop
+
+;------------------;
+; Update animation ;
+;------------------;
+
+    move.l  (RAM_StarfieldPos), d7
+    move.l  (RAM_GlobalAnimSpd), d6
+    lsl.l   #4, d6
+    add.l   d6, d7
+    move.l  d7, (RAM_StarfieldPos)
+
+;------------;
+; Next frame ;
+;------------;
+
+    bsr     UpdateSprites
+    bsr     VSync
+    bsr     FlushVDPBuffer
+
+;-------;
+; Over? ;
+;-------;
+
+    move.w  #240*$10, d0
+    cmp.w   (RAM_StarfieldPos), d0
+    bgt     @MainLoop
+
+;----------------------------------------------------------------------------
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    moveq   #0, d0
+    rts
+
+@Quit:
+    moveq   #1, d0
+    rts
+
+;----------------------------------------------------------------------------

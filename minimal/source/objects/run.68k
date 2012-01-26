@@ -1,0 +1,203 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------------;
+; RunObjects                                     ;
+;                                                ;
+; Runs the game logic code of all active objects ;
+;------------------------------------------------;
+; BREAKS: all                                    ;
+;------------------------------------------------;
+
+RunObjects:
+
+;----------------------------------------------;
+; Get addresses of object list and last object ;
+;----------------------------------------------;
+
+    move.l  (RAM_ObjectList), a0
+    move.l  (RAM_LastObject), a1
+
+;------------------------;
+; No objects to process? ;
+;------------------------;
+
+    cmp.l   a0, a1
+    beq.s   @End
+
+;-----------------------------------------------------------------;
+; Pointer to player data, because it can be handy to some objects ;
+;-----------------------------------------------------------------;
+
+    lea     (RAM_Player), a3
+
+;--------------------------------;
+; Get address of subroutine list ;
+;--------------------------------;
+
+    lea     (@Functions), a2
+    tst.b   (RAM_Player+Player_PowerDelay)
+    bne.s   @PassiveMode
+    btst.b  #IngameStat_Pause, (RAM_IngameStatus+1)
+    beq.s   @ActiveMode
+@PassiveMode:
+    lea     (@FunctionsPassive), a2
+@ActiveMode:
+
+;---------------------;
+; Process all objects ;
+;---------------------;
+
+@Loop:
+    move.w  (a0), d0
+    add.w   d0, d0
+    add.w   d0, d0
+    move.l  (a2,d0.w), a6
+    jsr     (a6)
+
+    adda.w  #Object_Size, a0
+    cmp.l   a0, a1
+    bne.s   @Loop
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------;
+; Subroutine for objects that do nothing ;
+;----------------------------------------;
+
+@Null:
+    rts
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------;
+; List of subroutines for each object type ;
+;------------------------------------------;
+
+@Functions:
+    dc.l    RunRhombus              ; Rhombus
+    dc.l    RunPulseGenerator       ; Pulse generator
+    dc.l    RunSpark                ; Horizontal sparks
+    dc.l    RunRay                  ; Ray power-up
+    dc.l    RunThinBlock            ; Breakable thin block
+    dc.l    RunBomb                 ; Bomb power-up
+    dc.l    RunTroll                ; Troll
+    dc.l    RunFlamethrower         ; Flamethrower going up
+    dc.l    RunFlamethrower2        ; Flamethrower going down
+    dc.l    RunVerticalPlatform     ; Vertical platforms
+    dc.l    RunCapacitorTop         ; Capacitors that go boom
+    dc.l    RunCableBase            ; Hanging cable base
+    dc.l    RunVSpark               ; Vertical sparks
+    dc.l    RunHeart                ; Love power-up
+    dc.l    RunEndButton            ; Button that ends the level
+    dc.l    RunDblCircle            ; Double circle thingy
+    dc.l    RunCheckPoint           ; Checkpoint
+    dc.l    RunStalactite           ; Stalactite
+    dc.l    RunSpikes               ; Spikes behaviour
+    dc.l    RunBreakablePlatform    ; Breakable platforms
+    dc.l    RunStars                ; Invinciblity item
+    dc.l    RunLaser                ; Laser
+    dc.l    RunGearHazard           ; Gear hazard area
+    dc.l    RunIceRock              ; Falling ice rocks
+    dc.l    RunRailPlatform         ; Rail platforms
+    dc.l    RunDJump                ; Double jump power-up
+    dc.l    Run1up                  ; 1-up
+    dc.l    RunWLTeleporter         ; Waterlava teleporter
+    dc.l    RunWLIceFloor           ; Waterlava ice floor
+    dc.l    RunBumper               ; Bumper
+    dc.l    RunBumperPad            ; Bumper pad
+    dc.l    RunLightBulb            ; Light bulb
+    dc.l    RunVSparkEmit           ; Vertical spark emitter (floor)
+    dc.l    RunVSparkEmit           ; Vertical spark emitter (ceiling)
+    dc.l    RunSpinSpike            ; Spinning spikeball
+    dc.l    RunBarrier              ; Barrier
+
+    dc.l    RunPulse                ; Pulse
+    dc.l    RunFlameball            ; Flameball going up
+    dc.l    RunFlameball2           ; Flameball going down
+    dc.l    RunCablePiece           ; Piece of hanging cable
+    dc.l    RunCableSpark           ; Hanging cable spark
+    dc.l    RunPlatformPiece        ; Falling platform pieces
+    dc.l    RunFallingPiece         ; Generic falling piece
+    dc.l    RunHeartBullet          ; Heart bullet
+    dc.l    RunSparkle              ; Sparkle when getting a rhombus
+
+;-----------------------------------------------;
+; Same as above, in passive mode (paused, etc.) ;
+;-----------------------------------------------;
+
+@FunctionsPassive:
+    dc.l    @Null                   ; Rhombus
+    dc.l    @Null                   ; Pulse generator
+    dc.l    @Null                   ; Horizontal sparks
+    dc.l    @Null                   ; Ray power-up
+    dc.l    @Null                   ; Breakable thin block
+    dc.l    @Null                   ; Bomb power-up
+    dc.l    @Null                   ; Troll
+    dc.l    @Null                   ; Flamethrower going up
+    dc.l    @Null                   ; Flamethrower going down
+    dc.l    @Null                   ; Vertical platforms
+    dc.l    @Null                   ; Capacitors that go boom
+    dc.l    RunCableBase            ; Hanging cable base
+    dc.l    @Null                   ; Vertical sparks
+    dc.l    @Null                   ; Love power-up
+    dc.l    RunEndButtonPassive     ; Button that ends the level
+    dc.l    @Null                   ; Double circle thingy
+    dc.l    @Null                   ; Checkpoint
+    dc.l    @Null                   ; Stalactite
+    dc.l    @Null                   ; Spikes behaviour
+    dc.l    @Null                   ; Breakable platforms
+    dc.l    @Null                   ; Invincibility item
+    dc.l    @Null                   ; Laser
+    dc.l    @Null                   ; Gear hazard area
+    dc.l    @Null                   ; Falling ice rock
+    dc.l    @Null                   ; Rail platforms
+    dc.l    @Null                   ; Double jump power-up
+    dc.l    @Null                   ; 1-up
+    dc.l    @Null                   ; Waterlava teleporter
+    dc.l    @Null                   ; Waterlava ice floor
+    dc.l    @Null                   ; Bumper
+    dc.l    @Null                   ; Bumper pad
+    dc.l    @Null                   ; Light bulb
+    dc.l    @Null                   ; Vertical spark emitter (floor)
+    dc.l    @Null                   ; Vertical spark emitter (ceiling)
+    dc.l    @Null                   ; Spinning spikeball
+    dc.l    @Null                   ; Barrier
+
+    dc.l    @Null                   ; Pulse
+    dc.l    @Null                   ; Flameball going up
+    dc.l    @Null                   ; Flameball going down
+    dc.l    RunCablePiece           ; Piece of hanging cable
+    dc.l    @Null                   ; Hanging cable spark
+    dc.l    @Null                   ; Falling platform piece
+    dc.l    @Null                   ; Generic falling piece
+    dc.l    @Null                   ; Heart bullet
+    dc.l    @Null                   ; Sparkle when getting a rhombus
+
+;----------------------------------------------------------------------------

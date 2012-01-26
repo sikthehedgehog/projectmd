@@ -1,0 +1,51 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------;
+; Map data for the Internet-themed level ;
+;----------------------------------------;
+
+;----------------------------------------------------------------------------
+
+;------------;
+; Layout map ;
+;------------;
+
+Layout_LevelInternet:
+    incbin  "levels/lvl_inet/layout.bin"
+Size_LevelInternet equ (*-Layout_LevelInternet)/8
+
+;---------------;
+; Collision map ;
+;---------------;
+
+Coll_LevelInternet:
+    incbin  "levels/lvl_inet/coll.bin"
+
+;----------;
+; Item map ;
+;----------;
+
+Item_LevelInternet:
+    incbin  "levels/lvl_inet/item.bin"
+
+;----------------------------------------------------------------------------

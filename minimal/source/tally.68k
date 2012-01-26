@@ -1,0 +1,449 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------------------------;
+; Main code for the score tally screen ;
+;--------------------------------------;
+
+ScoreTally:
+
+;------------------------;
+; Calculate energy bonus ;
+;------------------------;
+
+    btst.b  #IngameStat_NoHit, (RAM_IngameStatus+1)
+    beq.s   @NotNoHit
+    move.l  #$10000, (RAM_EnergyBonus)
+    bra.s   @EnergyBonusSet
+@NotNoHit:
+
+    moveq   #0, d0
+    moveq   #0, d1
+    move.b  (RAM_Player+Player_Energy), d1
+    add.w   d1, d1
+    lea     (@EnergyBonuses), a0
+    move.w  (a0,d1.w), d0
+    move.l  d0, (RAM_EnergyBonus)
+@EnergyBonusSet:
+
+    moveq   #0, d1
+    move.w  (RAM_LevelTime), d0
+    lsr.w   #5, d0
+    lsr.w   #6, d0
+    cmp.w   #11, d0
+    bge.s   @TimeBonusSet
+    add.w   d0, d0
+    lea     (@TimeBonuses), a0
+    move.w  (a0,d0.w), d1
+@TimeBonusSet:
+    move.l  d1, (RAM_TimeBonus)
+
+;------------------------;
+; Initialize game status ;
+;------------------------;
+
+    move.w  #%100, (RAM_GameStatus)
+    move.l  #0, (RAM_GlobalAnim)
+
+;-------------------;
+; Initialize fading ;
+;-------------------;
+
+    move.l  #7<<16, (RAM_FadeStage)
+    move.l  (RAM_GlobalAnimSpd), d0
+    asr.l   #2, d0
+    move.l  d0, (RAM_FadeSpeed)
+
+;----------------------;
+; Set up VDP registers ;
+;----------------------;
+
+    lea     ($C00004), a4
+    lea     ($C00000), a5
+
+    move.w  #$8230, (a4)    ; Tilemap A: $C000
+    move.w  #$8407, (a4)    ; Tilemap B: $E000
+    move.w  #$8500, (a4)    ; Sprite table: $0000
+    move.w  #$8B03, (a4)    ; No IRQ2, full VScroll, per-line HScroll
+    move.w  #$8D3E, (a0)    ; HScroll table: $F800
+    move.w  #$9001, (a4)    ; Tilemap size: 64x32
+
+;--------------------;
+; Clear sprite cache ;
+;--------------------;
+
+    move.l  #$40000000, (a4)
+    move.l  #$00000000, (a5)
+    move.l  #$00000000, (a5)
+
+;--------------;
+; Set up VSRAM ;
+;--------------;
+
+    move.l  #0, (RAM_VScrBuffer)
+
+;------------;
+; Clear CRAM ;
+;------------;
+
+    move.l  #$C0000000, (a4)
+    moveq   #-1, d0
+    moveq   #($40/8)-1, d1
+@ClearCRAM:
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    dbf     d1, @ClearCRAM
+
+;--------------------------------;
+; Reset global animation counter ;
+;--------------------------------;
+
+    move.l  #0, (RAM_GlobalAnim)
+
+;--------------------------;
+; Load palette into buffer ;
+;--------------------------;
+
+    lea     (Pal_Tally), a0
+    lea     (RAM_PalBuffer), a1
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+    move.l  (a0)+, (a1)+
+
+;---------------;
+; Clear plane A ;
+;---------------;
+
+    moveq   #0, d0
+    move.w  #((64/16)*32)-1, d1
+    move.l  #$40000003, (a4)
+@ClearPlaneA:
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    dbf     d1, @ClearPlaneA
+
+;-----------------;
+; Draw background ;
+;-----------------;
+
+    move.l  #$60000003, (a4)
+    move.w  #((64*29)/16)-1, d2
+@DrawBG:
+    move.l  #(VRAM_TallyBG<<16)|VRAM_TallyBG, d1
+    moveq   #8-1, d0
+@DrawBGI:
+    move.l  d1, (a5)
+    add.l   #$00010001, d1
+    dbf     d0, @DrawBGI
+    dbf     d2, @DrawBG
+
+;--------------;
+; Draw strings ;
+;--------------;
+
+    moveq   #6, d0
+    moveq   #6, d1
+    lea     (@Str_Level), a0
+    bsr     DrawTallyString
+
+    moveq   #18, d0
+    moveq   #6, d1
+    lea     (@Str_Complete), a0
+    bsr     DrawTallyString
+
+    lea     (@Str_Energy), a0
+    move.l  (RAM_EnergyBonus), d0
+    cmp.l   #$10000, d0
+    bne.s   @NotNoHitString
+    lea     (@Str_NoHit), a0
+@NotNoHitString:
+    moveq   #4, d0
+    moveq   #14, d1
+    bsr     DrawTallyString
+
+    moveq   #4, d0
+    moveq   #17, d1
+    lea     (@Str_Time), a0
+    bsr     DrawTallyString
+
+    moveq   #4, d0
+    moveq   #20, d1
+    lea     (@Str_Total), a0
+    bsr     DrawTallyString
+
+;---------------;
+; Load graphics ;
+;---------------;
+
+    lea     (Gfx_Tally), a0
+    lea     (RAM_TallyTemp), a1
+    bsr     Decompress
+
+    FixedDMA RAM_TallyTemp, VRAM_TallyBG*$20, (8+(4*24))*$20
+    bsr     FlushVDPBuffer
+
+;----------------;
+; Enable display ;
+;----------------;
+
+    move.w  #$8154, ($C00004)
+
+;----------------------------------------------------------------------------
+
+;-----------;
+; Main loop ;
+;-----------;
+
+@MainLoop:
+
+;-------;
+; Quit? ;
+;-------;
+
+    bsr     ReadJoypad
+    move.b  (RAM_JoypadPress), d0
+    and.b   #$F0, d0
+    bne     @Quit
+
+;-----------------;
+; Do fading, etc. ;
+;-----------------;
+
+    bsr     Fade
+
+;--------------;
+; Draw numbers ;
+;--------------;
+
+    moveq   #20, d0
+    moveq   #14, d1
+    move.l  (RAM_EnergyBonus), d2
+    bsr     DrawTallyNumber
+
+    moveq   #20, d0
+    moveq   #17, d1
+    move.l  (RAM_TimeBonus), d2
+    bsr     DrawTallyNumber
+
+    moveq   #20, d0
+    moveq   #20, d1
+    move.l  (RAM_Score), d2
+    bsr     DrawTallyNumber
+
+;----------------;
+; Update HScroll ;
+;----------------;
+
+    lea     (RAM_HScrBuffer), a0
+    lea     (RandomTable+4), a1
+    move.w  #(224/2)-1, d0
+    move.w  (RAM_GlobalAnim), d2
+    lsl.w   #4, d2
+@UpdateHScroll:
+    moveq   #0, d1
+    move.b  (a1)+, d1
+    add.w   d2, d1
+    neg.w   d1
+    move.l  d1, (a0)+
+    subq.w  #2, d1
+    move.l  d1, (a0)+
+    dbf     d0, @UpdateHScroll
+
+    FixedDMA RAM_HScrBuffer, $F800, 2*224*2
+
+;------------------------------------;
+; Update VScroll (used for blinking) ;
+;------------------------------------;
+
+    move.w  (RAM_GameStatus), d0
+    and.w   #$0001, d0
+    move.w  d0, (RAM_VScrBuffer+2)
+
+;-------------;
+; Keep moving ;
+;-------------;
+
+    move.l  (RAM_GlobalAnim), d0
+    add.l   (RAM_GlobalAnimSpd), d0
+    move.l  d0, (RAM_GlobalAnim)
+
+;-------------;
+; Count score ;
+;-------------;
+
+    cmp.l   #180<<16, d0
+    blt.s   @DontCount
+
+    move.l  (RAM_Score), d2
+    move.l  (RAM_EnergyBonus), d3
+    move.l  (RAM_TimeBonus), d4
+
+    tst.l   d3
+    beq.s   @NoEnergyBonus
+    move.l  d2, d0
+    moveq   #$25, d1
+    bsr     AddBCD
+    move.l  d0, d2
+    move.l  d3, d0
+    move.l  #$99999975, d1
+    bsr     AddBCD
+    move.l  d0, d3
+@NoEnergyBonus:
+
+    tst.l   d4
+    beq.s   @NoTimeBonus
+    move.l  d2, d0
+    moveq   #$25, d1
+    bsr     AddBCD
+    move.l  d0, d2
+    move.l  d4, d0
+    move.l  #$99999975, d1
+    bsr     AddBCD
+    move.l  d0, d4
+@NoTimeBonus:
+
+    move.l  d2, (RAM_Score)
+    move.l  d3, (RAM_EnergyBonus)
+    move.l  d4, (RAM_TimeBonus)
+@DontCount:
+
+;------------;
+; Next frame ;
+;------------;
+
+    bsr     VSync
+    bsr     FlushVDPBuffer
+    bchg.b  #GameStat_Blink, (RAM_GameStatus+1)
+    bra     @MainLoop
+
+;----------------------------------------------------------------------------
+
+;-------;
+; Quit! ;
+;-------;
+
+@Quit:
+
+;--------------------------------------------;
+; Add all score that hasn't been counted yet ;
+;--------------------------------------------;
+
+    move.l  (RAM_Score), d0
+    move.l  (RAM_EnergyBonus), d1
+    bsr     AddBCD
+    move.l  (RAM_TimeBonus), d1
+    bsr     AddBCD
+    move.l  d0, (RAM_Score)
+
+;---------------------------;
+; Advance to the next level ;
+;---------------------------;
+
+    addq.b  #1, (RAM_Level)
+
+;-------------;
+; Switch mode ;
+;-------------;
+
+    move.w  #$8114, ($C00004)
+    move.b  #GameMode_InGame, (RAM_GameMode)
+    jmp     SwitchMode
+
+;----------------------------------------------------------------------------
+
+;--------------------------------;
+; Base values for each character ;
+;--------------------------------;
+
+        rsset VRAM_TallyFont
+@0:     rs.b 4
+@1:     rs.b 4
+@2:     rs.b 4
+@3:     rs.b 4
+@4:     rs.b 4
+@5:     rs.b 4
+@6:     rs.b 4
+@7:     rs.b 4
+@8:     rs.b 4
+@9:     rs.b 4
+@L:     rs.b 4
+@E:     rs.b 4
+@V:     rs.b 4
+@C:     rs.b 4
+@M:     rs.b 4
+@P:     rs.b 4
+@T:     rs.b 4
+@N:     rs.b 4
+@R:     rs.b 4
+@G:     rs.b 4
+@Y:     rs.b 4
+@A:     rs.b 4
+@I:     rs.b 4
+@H:     rs.b 4
+@O      equ @0
+
+;---------------------------;
+; Strings to draw on screen ;
+;---------------------------;
+
+@Str_Level:     dc.w @L,@E,@V,@E,@L,-1
+@Str_Complete:  dc.w @C,@O,@M,@P,@L,@E,@T,@E,-1
+@Str_NoHit:     dc.w @N,@O,0,@H,@I,@T,-1
+@Str_Energy:    dc.w @E,@N,@E,@R,@G,@Y,-1
+@Str_Time:      dc.w @T,@I,@M,@E,-1
+@Str_Total:     dc.w @T,@O,@T,@A,@L,-1
+
+;----------------------------------------------------------------------------
+
+;----------------;
+; Energy bonuses ;
+;----------------;
+
+@EnergyBonuses:
+    dc.w    $0
+    dc.w    $1000
+    dc.w    $2000
+    dc.w    $5000
+
+;--------------;
+; Time bonuses ;
+;--------------;
+
+@TimeBonuses:
+    dc.w    $5000, $5000, $5000
+    dc.w    $5000, $5000, $4000
+    dc.w    $3500, $3000, $2500
+    dc.w    $2000, $1500, $1000
+    dc.w    $0500, $0200, $0100
+    dc.w    $0000
+
+;----------------------------------------------------------------------------

@@ -1,0 +1,71 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------;
+; Tile data ;
+;-----------;
+
+Gfx_Title:
+    incbin  "graphics/title/gfx.bin"
+    even
+
+;--------------------;
+; "PROJECT" patterns ;
+;--------------------;
+
+TitlePatterns:
+    dc.b    $01,$02,$02,$03     ; P     ; 1st line
+    dc.b    $01,$02,$02,$03     ; R
+    dc.b    $01,$02,$02,$03     ; O
+    dc.b    $00,$00,$00,$04     ; J
+    dc.b    $01,$02,$02,$08     ; E
+    dc.b    $01,$02,$02,$08     ; C
+    dc.b    $05,$06,$07,$08     ; T
+
+    dc.b    $09,$0A,$0A,$0B     ; P     ; 2nd line
+    dc.b    $09,$0A,$0C,$0B     ; R
+    dc.b    $0D,$00,$00,$0D     ; O
+    dc.b    $00,$00,$00,$0D     ; J
+    dc.b    $09,$0A,$0A,$0E     ; E
+    dc.b    $0D,$00,$00,$00     ; C
+    dc.b    $00,$0F,$10,$00     ; T
+
+    dc.b    $11,$00,$00,$00     ; P     ; 3rd line
+    dc.b    $11,$00,$12,$13     ; R
+    dc.b    $14,$15,$15,$16     ; O
+    dc.b    $17,$15,$15,$16     ; J
+    dc.b    $18,$15,$15,$19     ; E
+    dc.b    $18,$15,$15,$19     ; C
+    dc.b    $00,$1A,$1B,$00     ; T
+
+;---------------;
+; "MD" patterns ;
+;---------------;
+
+    dc.b    $00,$00,$1C,$1D,$1E,$1F,$20,$21,$22,$23     ; 1st line
+    dc.b    $00,$00,$24,$25,$26,$27,$20,$28,$29,$2A     ; 2nd line
+    dc.b    $00,$2B,$2C,$2D,$2E,$2F,$20,$30,$31,$32     ; 3rd line
+    dc.b    $33,$34,$35,$36,$35,$2F,$20,$37,$38,$39     ; 4th line
+
+    even
+
+;----------------------------------------------------------------------------

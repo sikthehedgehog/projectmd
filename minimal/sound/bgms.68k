@@ -1,0 +1,117 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo, Eric Voirin
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------;
+; Null background music ;
+; Used as a placeholder ;
+;-----------------------;
+
+BGMData_Null:
+    dc.b    $FF
+
+;----------------;
+; Infinite Field ;
+;----------------;
+
+BGMData_Level3D:
+    incbin  "sound/bgms/lvl_3d.esf"
+
+;--------------------;
+; Electronic Madness ;
+;--------------------;
+
+BGMData_LevelMotherboard:
+    incbin  "sound/bgms/lvl_mobo.esf"
+
+;------------;
+; Gate Array ;
+;------------;
+
+BGMData_LevelLogic:
+    incbin  "sound/bgms/lvl_log.esf"
+
+;-----------------;
+; Frozen Memories ;
+;-----------------;
+
+BGMData_LevelMemory:
+    incbin  "sound/bgms/lvl_mem.esf"
+
+;--------------;
+; Crazy Shapes ;
+;--------------;
+
+BGMData_LevelShape:
+    incbin  "sound/bgms/lvl_shap.esf"
+
+;-----------------;
+; Pixelated World ;
+;-----------------;
+
+BGMData_LevelVDP:
+    incbin  "sound/bgms/lvl_vdp.esf"
+
+;-----------------;
+; Bright Darkness ;
+;-----------------;
+
+BGMData_LevelLight:
+    incbin  "sound/bgms/lvl_lght.esf"
+
+;---------------;
+; Ether Network ;
+;---------------;
+
+BGMData_LevelInternet:
+    incbin  "sound/bgms/lvl_inet.esf"
+
+;------------------;
+; Mechanical Heart ;
+;------------------;
+
+BGMData_LevelTray:
+    incbin  "sound/bgms/lvl_tray.esf"
+
+;-----------;
+; WaterLava ;
+;-----------;
+
+BGMData_LevelWater:
+	incbin	"sound/bgms/lvl_aqua.esf"
+BGMData_LevelLava:
+    incbin  "sound/bgms/lvl_lava.esf"
+
+;--------------;
+; Level Select ;
+;--------------;
+
+BGMData_LevelSelect:
+    incbin  "sound/bgms/levelsel.esf"
+
+;-----------;
+; Game over ;
+;-----------;
+	
+BGMData_GameOver:
+	incbin	"sound/bgms/gameover.esf"
+
+;----------------------------------------------------------------------------

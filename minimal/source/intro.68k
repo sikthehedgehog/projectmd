@@ -1,0 +1,71 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------------;
+; Function for the game intro ;
+;-----------------------------;
+
+Intro:
+
+;--------------------------------------------------------------------;
+; Call the subroutines for each scene                                ;
+; If any returns != 0 in d0, this means that the cutscene should end ;
+;--------------------------------------------------------------------;
+
+    bsr     IntroLogin
+    tst.w   d0
+    bne.s   @Quit
+
+    bsr     IntroStarfield
+    tst.w   d0
+    bne.s   @Quit
+
+    bsr     IntroProgramming
+    tst.w   d0
+    bne.s   @Quit
+
+    bsr     IntroGraphics
+    tst.w   d0
+    bne.s   @Quit
+
+    bsr     IntroSound
+    tst.w   d0
+    bne.s   @Quit
+
+    bsr     IntroTesting
+    tst.w   d0
+    bne.s   @Quit
+    
+    nop
+
+;----------------------------------------------------------------------------
+
+;------------------------------;
+; Switch into the title screen ;
+;------------------------------;
+
+@Quit:
+    move.w  #$8114, ($C00004)
+    move.b  #GameMode_Title, (RAM_GameMode)
+    jmp     SwitchMode
+
+;----------------------------------------------------------------------------

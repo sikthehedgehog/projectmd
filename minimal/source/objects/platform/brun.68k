@@ -1,0 +1,168 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------;
+; RunBreakablePlatform               ;
+;                                    ;
+; Logic code for breakable platforms ;
+;------------------------------------;
+
+RunBreakablePlatform:
+
+;--------;
+; Break? ;
+;--------;
+
+    move.l  Object_Misc(a0), d0
+    beq     @DontBreak
+    add.l   (RAM_GlobalAnimSpd), d0
+    move.l  d0, Object_Misc(a0)
+
+    cmp.l   #60<<16, d0
+    blt     @DontBreak
+
+;-----------------------;
+; Create falling pieces ;
+;-----------------------;
+
+    move.w  Object_X(a0), d2
+    move.w  Object_Y(a0), d1
+    move.w  d2, d0
+    add.w   #64-8, d0
+
+    move.w  #$A800|VRAM_Platform, d4
+    move.w  #$A000|VRAM_Platform, d5
+    moveq   #0, d6
+    move.l  Player_AccelGrav(a3), d7
+    add.l   d7, d7
+
+    moveq   #4-1, d3
+@MakePieces:
+    move.w  #Obj_PlatformPiece, Object_Type(a1)
+    move.w  d4, Object_MapPos(a1)
+    move.w  d0, Object_X(a1)
+    move.w  #0, Object_X+2(a1)
+    move.w  d1, Object_Y(a1)
+    move.w  #0, Object_Y+2(a1)
+    move.l  d6, Object_Misc(a1)
+    adda.w  #Object_Size, a1
+
+    move.w  #Obj_PlatformPiece, Object_Type(a1)
+    move.w  d5, Object_MapPos(a1)
+    move.w  d2, Object_X(a1)
+    move.w  #0, Object_X+2(a1)
+    move.w  d1, Object_Y(a1)
+    move.w  #0, Object_Y+2(a1)
+    move.l  d6, Object_Misc(a1)
+    adda.w  #Object_Size, a1
+
+    subq.w  #8, d0
+    addq.w  #8, d2
+    addq.w  #2, d4
+    addq.w  #2, d5
+    add.l   d7, d6
+    dbf     d3, @MakePieces
+
+    move.l  a1, (RAM_LastObject)
+
+;-------------------;
+; Destroy ourselves ;
+;-------------------;
+
+    bra     DeleteObject
+@DontBreak:
+
+;-------------------;
+; Are we outbounds? ;
+;-------------------;
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+    cmp.w   #0-$E0, d0
+    blt.s   @Outbounds
+    cmp.w   #320+$60, d0
+    ble.s   @CheckCol
+
+@Outbounds:
+    bra     DeleteObject
+
+;-------------------------------;
+; Is the player stepping on us? ;
+;-------------------------------;
+
+@CheckCol:
+    move.w  Player_Gravity(a3), d0
+    blt.s   @End
+
+    move.w  Object_X(a0), d0
+    move.w  Player_X(a3), d1
+    cmp.w   d0, d1
+    blt.s   @End
+
+    add.w   #64, d0
+    cmp.w   d0, d1
+    bgt.s   @End
+
+    move.l  Object_Y(a0), d4
+    swap    d4
+    move.w  d4, d0
+    move.w  Player_Y(a3), d1
+    subq.w  #1, d0
+    cmp.w   d0, d1
+    blt.s   @End
+
+    addq.w  #8, d0
+    cmp.w   d0, d1
+    bgt.s   @End
+
+;---------------------------;
+; Make Stephany ride on us! ;
+;---------------------------;
+
+    subq.w  #1, d4
+    swap    d4
+    move.l  d4, Player_Y(a3)
+    move.w  Player_Status(a3), d0
+    bset.l  #PlayerStat_Ride, d0
+    move.w  d0, Player_Status(a3)
+    move.w  #0, Player_Gravity(a3)
+
+    move.l  #0, Player_RideSpeed(a3)
+    move.l  #0, Player_RideGrav(a3)
+
+;-------------------;
+; Uh oh, countdown! ;
+;-------------------;
+
+    move.l  Object_Misc(a0), d0
+    bne.s   @CountdownOn
+    move.l  (RAM_GlobalAnimSpd), Object_Misc(a0)
+@CountdownOn:
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

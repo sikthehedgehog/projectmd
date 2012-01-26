@@ -1,0 +1,13 @@
+palette ??? EEE 0A0 080 8AE 68E 000 0EE EA6 E60 08E 00E 00A ??? ??? ???
+setmask
+
+openout graphics/dsteph/hover1.bin openin concept/dsteph/hover1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dsteph/hover2.bin openin concept/dsteph/hover2.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/dsteph/hdash1.bin openin concept/dsteph/hdash1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dsteph/hdash2.bin openin concept/dsteph/hdash2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dsteph/vdash1.bin openin concept/dsteph/vdash1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dsteph/vdash2.bin openin concept/dsteph/vdash2.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/dsteph/hurt1.bin openin concept/dsteph/hurt1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/dsteph/hurt2.bin openin concept/dsteph/hurt2.bmp sprite 0 0 4 4 closein closeout

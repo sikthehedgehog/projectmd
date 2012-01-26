@@ -1,0 +1,100 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------------;
+; RunCablePiece                                  ;
+;                                                ;
+; Game logic code for a piece of a hanging cable ;
+;------------------------------------------------;
+
+RunCablePiece:
+
+;--------------------------------;
+; Determine angle for next piece ;
+;--------------------------------;
+
+    move.w  Object_Misc(a0), d2
+    move.b  Object_Misc+2(a0), d3
+    ext.w   d3
+    asl.w   #5, d3
+    add.w   d3, d2
+
+;----------------------------------------;
+; Calculate where child piece will spawn ;
+;----------------------------------------;
+
+    move.w  d2, d5
+    lsr.w   #8, d5
+    add.w   d5, d5
+
+    moveq   #0, d7
+    lea     (Sines), a6
+    move.w  (a6,d5.w), d7
+    ext.l   d7
+    move.l  Object_X(a0), d4
+    asl.l   #3+2, d7
+    add.l   d7, d4
+    add.l   d7, d4
+    add.l   d7, d4
+
+    moveq   #0, d7
+    lea     (Cosines), a6
+    move.w  (a6,d5.w), d7
+    ext.l   d7
+    move.l  Object_Y(a0), d1
+    asl.l   #3+2, d7
+    add.l   d7, d1
+    add.l   d7, d1
+    add.l   d7, d1
+
+;---------------------------------;
+; Spawn a child piece or a spark? ;
+;---------------------------------;
+
+    move.w  #Obj_CablePiece, d6
+    move.b  Object_Misc+3(a0), d0
+    subq.b  #1, d0
+    bne.s   @SpawnPiece
+    addq.w  #1, d6
+@SpawnPiece:
+
+;--------------------;
+; Create child piece ;
+;--------------------;
+
+    move.w  d6, Object_Type(a1)
+    move.l  d4, Object_X(a1)
+    move.l  d1, Object_Y(a1)
+    move.w  d2, Object_Misc(a1)
+    move.b  Object_Misc+2(a0), Object_Misc+2(a1)
+    move.b  d0, Object_Misc+3(a1)
+
+    adda.w  #Object_Size, a1
+    move.l  a1, (RAM_LastObject)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

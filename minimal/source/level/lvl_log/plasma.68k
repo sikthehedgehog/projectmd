@@ -1,0 +1,170 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;---------------------------------------------------;
+; Update_LevelLogic_Plasma                          ;
+;                                                   ;
+; Animates the background in the logic-themed level ;
+; Enjoy my lame attempt at a plasma effect! =D      ;
+;---------------------------------------------------;
+; INPUT                                             ;
+;   d0.w ... First line to process                  ;
+;---------------------------------------------------;
+; BREAKS: all                                       ;
+;---------------------------------------------------;
+
+Update_LevelLogic_Plasma:
+
+;-----------;
+; Variables ;
+;-----------;
+
+@NumRows equ 5
+
+    rsset RAM_LevelStuff
+                    rs.l    1
+                    rs.w    1
+@Var_Buffer         rs.w    64*@NumRows
+
+;-----------------------;
+; Get animation counter ;
+;-----------------------;
+
+    move.w  (RAM_GlobalAnim), d2
+    and.w   #$FFF8, d2
+
+;------------------------;
+; Issue DMA command      ;
+; TO-DO: make VarDestDMA ;
+;------------------------;
+
+    move.w  d0, d7
+    btst.l  #3, d2
+    bne.s   @No2ndBuffer
+    add.w   #30, d7
+@No2ndBuffer:
+    lsl.w   #6+1, d7
+    add.w   #$A000, d7
+
+    move.l  #@Var_Buffer, d6
+    VarSrcDestDMA 64*@NumRows*2
+
+;-------------------------;
+; Loop through all pixels ;
+;-------------------------;
+
+    lea     (@Var_Buffer), a0
+    lea     (Sines), a1
+    lea     (Cosines), a2
+    lea     (@FixTable), a3
+
+    add.w   d2, d2
+
+    move.w  d2, d4
+    and.w   #$FF<<1, d4
+    move.w  (a1,d4.w), d4
+    asr.w   #4, d4
+
+    lsl.w   #4, d0
+    moveq   #@NumRows-1, d7
+@LineLoop:
+
+    move.w  #(40<<4), d5
+    moveq   #40-1, d6
+@ColLoop:
+
+;------------------;
+; Calculate plasma ;
+;------------------;
+
+    move.w  d5, d3
+    add.w   d3, d3
+    add.w   d2, d3
+    and.w   #$FF<<1, d3
+    move.w  (a1,d3.w), d3
+    move.w  d3, d1
+
+    move.w  d5, d3
+    add.w   d2, d3
+    add.w   d2, d3
+    and.w   #$FF<<1, d3
+    move.w  (a2,d3.w), d3
+    add.w   d3, d1
+
+    move.w  d0, d3
+    add.w   d3, d3
+    add.w   d2, d3
+    and.w   #$FF<<1, d3
+    move.w  (a2,d3.w), d3
+    add.w   d3, d1
+
+    move.w  d0, d3
+    add.w   d2, d3
+    add.w   d2, d3
+    and.w   #$FF<<1, d3
+    move.w  (a1,d3.w), d3
+    add.w   d3, d1
+    
+    add.w   #$4000, d1
+
+;    lsr.w   #8, d1
+;    lsr.w   #4, d1
+    
+    rol.w   #4, d1
+    and.w   #$0007, d1
+    move.b  (a3,d1.w), d1
+
+;------------;
+; Write tile ;
+;------------;
+
+    add.w   #$C000|VRAM_Level, d1
+    move.w  d1, (a0)+
+
+;------------;
+; Next pixel ;
+;------------;
+
+    add.w   #1<<4, d5
+    dbf     d6, @ColLoop
+
+    add.w   #1<<4, d0
+    add.w   #(64-40)*2, a0
+    dbf     d7, @LineLoop
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;--------------------------------------------------------------------------;
+; Look-up table used to modify the output shades to make better use of the ;
+; limited amount of steps                                                  ;
+;--------------------------------------------------------------------------;
+
+@FixTable:
+    dc.b    0, 0, 0, 1, 2, 3, 3, 3
+
+;----------------------------------------------------------------------------

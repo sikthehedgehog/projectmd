@@ -1,0 +1,78 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;---------------------------------------------------------;
+; FlushVDPBuffer                                          ;
+;                                                         ;
+; Sends all commands in the VDP command buffer to the VDP ;
+; The VDP command buffer is cleared out after this        ;
+;---------------------------------------------------------;
+; BREAKS: a4, a5, a6                                      ;
+;---------------------------------------------------------;
+
+FlushVDPBuffer:
+
+;----------------;
+; Update VScroll ;
+;----------------;
+
+    lea     ($C00004), a6
+    move.l  #$40000010, (a6)
+    move.l  (RAM_VScrBuffer), ($C00000)
+
+;-------------------;
+; Some addresses... ;
+;-------------------;
+
+    lea     (RAM_VDPBuffer), a4     ; VDP command buffer start
+    move.l  (RAM_VDPBufPos), a5     ; VDP command buffer tail
+
+;------------------------------------;
+; Do nothing if the buffer is empty! ;
+;------------------------------------;
+
+    cmp.l   a4, a5
+    beq.s   @End
+
+;------------------------------;
+; Send all commands to the VDP ;
+;------------------------------;
+
+@Loop:
+    move.w  (a4)+, (a6)
+    cmp.l   a4, a5
+    bne.s   @Loop
+
+;------------------------------;
+; Clear out VDP command buffer ;
+;------------------------------;
+
+    move.l  #RAM_VDPBuffer, (RAM_VDPBufPos)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

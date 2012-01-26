@@ -1,0 +1,141 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------;
+; DrawPauseMenu        ;
+;                      ;
+; Draws the pause menu ;
+;----------------------;
+; BREAKS: all          ;
+;----------------------;
+
+DrawPauseMenu:
+
+;-------------;
+; Draw border ;
+;-------------;
+
+    move.w  #$80+120, d0
+    move.w  #$80+88, d1
+    move.w  #$8000|VRAM_HUDBorder, d2
+    moveq   #%0011, d3
+    bsr     AddSprite
+    
+    add.w   #$20, d1
+    moveq   #%0001, d3
+    bsr     AddSprite
+    
+    add.w   #72, d0
+    move.w  #$9800|VRAM_HUDBorder, d2
+    bsr     AddSprite
+
+    sub.w   #$20, d1
+    moveq   #%0011, d3
+    bsr     AddSprite
+
+;-----------;
+; Draw text ;
+;-----------;
+
+    sub.w   #$40, d0
+    move.w  #$8000|VRAM_PauseContinue, d2
+    moveq   #%1101, d3
+    bsr     AddSprite
+    add.w   #$20, d0
+    addq.w  #8, d2
+    bsr     AddSprite
+    
+    add.w   #$10, d1
+    add.w   #8*2, d2
+    bsr     AddSprite
+    sub.w   #$20, d0
+    subq.w  #8, d2
+    bsr     AddSprite
+    
+    add.w   #$10, d1
+    add.w   #8*2, d2
+    bsr     AddSprite
+    add.w   #$20, d0
+    addq.w  #8, d2
+    bsr     AddSprite
+
+;--------------------------------------;
+; Temp, d0 contains the current option ;
+;--------------------------------------;
+
+    moveq   #0, d0
+
+;----------------------------------;
+; Determine graphic for "CONTIUNE" ;
+;----------------------------------;
+
+    move.w  (RAM_GameStatus), d1
+
+    move.l  #Gfx_PauseContinue, d7
+    tst.b   d0
+    beq.s   @IsContinue
+    add.l   #8*2*$20, d7
+    btst.l  #GameStat_Blink, d1
+    beq.s   @IsContinue
+    add.l   #8*2*$20, d7
+@IsContinue:
+    
+    VarSrcDMA VRAM_PauseContinue*$20, 8*2*$20
+
+;---------------------------------;
+; Determine graphic for "RESTART" ;
+;---------------------------------;
+
+    move.l  #Gfx_PauseRestart, d7
+    subq.b  #1, d0
+    beq.s   @IsRestart
+    add.l   #8*2*$20, d7
+    btst.l  #GameStat_Blink, d1
+    beq.s   @IsRestart
+    add.l   #8*2*$20, d7
+@IsRestart:
+    
+    VarSrcDMA VRAM_PauseRestart*$20, 8*2*$20
+
+;------------------------------;
+; Determine graphic for "EXIT" ;
+;------------------------------;
+
+    move.l  #Gfx_PauseExit, d7
+    subq.b  #1, d0
+    beq.s   @IsExit
+    add.l   #4*2*$20, d7
+    btst.l  #GameStat_Blink, d1
+    beq.s   @IsExit
+    add.l   #4*2*$20, d7
+@IsExit:
+    
+    VarSrcDMA VRAM_PauseExit*$20, 4*2*$20
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+

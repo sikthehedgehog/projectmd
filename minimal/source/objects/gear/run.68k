@@ -1,0 +1,86 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------------;
+; RunGearHazard                    ;
+;                                  ;
+; Game logic code for gear hazards ;
+;----------------------------------;
+
+RunGearHazard:
+
+;-------------------;
+; Are we outbounds? ;
+;-------------------;
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+    cmp.w   #0-$40, d0
+    blt.s   @Outbounds
+    cmp.w   #320+$40, d0
+    ble.s   @CheckCol
+
+@Outbounds:
+    bra     DeleteObject
+
+;----------------------------------;
+; Is the player colliding with us? ;
+;----------------------------------;
+
+@CheckCol:
+    move.w  Object_X(a0), d0
+    move.w  Player_X(a3), d1
+    sub.w   #26, d0
+    addq.w  #3, d1
+    cmp.w   d0, d1
+    blt.s   @End
+
+    add.w   #26+25, d0
+    subq.w  #7, d1
+    cmp.w   d0, d1
+    bgt.s   @End
+
+    move.w  Object_Y(a0), d0
+    move.w  Player_Y(a3), d1
+    sub.w   #26, d0
+    cmp.w   d0, d1
+    blt.s   @End
+
+    add.w   #26+25, d0
+    sub.w   #31, d1
+    cmp.w   d0, d1
+    bgt.s   @End
+
+;------------------;
+; Hurt the player! ;
+;------------------;
+
+    bsr     HurtPlayer
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

@@ -1,0 +1,122 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------------;
+; InitPlayer                  ;
+;                             ;
+; Initializes the player data ;
+; Used when starting a level  ;
+;-----------------------------;
+; BREAKS: d0, a0, a1          ;
+;-----------------------------;
+
+InitPlayer:
+
+;-------------------------------------------------------------------------;
+; Determine which list to use for values that differ between NTSC and PAL ;
+;-------------------------------------------------------------------------;
+
+    lea     (@NTSCVals), a1
+    move.w  ($C00004), d0
+    btst.l  #0, d0
+    beq.s   @NotPAL
+    lea     (@PALVals), a1
+@NotPAL:
+
+;------------------------------;
+; Set up initial player values ;
+;------------------------------;
+
+    lea     (RAM_Player+8), a0
+
+    move.l  #0, (a0)+               ; Horizontal speed
+    move.l  #0, (a0)+               ; Vertical speed
+    move.w  #%0000000010, (a0)+     ; Status flags
+    move.w  #1, (a0)+               ; Force a frame change
+    move.w  #0, (a0)+               ; ID of first frame to show
+    move.b  #PlayerAct_Idle, (a0)+  ; Current action
+    move.b  #-1, (a0)+              ; Previous action (force change)
+    move.l  (a1)+, (a0)+            ; Acceleration speed
+    move.l  (a1)+, (a0)+            ; Maximum speed
+    move.l  (a1)+, (a0)+            ; Gravity acceleration
+    move.l  (a1)+, (a0)+            ; Jump strength
+    move.l  #0, (a0)+               ; Riding speed
+    move.l  #0, (a0)+               ; Riding gravity
+    move.b  #0, (a0)+               ; Not invulnerable!
+    move.b  (a1)+, (a0)+            ; Invulnerability time length
+    move.b  #PlayerPow_None, (a0)+  ; Current power
+    move.b  #PlayerPow_None, (a0)+  ; Previous power
+    move.b  (a1)+, (a0)+            ; How long it takes to transform
+    move.b  #0, (a0)+               ; Delay while transforming
+    move.b  (a1)+, (a0)+            ; How long it takes to explode
+    move.b  #0, (a0)+               ; Delay while exploding
+    addq.w  #4*2, a0                ; Skip explosion coordinates
+    move.b  #3, (a0)+               ; Initial energy (health)
+    move.b  #0, (a0)+               ; Delay before quitting on death
+    move.b  #0, (a0)+               ; Not frozen!
+    move.b  (a1)+, (a0)+            ; How long it takes to kiss
+    move.w  #0, (a0)+               ; No invincibility
+    move.w  (a1)+, (a0)+            ; How long invincibility lasts
+    move.w  #0, (a0)+               ; Reset delay for shock shield SFX
+    move.w  (a1)+, (a0)+            ; How much to wait between shock SFXs
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;-----------------------;
+; Speed values for NTSC ;
+;-----------------------;
+
+@NTSCVals:
+    dc.l    16384                   ; Acceleration speed
+    dc.l    131072                  ; Maximum speed
+    dc.l    8192                    ; Gravity acceleration
+    dc.l    -294912                 ; Jump strength
+    dc.b    120                     ; Length of invulnerability time
+    dc.b    60                      ; How long it takes to transform
+    dc.b    3+3+3+3+3+3+3           ; How long it takes to explode
+    dc.b    3+3+3+3+3+3+3+30+3+3    ; How long it takes to kiss
+    dc.w    20*60                   ; Invincibility time
+    dc.w    8                       ; Delay for shock shield SFX
+    even
+
+;----------------------;
+; Speed values for PAL ;
+;----------------------;
+
+@PALVals:
+    dc.l    19661                   ; Acceleration speed
+    dc.l    157286                  ; Maximum speed
+    dc.l    9830                    ; Gravity acceleration
+    dc.l    -324390                 ; Jump strength
+    dc.b    100                     ; Length of invulnerability time
+    dc.b    50                      ; How long it takes to transform
+    dc.b    3+2+3+2+3+2+3           ; How long it takes to explode
+    dc.b    3+2+3+2+3+2+3+25+2+3    ; How long it takes to kiss
+    dc.w    20*50                   ; Invincibility time
+    dc.w    7                       ; Delay for shock shield SFX
+    even
+
+;----------------------------------------------------------------------------

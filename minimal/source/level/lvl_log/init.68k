@@ -1,0 +1,87 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------------------;
+; InitLevel_Logic                                      ;
+;                                                      ;
+; Initializes stuff specific to the logic-themed level ;
+;------------------------------------------------------;
+; BREAKS: d6, d7, a5, a6                               ;
+;------------------------------------------------------;
+
+InitLevel_Logic:
+
+;---------------------------;
+; Change default BG address ;
+; Now we use $A000          ;
+;---------------------------;
+
+    move.w  #$8405, ($C00004)
+
+;----------------------;
+; Initialize variables ;
+;----------------------;
+
+    lea     (RAM_LevelStuff), a6
+    move.l  #8<<16, (a6)+
+    move.w  #30-5, (a6)+
+    move.l  #0, (a6)+
+    move.l  #0, (a6)+
+
+;------------------------------;
+; Load level-specific graphics ;
+;------------------------------;
+
+    FixedDMA Gfx_XORSpin, VRAM_TrollWalk*$20, 16*$20
+    FixedDMA Gfx_XORDead, VRAM_TrollDead*$20, 16*$20
+    FixedDMA Gfx_DblCircleSpin, VRAM_DblCircleFly*$20, $10*$20
+    FixedDMA Gfx_DblCircleDead, VRAM_DblCircleDead*$20, $10*$20
+
+    FixedDMA Gfx_LevelLogic_Platform, VRAM_Platform*$20, 8*$20
+
+;---------------------------;
+; Initialize the background ;
+;---------------------------;
+
+    movem.l d0-d5/a0-a4, -(sp)
+
+    move.w  #1<<3, (RAM_GlobalAnim)
+    moveq   #0, d0
+@PlasmaLoop1:
+    move.w  d0, -(sp)
+    bsr     Update_LevelLogic_Plasma
+    bsr     FlushVDPBuffer
+    move.w  (sp)+, d0
+    addq.w  #5, d0
+    cmp.w   #30, d0
+    blt.s   @PlasmaLoop1
+    move.w  #0, (RAM_GlobalAnim)
+
+    movem.l (sp)+, d0-d5/a0-a4
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

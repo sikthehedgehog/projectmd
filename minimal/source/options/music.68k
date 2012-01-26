@@ -1,0 +1,283 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------;
+; Music and SFX menu ;
+;--------------------;
+
+MusicAndSFXMenu:
+
+;---------------;
+; Call the menu ;
+;---------------;
+
+    lea     (@Str_Title), a0
+    lea     (@Options), a1
+    lea     (MusicMenuHandler), a2
+    bsr     MenuEx
+
+;-------------------------;
+; Go back to options menu ;
+;-------------------------;
+
+    bra     Options
+
+;----------------------------------------------------------------------------
+
+;------------;
+; Menu title ;
+;------------;
+
+@Str_Title:
+    dc.b    'MUSIC AND SFX', 0
+    even
+
+;--------------;
+; Menu options ;
+;--------------;
+
+@Options:
+    dc.w    3
+    dc.l    @Str_MTest
+    dc.l    @Str_STest
+    dc.l    @Str_Quit
+
+@Str_MTest:     dc.b 'MUSIC TEST', 0
+@Str_STest:     dc.b 'SFX TEST', 0
+@Str_Quit:      dc.b 'EXIT', 0
+    even
+
+;----------------------------------------------------------------------------
+
+;---------------------;
+; Custom menu handler ;
+;---------------------;
+
+MusicMenuHandler:
+
+;----------------;
+; Initialization ;
+;----------------;
+
+    cmp.b   #$FF, d0
+    bne.s   @NoInit
+
+    moveq   #20, d0
+    moveq   #0, d1
+    move.b  (RAM_MusicTest), d2
+    bsr     WriteMenuHex
+
+    moveq   #2, d1
+    move.b  (RAM_SoundTest), d2
+    bsr     WriteMenuHex
+
+    rts
+@NoInit:
+
+;-----------------------------------;
+; User is selecting previous value? ;
+;-----------------------------------;
+
+    btst.l  #2, d0
+    beq.s   @NotPrev
+
+    moveq   #0, d7
+    move.b  (RAM_CurrOption), d7
+    add.w   d7, d7
+    add.w   d7, d7
+    lea     (@CodePrev), a6
+    move.l  (a6,d7.w), a6
+    jsr     (a6)
+
+@NotPrev:
+
+;-------------------------------;
+; User is selecting next value? ;
+;-------------------------------;
+
+    btst.l  #3, d0
+    beq.s   @NotNext
+
+    moveq   #0, d7
+    move.b  (RAM_CurrOption), d7
+    add.w   d7, d7
+    add.w   d7, d7
+    lea     (@CodeNext), a6
+    move.l  (a6,d7.w), a6
+    jsr     (a6)
+
+@NotNext:
+
+;------------------------------;
+; User is OKing the selection? ;
+;------------------------------;
+
+    and.b   #$E0, d0
+    beq.s   @NotSelected
+
+    moveq   #0, d7
+    move.b  (RAM_CurrOption), d7
+    add.w   d7, d7
+    add.w   d7, d7
+    lea     (@CodeSelect), a6
+    move.l  (a6,d7.w), a6
+    jsr     (a6)
+
+@NotSelected:
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@Null:
+    rts
+
+;-------------------;
+; Previous handlers ;
+;-------------------;
+
+@CodePrev:
+    dc.l    @PrevBGM
+    dc.l    @PrevSFX
+    dc.l    @Null
+
+;---------------;
+; Next handlers ;
+;---------------;
+
+@CodeNext:
+    dc.l    @NextBGM
+    dc.l    @NextSFX
+    dc.l    @Null
+
+;-----------------;
+; Select handlers ;
+;-----------------;
+
+@CodeSelect:
+    dc.l    @PlayBGM
+    dc.l    @PlaySFX
+    dc.l    @Quit
+
+;--------------;
+; Previous BGM ;
+;--------------;
+
+@PrevBGM:
+    move.b  (RAM_MusicTest), d2
+    bne.s   @PrevBGMOK
+    moveq   #BGM_Max, d2
+@PrevBGMOK:
+    subq.b  #1, d2
+    move.b  d2, (RAM_MusicTest)
+
+    moveq   #20, d0
+    moveq   #0, d1
+    bsr     WriteMenuHex
+
+    move.b  #SFX_Beep, (RAM_SFXToPlay)
+    rts
+
+;----------;
+; Next BGM ;
+;----------;
+
+@NextBGM:
+    move.b  (RAM_MusicTest), d2
+    addq.b  #1, d2
+    cmp.b   #BGM_Max, d2
+    bne.s   @NextBGMOK
+    moveq   #0, d2
+@NextBGMOK:
+    move.b  d2, (RAM_MusicTest)
+
+    moveq   #20, d0
+    moveq   #0, d1
+    bsr     WriteMenuHex
+
+    move.b  #SFX_Beep, (RAM_SFXToPlay)
+    rts
+
+;----------;
+; Play BGM ;
+;----------;
+
+@PlayBGM:
+    move.b  (RAM_MusicTest), (RAM_BGMToPlay)
+    rts
+
+;--------------;
+; Previous SFX ;
+;--------------;
+
+@PrevSFX:
+    move.b  (RAM_SoundTest), d2
+    bne.s   @PrevSFXOK
+    moveq   #SFX_Max, d2
+@PrevSFXOK:
+    subq.b  #1, d2
+    move.b  d2, (RAM_SoundTest)
+
+    moveq   #20, d0
+    moveq   #2, d1
+    bsr     WriteMenuHex
+
+    move.b  #SFX_Beep, (RAM_SFXToPlay)
+    rts
+
+;----------;
+; Next SFX ;
+;----------;
+
+@NextSFX:
+    move.b  (RAM_SoundTest), d2
+    addq.b  #1, d2
+    cmp.b   #SFX_Max, d2
+    bne.s   @NextSFXOK
+    moveq   #0, d2
+@NextSFXOK:
+    move.b  d2, (RAM_SoundTest)
+
+    moveq   #20, d0
+    moveq   #2, d1
+    bsr     WriteMenuHex
+
+    move.b  #SFX_Beep, (RAM_SFXToPlay)
+    rts
+
+;----------;
+; Play SFX ;
+;----------;
+
+@PlaySFX:
+    move.b  (RAM_SoundTest), (RAM_SFXToPlay)
+    rts
+
+;-----------;
+; Quit menu ;
+;-----------;
+
+@Quit:
+    move.b  #1, (RAM_MenuQuit)
+    rts
+
+;----------------------------------------------------------------------------

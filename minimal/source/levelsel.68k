@@ -1,0 +1,104 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------;
+; Function for the level select ;
+;-------------------------------;
+
+LevelSelect:
+
+;---------------;
+; Call the menu ;
+;---------------;
+
+    lea     (@Str_Title), a0
+    lea     (@Options), a1
+    bsr     Menu
+
+;--------------------------;
+; Go back to title screen? ;
+;--------------------------;
+
+    tst.b   (RAM_CurrOption)
+    bge.s   @NoBack
+
+    move.w  #$8114, ($C00004)
+    move.b  #GameMode_Title, (RAM_GameMode)
+    move.b  #BGMStop, (RAM_BGMToPlay)
+    jmp     SwitchMode
+@NoBack:
+
+;------------------------------;
+; Switch into the in-game mode ;
+;------------------------------;
+
+    move.b  (RAM_CurrOption), (RAM_Level)
+    move.w  #$8114, ($C00004)
+    move.b  #GameMode_InGameInit, (RAM_GameMode)
+    jmp     SwitchMode
+
+;----------------------------------------------------------------------------
+
+;------------;
+; Menu title ;
+;------------;
+
+@Str_Title:
+    dc.b    'SELECT A LEVEL',0
+;    dc.b    'DOREEECOOOOO',0
+;    dc.b    'HOOOMECOOOOON',0
+    even
+
+;--------------;
+; Menu options ;
+;--------------;
+
+@Options:
+    dc.w    12
+    dc.l    @Str_Level3D
+    dc.l    @Str_LevelMotherboard
+    dc.l    @Str_LevelLogic
+    dc.l    @Str_LevelMemory
+    dc.l    @Str_LevelShape
+    dc.l    @Str_LevelVDP
+    dc.l    @Str_BossBinary
+    dc.l    @Str_LevelLight
+    dc.l    @Str_LevelInternet
+    dc.l    @Str_LevelTray
+    dc.l    @Str_BossTray
+    dc.l    @Str_LevelWaterlava
+
+@Str_Level3D            dc.b 'INFINITE FIELD', 0
+@Str_LevelMotherboard   dc.b 'ELECTRONIC MADNESS', 0
+@Str_LevelLogic         dc.b 'GATE ARRAY', 0
+@Str_LevelMemory        dc.b 'FROZEN MEMORIES', 0
+@Str_LevelShape         dc.b 'CRAZY SHAPES', 0
+@Str_LevelVDP           dc.b 'PIXELATED WORLD', 0
+@Str_BossBinary         dc.b 'BINARY FURY', 0
+@Str_LevelLight         dc.b 'BRIGHT DARKNESS', 0
+@Str_LevelInternet      dc.b 'ETHER NETWORK', 0
+@Str_LevelTray          dc.b 'MECHANICAL HEART', 0
+@Str_BossTray           dc.b 'DANGEROUS GEARS', 0
+@Str_LevelWaterlava     dc.b 'WATERLAVA', 0
+    even
+
+;----------------------------------------------------------------------------

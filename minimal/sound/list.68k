@@ -1,0 +1,101 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo, Eric Voirin
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------;
+; Pointer list for Echo ;
+;-----------------------;
+
+EchoList:
+    Echo_ListEntry Voice_Rhombus        ; $00 Voice for rhombus SFX
+    Echo_ListEntry Voice_Electric       ; $01 Voice for electric hazards
+    Echo_ListEntry Voice_BigExplosion   ; $02 Voice for big explosions
+    Echo_ListEntry Voice_Musicbox       ; $03 Musicbox-like instrument
+    Echo_ListEntry Voice_Option         ; $04 Beep when accepting an option
+    Echo_ListEntry Voice_Explosion      ; $05 Voice for normal explosions
+    Echo_ListEntry Voice_PSGFlat        ; $06 Flat PSG envelope
+    
+    Echo_ListEntry Voice_BassDrum       ; $07 Bass drum #1
+    Echo_ListEntry Voice_BassDrum2      ; $08 Bass drum #2
+    Echo_ListEntry Voice_SnareDrum      ; $09 Snare drum #1
+    Echo_ListEntry Voice_SnareDrum2     ; $0A Snare drum #2
+    Echo_ListEntry Voice_SnareDrum3     ; $0B Snare drum #3
+    Echo_ListEntry Voice_Cymbal         ; $0C Cymbals crash
+    Echo_ListEntry Voice_TomTom         ; $0D Tom-tom drum (highest)
+    Echo_ListEntry Voice_TomTom2        ; $0E Tom-tom drum (high)
+    Echo_ListEntry Voice_TomTom3        ; $0F Tom-tom drum (low)
+    Echo_ListEntry Voice_TomTom4        ; $10 Tom-tom drum (lowest)
+    Echo_ListEntry Voice_Rrrchh         ; $11 "Rrrchh" sample (?)
+    Echo_ListEntry Voice_Cowbell        ; $12 Cowbell
+    Echo_ListEntry Voice_OpenHitHat     ; $13 Open hit-hat
+    Echo_ListEntry Voice_ShreaungFX     ; $14 [lvl3d] "Shreaaaung" FX
+    Echo_ListEntry Voice_CrashFX        ; $15 [lvl3d] Crash FX
+    Echo_ListEntry Voice_InfBass        ; $16 [lvl3d] Bass
+    Echo_ListEntry Voice_InfLead        ; $17 [lvl3d] Lead
+    Echo_ListEntry Voice_InfString      ; $18 [lvl3d] String
+    Echo_ListEntry Voice_ClosedHitHat   ; $19 Closed hit-hat
+    Echo_ListEntry Voice_ElecBass       ; $1A [lvlmobo] Bass
+    Echo_ListEntry Voice_ElecString     ; $1B [lvlmobo] String
+    Echo_ListEntry Voice_ElecArpeggio2  ; $1C [lvlmobo] Arpeggio #2
+    Echo_ListEntry Voice_ElecArpeggio1  ; $1D [lvlmobo] Arpeggio #1
+    Echo_ListEntry Voice_GateString     ; $1E [lvllog] String
+    Echo_ListEntry Voice_JingleBell     ; $1F [lvlmem] Jingle bells
+    Echo_ListEntry Voice_Tambourine     ; $20 [lvlmem] Tambourine
+    Echo_ListEntry Voice_FrozString     ; $21 [lvlmem] String
+    Echo_ListEntry Voice_FrozBass       ; $22 [lvlmem] Bass
+    Echo_ListEntry Voice_FrozHitHat     ; $23 [lvlmem] Hit-hat
+    Echo_ListEntry Voice_ShapPSGFade    ; $24 [lvlshap] PSG fade
+    Echo_ListEntry Voice_ShapLead       ; $25 [lvlshap] Lead and arpeggio
+    Echo_ListEntry Voice_PixelLead      ; $26 [lvlvdp] Lead
+    Echo_ListEntry Voice_BrghString     ; $27 [lvllght] String
+    Echo_ListEntry Voice_BrghBass       ; $28 [lvllght] Bass
+    Echo_ListEntry Voice_MechLead1      ; $29 [lvltray] Lead #1
+    Echo_ListEntry Voice_MechLead2      ; $2A [lvltray] Lead #2
+    Echo_ListEntry Voice_MechLongPSG    ; $2B [lvltray] Long PSG envelope
+    Echo_ListEntry Voice_SelectBass1    ; $2C [levelsel] Bass #1
+    Echo_ListEntry Voice_SelectBass2    ; $2D [levelsel] Bass #2
+    Echo_ListEntry Voice_SelectPiano    ; $2E [levelsel] Chordpiano
+    Echo_ListEntry Voice_LavaGuitar     ; $2F [lvlwater] Guitar
+    Echo_ListEntry Voice_LavaBass       ; $30 [lvlwater] Synth Bass
+    Echo_ListEntry Voice_LavaPSG        ; $31 [lvlwater] PSG
+    Echo_ListEntry Voice_WaterString    ; $32 [lvlwater] Long String
+    Echo_ListEntry Voice_GameOverString ; $33 [gameover] Long String w/ short release
+    Echo_ListEntry Drumloop1			; $34 [lvlinet] Drumloop
+    Echo_ListEntry Drumloop2			; $35 [lvlinet] Drumloop
+    Echo_ListEntry Drumloop3			; $36 [lvlinet] Drumloop
+    Echo_ListEntry Drumloop4			; $37 [lvlinet] Drumloop
+    Echo_ListEntry Drumloop5			; $38 [lvlinet] Drumloop
+    Echo_ListEntry Drumloop6			; $39 [lvlinet] Drumloop
+    Echo_ListEntry Drumloop7			; $3A [lvlinet] Drumloop
+    Echo_ListEntry Drumloop8			; $3B [lvlinet] Drumloop
+    Echo_ListEntry Drumloop9			; $3C [lvlinet] Drumloop
+    Echo_ListEntry Drumloop10			; $3D [lvlinet] Drumloop
+    Echo_ListEntry Voice_InetString		; $3E [lvlinet] String
+    Echo_ListEntry Voice_InetLead		; $3F [lvlinet] Lead
+    Echo_ListEntry Voice_InetArp 		; $40 [lvlinet] Arpeggio
+    Echo_ListEntry Voice_InetPSGArp1    ; $41 [lvlinet] PSG arpeggio
+    Echo_ListEntry Voice_InetPSGArp2    ; $42 [lvlinet] PSG arpeggio
+    Echo_ListEntry Voice_InetPSGArp3    ; $43 [lvlinet] PSG arpeggio
+    Echo_ListEntry Voice_InetPSGArp4    ; $44 [lvlinet] PSG arpeggio
+    Echo_ListEntry Voice_InetFade		; $45 [lvlinet] Fade-In w/ distort
+    Echo_ListEnd
+
+;----------------------------------------------------------------------------

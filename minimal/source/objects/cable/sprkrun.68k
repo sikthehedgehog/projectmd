@@ -1,0 +1,83 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------;
+; RunCableSpark                            ;
+;                                          ;
+; Game logic code for hanging cable sparks ;
+;------------------------------------------;
+
+RunCableSpark:
+
+;--------------------------------------------;
+; Player must not have the electricity power ;
+;--------------------------------------------;
+
+    cmp.b   #PlayerPow_Ray, Player_Power(a3)
+    beq.s   @End
+
+;-----------------------------------;
+; Are we colliding with the player? ;
+;-----------------------------------;
+
+    move.w  Object_X(a0), d0
+    move.w  Player_X(a3), d1
+    subq.w  #6, d0
+    addq.w  #3, d1
+    cmp.w   d0, d1
+    blt.s   @End
+
+    add.w   #11, d0
+    subq.w  #7, d1
+    cmp.w   d0, d1
+    bgt.s   @End
+
+    move.w  Object_Y(a0), d0
+    move.w  Player_Y(a3), d1
+    subq.w  #6, d0
+    cmp.w   d0, d1
+    blt.s   @End
+
+    add.w   #11, d0
+    sub.w   #31, d1
+    cmp.w   d0, d1
+    bgt.s   @End
+
+;------------------;
+; Hurt the player! ;
+;------------------;
+
+    bsr     HurtPlayer
+
+    tst.w   d6
+    beq.s   @DidntHurt
+    move.b  #SFX_Electrocute, (RAM_SFXToPlay)
+@DidntHurt:
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

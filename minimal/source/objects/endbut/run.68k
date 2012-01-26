@@ -1,0 +1,303 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------------------------;
+; RunEndButton                         ;
+;                                      ;
+; Game logic code for the goal buttons ;
+;--------------------------------------;
+
+RunEndButton:
+
+;-------------------;
+; Are we outbounds? ;
+;-------------------;
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+    cmp.w   #0-$80, d0
+    blt.s   @Outbounds
+    cmp.w   #320+$80, d0
+    ble.s   @NotOutbounds
+@Outbounds:
+    bra     DeleteObject
+@NotOutbounds:
+
+;----------------------;
+; Got pressed already? ;
+;----------------------;
+
+    move.l  Object_Misc(a0), d0
+    beq     @NotPressed
+
+;------------------;
+; Increase counter ;
+;------------------;
+
+    add.l   (RAM_GlobalAnimSpd), d0
+    move.l  d0, Object_Misc(a0)
+
+;-----------;
+; Fade out? ;
+;-----------;
+
+    swap    d0
+    and.w   #$FFFE, d0
+    cmp.w   #180, d0
+    bne.s   @DontFade
+
+    addq.w  #2, d0
+    move.w  d0, Object_Misc(a0)
+
+    move.l  #7<<16, (RAM_FadeStage)
+    move.l  (RAM_GlobalAnimSpd), d0
+    asr.l   #2, d0
+    move.l  d0, (RAM_FadeSpeed)
+
+    bset.b  #GameStat_FadeOut, (RAM_GameStatus+1)
+    bset.b  #GameStat_WhiteFade, (RAM_GameStatus+1)
+    bset.b  #IngameStat_Quit, (RAM_IngameStatus+1)
+@DontFade:
+
+;-----------;
+; Draw beam ;
+;-----------;
+
+    bsr     RunEndButtonPassive
+
+;-------------------------------;
+; Position player for the beam  ;
+;-------------------------------;
+
+    move.l  Player_X(a3), d1
+    asr.l   #2, d1
+    move.l  d1, d0
+    add.l   d1, d0
+    add.l   d1, d0
+    move.l  Object_X(a0), d1
+    add.l   #32<<16, d1
+    asr.l   #2, d1
+    add.l   d1, d0
+    move.l  d0, Player_X(a3)
+
+    move.l  Player_Y(a3), d1
+    asr.l   #2, d1
+    move.l  d1, d0
+    add.l   d1, d0
+    add.l   d1, d0
+    move.l  Object_Y(a0), d1
+    asr.l   #2, d1
+    add.l   d1, d0
+    move.l  d0, Player_Y(a3)
+
+    ;moveq   #0, d2
+
+    ;move.w  Player_X(a3), d2
+    ;move.l  d2, d0
+    ;add.l   d2, d0
+    ;add.l   d2, d0
+
+    ;move.w  Player_Y(a3), d2
+    ;move.l  d2, d1
+    ;add.l   d2, d1
+    ;add.l   d2, d1
+
+    ;move.w  Object_X(a0), d2
+    ;add.l   d2, d0
+    ;move.w  Object_Y(a0), d2
+    ;add.l   d2, d1
+
+    ;add.l   #32, d0
+    ;asr.l   #2, d0
+    ;asr.l   #2, d1
+    ;move.w  d0, Player_X(a3)
+    ;move.w  d1, Player_Y(a3)
+
+    bra.s   @End
+
+;-------------------------------;
+; Is the player stepping on us? ;
+;-------------------------------;
+
+@NotPressed:
+    move.w  Player_Gravity(a3), d0
+    blt.s   @End
+
+    move.w  Object_X(a0), d0
+    move.w  Player_X(a3), d1
+    add.w   #16, d0
+    cmp.w   d0, d1
+    blt.s   @End
+
+    add.w   #31, d0
+    cmp.w   d0, d1
+    bgt.s   @End
+
+    move.w  Object_Y(a0), d0
+    move.w  Player_Y(a3), d1
+    add.w   #16, d0
+    cmp.w   d0, d1
+    blt.s   @End
+
+    addq.w  #7, d0
+    cmp.w   d0, d1
+    bgt.s   @End
+
+;----------;
+; Turn on! ;
+;----------;
+
+    move.l  #1, Object_Misc(a0)
+    move.w  #-1, (RAM_CheckPoint)
+    move.b  #SFX_Beep, (RAM_SFXToPlay)
+
+;----------------------;
+; Reward some score :) ;
+;----------------------;
+
+    move.l  #Score_Goal, d0
+    bsr     AddScore
+
+;-------------------;
+; Catch the player! ;
+;-------------------;
+
+    move.w  Player_Status(a3), d0
+    bset.l  #PlayerStat_NoCtrl, d0
+    move.w  d0, Player_Status(a3)
+
+    move.b  #PlayerAct_OnGoal, Player_CurrAct(a3)
+    move.w  #0, Player_Invinc(a3)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------
+
+;------------------------------------;
+; RunEndButtonPassive                ;
+;                                    ;
+; Used to draw the beam while paused ;
+;------------------------------------;
+
+RunEndButtonPassive:
+
+;-------------;
+; Get counter ;
+;-------------;
+
+    move.w  Object_Misc(a0), d0
+
+;---------------------;
+; Draw beam if needed ;
+;---------------------;
+
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    bne     @NoBeam
+
+    cmp.w   #90, d0
+    blo     @NoBeam
+    cmp.w   #90+15, d0
+    bhi     @NoBeam
+
+    sub.w   #90, d0
+    lsr.w   #1, d0
+    add.w   d0, d0
+    add.w   d0, d0
+    add.w   d0, d0
+    lea     (@BeamData), a4
+    lea     (a4,d0.w), a4
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+    add.w   #$80+32, d0
+    move.w  #$80, d1
+    move.w  (a4)+, d2
+    move.w  (a4)+, d3
+
+    bsr     AddSprite
+    add.w   #32, d1
+    bsr     AddSprite
+    add.w   #32, d1
+    bsr     AddSprite
+    add.w   #32, d1
+    bsr     AddSprite
+    add.w   #32, d1
+    bsr     AddSprite
+    add.w   #32, d1
+    bsr     AddSprite
+    add.w   #32, d1
+    bsr     AddSprite
+
+    move.w  (a4), d4
+    sub.w   d4, d0
+    eor.w   #$1800, d2
+
+    bsr     AddSprite
+    sub.w   #32, d1
+    bsr     AddSprite
+    sub.w   #32, d1
+    bsr     AddSprite
+    sub.w   #32, d1
+    bsr     AddSprite
+    sub.w   #32, d1
+    bsr     AddSprite
+    sub.w   #32, d1
+    bsr     AddSprite
+    sub.w   #32, d1
+    bsr     AddSprite
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@NoBeam:
+    rts
+
+;----------------------------------------------------------------------------
+
+;---------------------------;
+; Data for the beam sprites ;
+;---------------------------;
+
+@BeamEntry macro addr, size, y
+    dc.w    addr
+    dc.w    size
+    dc.w    y
+    dc.w    0
+    endm
+
+@BeamData:
+    @BeamEntry $9800|VRAM_EndBeam, %0011, 8
+    @BeamEntry $9800|(VRAM_EndBeam+4), %0011, 8
+    @BeamEntry $9800|(VRAM_EndBeam+8), %0111, 16
+    @BeamEntry $9800|(VRAM_EndBeam+16), %0111, 16
+    @BeamEntry $9800|(VRAM_EndBeam+16), %0111, 16
+    @BeamEntry $9800|(VRAM_EndBeam+8), %0111, 16
+    @BeamEntry $9800|(VRAM_EndBeam+4), %0011, 8
+    @BeamEntry $9800|VRAM_EndBeam, %0011, 8
+
+;----------------------------------------------------------------------------

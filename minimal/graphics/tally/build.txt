@@ -1,0 +1,16 @@
+openout graphics/tally/gfx.tmp
+
+palette ??? E00 C00 A00 800 600 EAA 00A 008 000 ??? ??? ??? ??? ??? ???
+setmask
+
+openin concept/tally/bkground.bmp
+scroll 0 0 8 1
+closein
+
+openin concept/tally/font.bmp
+sprite 0 0 16 2
+sprite 0 2 16 2
+sprite 0 4 16 2
+closein
+
+closeout

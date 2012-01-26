@@ -1,0 +1,79 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------------------;
+; InitLevel_Light                                      ;
+;                                                      ;
+; Initializes stuff specific to the light-themed level ;
+;------------------------------------------------------;
+; BREAKS: d6, d7, a5, a6                               ;
+;------------------------------------------------------;
+
+InitLevel_Light:
+
+;-------------------------;
+; Enable shadow/highlight ;
+;-------------------------;
+
+    move.w  #$8C89, ($C00004)
+
+;------------------------------;
+; Load level-specific graphics ;
+;------------------------------;
+
+    FixedDMA Gfx_SHRobotWalk, VRAM_TrollWalk*$20, 16*$20
+    FixedDMA Gfx_SHRobotDead, VRAM_TrollDead*$20, 16*$20
+    FixedDMA Gfx_SHFlyRobotFly, VRAM_DblCircleFly*$20, $10*$20
+    FixedDMA Gfx_SHFlyRobotDead, VRAM_DblCircleDead*$20, $10*$20
+    FixedDMA Gfx_LightBulb, VRAM_LightBulb*$20, 12*$20
+    FixedDMA Gfx_VSpark, VRAM_VSpark*$20, 14*$20
+    FixedDMA Gfx_VSparkBase, VRAM_VSparkBase*$20, 3*$20
+    FixedDMA Gfx_SpinSpike, VRAM_SpinSpike*$20, 16*$20
+    FixedDMA Gfx_LevelLight_Platform, VRAM_Platform*$20, 8*$20
+
+;-----------------;
+; Draw background ;
+;-----------------;
+
+    movem.l d0-d5/a0-a1, -(sp)
+    lea     (Gfx_LevelLight_BGLayout), a0
+    move.l  (RAM_ObjectList), a1
+    move.l  a1, a6
+    bsr     Decompress
+    movem.l (sp)+, d0-d5/a0-a1
+
+    move.l  #$60000003, ($C00004)
+    lea     ($C00000), a5
+    move.w  #(64*28)-1, d7
+@BGLoop:
+    move.w  (a6)+, d6
+    add.w   #VRAM_LightBG, d6
+    move.w  d6, (a5)
+    dbf     d7, @BGLoop
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

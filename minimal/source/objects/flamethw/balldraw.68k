@@ -1,0 +1,94 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------------;
+; DrawFlameball            ;
+;                          ;
+; Draws a flameball object ;
+;--------------------------;
+
+DrawFlameball:
+
+;-------------------------------------;
+; Check if we're visible for starters ;
+;-------------------------------------;
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+
+    cmp.w   #-32, d0
+    ble.s   @End
+    cmp.w   #320, d0
+    bge.s   @End
+
+;-------------------------;
+; Get sprite mapping info ;
+;-------------------------;
+
+    move.w  Object_Misc(a0), d4
+    and.w   #$7FF8, d4
+    lea     (@Mappings), a6
+    lea     (a6, d4.w), a6
+
+    add.w   (a6)+, d0
+    move.w  (a6)+, d1
+    move.w  (a6)+, d2
+    move.w  (a6)+, d3
+
+;------------------------------------;
+; Calculate final sprite coordinates ;
+;------------------------------------;
+
+    add.w   Object_Y(a0), d1
+
+;----------------------;
+; Put sprite on screen ;
+;----------------------;
+
+    bsr     AddSprite
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------
+
+;-----------------;
+; Sprite mappings ;
+;-----------------;
+
+@Mappings:
+    dc.w    128+12, 128+12, $8000|VRAM_Flameball, %0000
+    dc.w    128+8, 128+8, $8000|VRAM_Flameball+1, %0101
+    dc.w    128+8, 128+8, $8000|VRAM_Flameball+5, %0101
+    dc.w    128+4, 128+4, $8000|VRAM_Flameball+9, %1010
+    dc.w    128+4, 128+4, $8000|VRAM_Flameball+18, %1010
+    dc.w    128+0, 128+0, $8000|VRAM_Flameball+27, %1111
+    dc.w    128+0, 128+0, $8000|VRAM_Flameball+43, %1111
+    dc.w    128+0, 128+0, $8000|VRAM_Flameball+59, %1111
+    dc.w    128+0, 128+0, $8000|VRAM_Flameball+75, %1111
+    dc.w    128+0, 128+0, $8000|VRAM_Flameball+91, %1111
+
+;----------------------------------------------------------------------------

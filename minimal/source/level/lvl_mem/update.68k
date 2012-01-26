@@ -1,0 +1,282 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;---------------------------------------------------;
+; UpdateLevel_Memory                                ;
+;                                                   ;
+; Updates stuff specific to the memory-themed level ;
+;---------------------------------------------------;
+; BREAKS: all                                       ;
+;---------------------------------------------------;
+
+UpdateLevel_Memory:
+
+;-----------------------------;
+; Gotta reduce text length :P ;
+;-----------------------------;
+
+    rsset VRAM_Level
+    rs.b (16*4)+3
+@T2 rs.b (16*8)+10
+@T4 rs.b (16*2)+10
+@W  rs.b 0
+
+@Addr_Water equ @W*$20
+
+;-------------------------------------------;
+; The level-specific stuff variables we use ;
+;-------------------------------------------;
+
+    rsreset
+@Var_RainbowAnim        rs.l 1      ; Used to animate the rainbow waterfalls
+
+;--------------------------------------------;
+; Get pointer to level-specific stuff memory ;
+;--------------------------------------------;
+
+    lea     (RAM_LevelStuff), a0
+
+;------------------------;
+; Update rainbow palette ;
+;------------------------;
+
+    btst.b  #IngameStat_Pause, (RAM_IngameStatus+1)
+    bne.s   @NoRainbowAnim
+
+    move.l  @Var_RainbowAnim(a0), d0
+    add.l   (RAM_GlobalAnimSpd), d0
+    cmp.l   #9<<17, d0
+    blt.s   @NoRainbowWrap
+    sub.l   #9<<17, d0
+@NoRainbowWrap:
+    move.l  d0, @Var_RainbowAnim(a0)
+
+    swap    d0
+    bclr.l  #0, d0
+    lea     (@RainbowPal), a1
+    lea     (a1,d0.w), a1
+    lea     (RAM_PalBuffer+$62), a2
+
+    move.l  (a1)+, (a2)+
+    move.l  (a1)+, (a2)+
+    move.l  (a1)+, (a2)+
+    move.l  (a1)+, (a2)+
+    move.w  (a1)+, (a2)+
+@NoRainbowAnim:
+
+;--------------;
+; Update water ;
+;--------------;
+
+    move.w  (RAM_GlobalAnim), d0
+    and.l   #$F<<2, d0
+    add.l   #Gfx_LevelMemory_Water, d0
+
+    move.l  d0, d7
+    VarSrcDMA @Addr_Water, 2*$20
+
+    add.l   #4*$20, d0
+    move.l  d0, d7
+    VarSrcDMA @Addr_Water+(2*$20), 2*$20
+
+    add.l   #4*$20, d0
+    move.l  d0, d7
+    VarSrcDMA @Addr_Water+(4*$20), 2*$20
+
+    add.l   #4*$20, d0
+    move.l  d0, d7
+    VarSrcDMA @Addr_Water+(6*$20), 2*$20
+
+    add.l   #4*$20, d0
+    move.l  d0, d7
+    VarSrcDMA @Addr_Water+(8*$20), 2*$20
+
+    add.l   #4*$20, d0
+    move.l  d0, d7
+    VarSrcDMA @Addr_Water+(10*$20), 2*$20
+
+    add.l   #4*$20, d0
+    move.l  d0, d7
+    VarSrcDMA @Addr_Water+(12*$20), 2*$20
+
+    add.l   #4*$20, d0
+    move.l  d0, d7
+    VarSrcDMA @Addr_Water+(14*$20), 2*$20
+
+;-----------------------;
+; Update HScroll buffer ;
+;-----------------------;
+
+    moveq   #0, d0
+    move.w  (RAM_Scroll), d0
+    neg.w   d0
+
+    move.w  d0, d1
+    move.w  d0, d2
+    asr.w   #2, d1
+    asr.w   #3, d2
+
+    lea     (RAM_HScrBuffer), a0
+    moveq   #5-1, d7
+@ScrollLoopFG1:
+    move.w  d0, (a0)+
+    move.w  d1, (a0)+
+    add.w   #28, a0
+    dbf     d7, @ScrollLoopFG1
+
+    moveq   #18-1, d7
+@ScrollLoopBG:
+    move.w  d0, (a0)+
+    move.w  d2, (a0)+
+    add.w   #28, a0
+    dbf     d7, @ScrollLoopBG
+
+    moveq   #5-1, d7
+@ScrollLoopFG2:
+    move.w  d0, (a0)+
+    move.w  d1, (a0)+
+    add.w   #28, a0
+    dbf     d7, @ScrollLoopFG2
+
+;----------------------------------------------------------;
+; Update HScroll                                           ;
+; TO-DO: improve this code to reduce amount to transfer... ;
+;----------------------------------------------------------;
+
+    FixedDMA RAM_HScrBuffer, $F800, 2*224*2
+
+;------------------;
+; Perform blinking ;
+;------------------;
+
+    moveq   #0, d0
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @BlinkFrame1
+    move.w  #224, d0
+@BlinkFrame1:
+    move.w  d0, (RAM_VScrBuffer)
+    move.w  #0, (RAM_VScrBuffer+2)
+
+;----------------------------------;
+; Animate the crystallic creatures ;
+;----------------------------------;
+
+    move.w  (RAM_GlobalAnim), d0
+
+    moveq   #0, d7
+    move.w  d0, d7
+    and.w   #$F<<1, d7
+    lsl.l   #5+4-1, d7
+    add.l   #Gfx_CrystalCreatureWalk, d7
+    VarSrcDMA VRAM_TrollWalk*$20, 16*$20
+
+    moveq   #0, d7
+    move.w  d0, d7
+    and.w   #$3<<1, d7
+    lsl.l   #5+2-1, d7
+    add.l   #Gfx_CrystalCreaturePieces, d7
+    move.l  d7, d5
+    VarSrcDMA VRAM_DblCircleDead*$20, 4*$20
+    move.l  d5, d7
+    VarSrcDMA (VRAM_DblCircleDead+4)*$20, 4*$20
+    move.l  d5, d7
+    VarSrcDMA (VRAM_DblCircleDead+8)*$20, 4*$20
+    move.l  d5, d7
+    VarSrcDMA (VRAM_DblCircleDead+12)*$20, 4*$20
+
+    and.w   #$7<<1, d0
+    moveq   #0, d7
+    lea     (Gfx_CrystalBatFly_Pattern), a0
+    move.w  (a0,d0.w), d7
+    add.l   #Gfx_CrystalBatFly, d7
+    VarSrcDMA VRAM_DblCircleFly*$20, 16*$20
+
+;------------------------------------------------------;
+; Add pillar sprites (topmost layer of the background) ;
+;------------------------------------------------------;
+
+    move.w  (RAM_Scroll), d0
+    neg.w   d0
+    asr.w   #2, d0
+    and.w   #$3F, d0
+    add.w   #64, d0
+
+    moveq   #6-1, d4
+@PillarLoop:
+    move.w  #(5*8)+128, d1
+    move.w  #VRAM_Level+$4028, d2
+    moveq   #%1100, d3
+    bsr     AddSprite
+
+    move.w  #(22*8)+128, d1
+    move.w  #VRAM_Level+$5028, d2
+    bsr     AddSprite
+
+    addq.w  #8, d0
+    move.w  #(6*8)+128, d1
+    move.w  #VRAM_Level+$402C, d2
+    moveq   #%0111, d3
+    bsr     AddSprite
+    move.w  #(10*8)+128, d1
+    bsr     AddSprite
+    move.w  #(14*8)+128, d1
+    bsr     AddSprite
+    move.w  #(18*8)+128, d1
+    bsr     AddSprite
+
+    add.w   #64-8, d0
+    dbf     d4, @PillarLoop
+
+;--------------------------;
+; Animate fake layer (x_x) ;
+;--------------------------;
+
+    move.w  (RAM_Scroll), d7
+    add.w   #15, d7
+    asr.w   #4, d7
+    and.l   #$F, d7
+    lsl.w   #7, d7
+
+    add.l   #Gfx_LevelMemory_BGScroll, d7
+    VarSrcDMA (VRAM_Level+$3F)*$20, 4*$20
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
+
+;------------------------------------;
+; Palette for the rainbow waterfalls ;
+;------------------------------------;
+
+@RainbowPal:
+    dc.w    $E88, $CA8, $AC8
+    dc.w    $8E8, $8CA, $8AC
+    dc.w    $88E, $A8C, $C8A
+    dc.w    $E88, $CA8, $AC8
+    dc.w    $8E8, $8CA, $8AC
+    dc.w    $88E, $A8C
+
+;----------------------------------------------------------------------------

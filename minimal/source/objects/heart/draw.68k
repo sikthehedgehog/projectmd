@@ -1,0 +1,95 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------;
+; DrawHeart                    ;
+;                              ;
+; Draws a love power-up object ;
+;------------------------------;
+
+DrawHeart:
+
+;-------------------------------------------------------------------------;
+; Check if we're visible for starters                                     ;
+; Spurious sprites cause sprite overflow                                  ;
+; Also the sprite may appear at X coordinate 0, which accidentally causes ;
+; the sprite cut feature to kick in...                                    ;
+;-------------------------------------------------------------------------;
+
+    move.w  Object_X(a0), d0
+    sub.w   (RAM_Scroll), d0
+
+    cmp.w   #-32, d0
+    ble.s   @End
+    cmp.w   #320, d0
+    bge.s   @End
+
+;------------------------------;
+; Calculate sprite coordinates ;
+;------------------------------;
+
+    move.w  Object_Y(a0), d1
+    add.w   #128+8, d0
+    add.w   #128+8, d1
+
+;--------------------------;
+; Calculate vertical shift ;
+;--------------------------;
+
+    move.w  (RAM_GlobalAnim), d2
+    btst.l  #3, d2
+    beq.s   @NoShift
+    subq.w  #1, d1
+    btst.l  #4, d2
+    beq.s   @NoShift
+    addq.w  #2, d1
+@NoShift:
+
+;-------------------------;
+; Determine sprite to use ;
+;-------------------------;
+
+    move.w  #$8000|VRAM_LovePowerup, d2
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @NoBlink
+    addq.w  #4, d2
+@NoBlink:
+    cmp.b   #Level_Light, (RAM_Level)
+    bne.s   @NoDarken
+    bclr.l  #15, d2
+@NoDarken:
+
+;----------------------;
+; Put sprite on screen ;
+;----------------------;
+
+    moveq   #%0101, d3
+    bsr     AddSprite
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------

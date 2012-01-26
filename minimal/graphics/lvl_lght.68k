@@ -1,0 +1,314 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------------------------------------;
+; This file contains the graphics data for the light-themed level ;
+;-----------------------------------------------------------------;
+
+;----------------------------------------------------------------------------
+
+;---------------;
+; 8x8 tile data ;
+;---------------;
+
+Gfx_LevelLight:
+    incbin "graphics/lvl_lght/gfx.bin"
+    even
+
+;-------------------;
+; Background layout ;
+;-------------------;
+
+Gfx_LevelLight_BGLayout:
+    incbin  "graphics/lvl_lght/bglayout.bin"
+    even
+
+;-------------------;
+; Platform graphics ;
+;-------------------;
+
+    cnop    0, 4*8*$20
+Gfx_LevelLight_Platform:
+    incbin "graphics/lvl_lght/platform.bin"
+
+;----------------------------------------------------------------------------
+
+;-----------------;
+; 32x32 tile data ;
+;-----------------;
+
+Tiles_LevelLight:
+
+;--------------------------------------------;
+; To make my life easier and save text space ;
+;--------------------------------------------;
+
+@Begin equ Tiles_LevelLight
+
+    rsset VRAM_Level
+@T2 rs.b (16*2)+4
+@T3 rs.b 12
+
+;-----------;
+; Tile list ;
+;-----------;
+
+    dc.w    @Tile00-@Begin, @Tile00-@Begin
+    dc.w    @Tile01-@Begin, @Tile01B-@Begin
+    dc.w    @Tile02-@Begin, @Tile02B-@Begin
+    dc.w    @Tile03-@Begin, @Tile03B-@Begin
+    dc.w    @Tile04-@Begin, @Tile04B-@Begin
+    dc.w    @Tile05-@Begin, @Tile05-@Begin
+    dc.w    @Tile06-@Begin, @Tile06-@Begin
+    dc.w    @Tile07-@Begin, @Tile07-@Begin
+    dc.w    @Tile08-@Begin, @Tile08-@Begin
+    dc.w    @Tile09-@Begin, @Tile09-@Begin
+    dc.w    @Tile0A-@Begin, @Tile0A-@Begin
+    dc.w    @Tile0B-@Begin, @Tile0BB-@Begin
+    dc.w    @Tile0C-@Begin, @Tile0CB-@Begin
+    dc.w    @Tile0D-@Begin, @Tile0DB-@Begin
+    dc.w    @Tile0E-@Begin, @Tile0E-@Begin
+    dc.w    @Tile0F-@Begin, @Tile0FB-@Begin
+    dc.w    @Tile10-@Begin, @Tile10B-@Begin
+
+;----------------------;
+; Tile $00: empty tile ;
+;----------------------;
+
+@Tile00:
+    dcb.w   4*4, $8000
+
+;-------------------------;
+; Tile $01: main block #1 ;
+;-------------------------;
+
+@Tile01:
+    dc.w    @T2+$A000, @T2+$A001, @T2+$A002, @T2+$A003
+    dc.w    @T2+$A004, @T2+$A005, @T2+$A006, @T2+$A007
+    dc.w    @T2+$B004, @T2+$B005, @T2+$B006, @T2+$B007
+    dc.w    @T2+$B000, @T2+$B001, @T2+$B002, @T2+$B003
+
+@Tile01B:
+    dc.w    @T2+$A803, @T2+$A802, @T2+$A801, @T2+$A800
+    dc.w    @T2+$A807, @T2+$A806, @T2+$A805, @T2+$A804
+    dc.w    @T2+$B807, @T2+$B806, @T2+$B805, @T2+$B804
+    dc.w    @T2+$B803, @T2+$B802, @T2+$B801, @T2+$B800
+
+;-------------------------;
+; Tile $02: main block #2 ;
+;-------------------------;
+
+@Tile02:
+    dc.w    @T2+$A008, @T2+$A009, @T2+$A00A, @T2+$A00B
+    dc.w    @T2+$A00C, @T2+$A00D, @T2+$A00E, @T2+$A00F
+    dc.w    @T2+$B00C, @T2+$B00D, @T2+$B00E, @T2+$B00F
+    dc.w    @T2+$B008, @T2+$B009, @T2+$B00A, @T2+$B00B
+
+@Tile02B:
+    dc.w    @T2+$A80B, @T2+$A80A, @T2+$A809, @T2+$A808
+    dc.w    @T2+$A80F, @T2+$A80E, @T2+$A80D, @T2+$A80C
+    dc.w    @T2+$B80F, @T2+$B80E, @T2+$B80D, @T2+$B80C
+    dc.w    @T2+$B80B, @T2+$B80A, @T2+$B809, @T2+$B808
+
+;----------------------------;
+; Tile $03: light bulb (top) ;
+;----------------------------;
+
+@Tile03:
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    @T2+$A010, @T2+$A011, @T2+$A012, @T2+$A013
+    dc.w    @T2+$A014, @T2+$A015, @T2+$A815, @T2+$A814
+    dc.w    @T2+$A014, @T2+$A015, @T2+$A815, @T2+$A814
+
+@Tile03B:
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    @T2+$A813, @T2+$A812, @T2+$A811, @T2+$A810
+    dc.w    @T2+$B014, @T2+$B015, @T2+$B815, @T2+$B814
+    dc.w    @T2+$B014, @T2+$B015, @T2+$B815, @T2+$B814
+
+;-------------------------------;
+; Tile $04: light bulb (bottom) ;
+;-------------------------------;
+
+@Tile04:
+    dc.w    @T2+$A014, @T2+$A015, @T2+$A815, @T2+$A814
+    dc.w    @T2+$A014, @T2+$A015, @T2+$A815, @T2+$A814
+    dc.w    @T2+$B813, @T2+$B812, @T2+$B811, @T2+$B810
+    dc.w    $8000, @T2+$A016, @T2+$B816, $8000
+
+@Tile04B:
+    dc.w    @T2+$B014, @T2+$B015, @T2+$B815, @T2+$B814
+    dc.w    @T2+$B014, @T2+$B015, @T2+$B815, @T2+$B814
+    dc.w    @T2+$B010, @T2+$B011, @T2+$B012, @T2+$B013
+    dc.w    $8000, @T2+$B016, @T2+$A816, $8000
+
+;---------------------------------;
+; Tile $05: glass area (top left) ;
+;---------------------------------;
+
+@Tile05:
+    dc.w    @T2+$A017, @T2+$A018, @T2+$A017, @T2+$A018
+    dc.w    @T2+$A019, @T2+$A01A, @T2+$A019, @T2+$A01A
+    dc.w    @T2+$A01B, $0000, $0000, $0000
+    dc.w    @T2+$A01B, $0000, $0000, $0000
+
+;----------------------------;
+; Tile $06: glass area (top) ;
+;----------------------------;
+
+@Tile06:
+    dc.w    @T2+$A017, @T2+$A018, @T2+$A017, @T2+$A018
+    dc.w    @T2+$A019, @T2+$A01A, @T2+$A019, @T2+$A01A
+    dc.w    $0000, $0000, $0000, $0000
+    dc.w    $0000, $0000, $0000, $0000
+
+;----------------------------------;
+; Tile $07: glass area (top right) ;
+;----------------------------------;
+
+@Tile07:
+    dc.w    @T2+$A017, @T2+$A018, @T2+$A017, @T2+$A018
+    dc.w    @T2+$A019, @T2+$A01A, @T2+$A019, @T2+$A01A
+    dc.w    $0000, $0000, $0000, @T2+$A81B
+    dc.w    $0000, $0000, $0000, @T2+$A81B
+
+;-----------------------------;
+; Tile $08: glass area (left) ;
+;-----------------------------;
+
+@Tile08:
+    dc.w    @T2+$A01B, $0000, $0000, $0000
+    dc.w    @T2+$A01B, $0000, $0000, $0000
+    dc.w    @T2+$A01B, $0000, $0000, $0000
+    dc.w    @T2+$A01B, $0000, $0000, $0000
+
+;-----------------------------;
+; Tile $09: glass area (main) ;
+;-----------------------------;
+
+@Tile09:
+    dc.w    $0000, $0000, $0000, $0000
+    dc.w    $0000, $0000, $0000, $0000
+    dc.w    $0000, $0000, $0000, $0000
+    dc.w    $0000, $0000, $0000, $0000
+
+;------------------------------;
+; Tile $0A: glass area (right) ;
+;------------------------------;
+
+@Tile0A:
+    dc.w    $0000, $0000, $0000, @T2+$A81B
+    dc.w    $0000, $0000, $0000, @T2+$A81B
+    dc.w    $0000, $0000, $0000, @T2+$A81B
+    dc.w    $0000, $0000, $0000, @T2+$A81B
+
+;------------------------------------;
+; Tile $0B: ceiling light bulb (top) ;
+;------------------------------------;
+
+@Tile0B:
+    dc.w    $8000, @T2+$A016, @T2+$B816, $8000
+    dc.w    @T2+$A010, @T2+$A011, @T2+$A012, @T2+$A013
+    dc.w    @T2+$A014, @T2+$A015, @T2+$A815, @T2+$A814
+    dc.w    @T2+$A014, @T2+$A015, @T2+$A815, @T2+$A814
+
+@Tile0BB:
+    dc.w    $8000, @T2+$B016, @T2+$A816, $8000
+    dc.w    @T2+$A813, @T2+$A812, @T2+$A811, @T2+$A810
+    dc.w    @T2+$B014, @T2+$B015, @T2+$B815, @T2+$B814
+    dc.w    @T2+$B014, @T2+$B015, @T2+$B815, @T2+$B814
+
+;---------------------------------------;
+; Tile $0C: ceiling light bulb (bottom) ;
+;---------------------------------------;
+
+@Tile0C:
+    dc.w    @T2+$A014, @T2+$A015, @T2+$A815, @T2+$A814
+    dc.w    @T2+$A014, @T2+$A015, @T2+$A815, @T2+$A814
+    dc.w    @T2+$B813, @T2+$B812, @T2+$B811, @T2+$B810
+    dc.w    $8000, $8000, $8000, $8000
+
+@Tile0CB:
+    dc.w    @T2+$B014, @T2+$B015, @T2+$B815, @T2+$B814
+    dc.w    @T2+$B014, @T2+$B015, @T2+$B815, @T2+$B814
+    dc.w    @T2+$B010, @T2+$B011, @T2+$B012, @T2+$B013
+    dc.w    $8000, $8000, $8000, $8000
+
+;------------------------------------;
+; Tile $0D: foreground block scenery ;
+;------------------------------------;
+
+@Tile0D:
+    dc.w    @T3+$C000, @T3+$C001, @T3+$C001, @T3+$C002
+    dc.w    @T3+$C003, @T3+$C000, @T3+$C002, @T3+$C004
+    dc.w    @T3+$C003, @T3+$C005, @T3+$C006, @T3+$C004
+    dc.w    @T3+$C005, @T3+$C007, @T3+$C007, @T3+$C006
+
+@Tile0DB:
+    dc.w    @T3+$C008, @T3+$C801, @T3+$C801, @T3+$C009
+    dc.w    @T3+$C803, @T3+$C008, @T3+$C009, @T3+$C804
+    dc.w    @T3+$C803, @T3+$C00A, @T3+$C00B, @T3+$C804
+    dc.w    @T3+$C00A, @T3+$C807, @T3+$C807, @T3+$C00B
+
+;----------------------------------;
+; Tile $0E: red floor (glass-less) ;
+;----------------------------------;
+
+@Tile0E:
+    dc.w    @T2+$A017, @T2+$A018, @T2+$A017, @T2+$A018
+    dc.w    @T2+$A019, @T2+$A01A, @T2+$A019, @T2+$A01A
+    dc.w    $8000, $8000, $8000, $8000
+    dc.w    $8000, $8000, $8000, $8000
+
+;------------------------;
+; Tile $0F: floor spikes ;
+;------------------------;
+
+@Tile0F:
+    dc.w    @T2+$A01C, @T2+$A01D, @T2+$A01C, @T2+$A01D
+    dc.w    @T2+$A01E, @T2+$A01F, @T2+$A01E, @T2+$A01F
+    dc.w    @T2+$A020, @T2+$A021, @T2+$A020, @T2+$A021
+    dc.w    @T2+$A022, @T2+$A023, @T2+$A022, @T2+$A023
+
+@Tile0FB:
+    dc.w    @T2+$A81C, @T2+$A81D, @T2+$A81C, @T2+$A81D
+    dc.w    @T2+$A81E, @T2+$A81F, @T2+$A81E, @T2+$A81F
+    dc.w    @T2+$A820, @T2+$A821, @T2+$A820, @T2+$A821
+    dc.w    @T2+$A822, @T2+$A823, @T2+$A822, @T2+$A823
+
+;--------------------------;
+; Tile $10: ceiling spikes ;
+;--------------------------;
+
+@Tile10:
+    dc.w    @T2+$B022, @T2+$B023, @T2+$B022, @T2+$B023
+    dc.w    @T2+$B020, @T2+$B021, @T2+$B020, @T2+$B021
+    dc.w    @T2+$B01E, @T2+$B01F, @T2+$B01E, @T2+$B01F
+    dc.w    @T2+$B01C, @T2+$B01D, @T2+$B01C, @T2+$B01D
+
+@Tile10B:
+    dc.w    @T2+$B822, @T2+$B823, @T2+$B822, @T2+$B823
+    dc.w    @T2+$B820, @T2+$B821, @T2+$B820, @T2+$B821
+    dc.w    @T2+$B81E, @T2+$B81F, @T2+$B81E, @T2+$B81F
+    dc.w    @T2+$B81C, @T2+$B81D, @T2+$B81C, @T2+$B81D
+
+;----------------------------------------------------------------------------

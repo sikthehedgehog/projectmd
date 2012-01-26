@@ -1,0 +1,65 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------;
+; To work around the DMA bug... ;
+;-------------------------------;
+
+    cnop 0, $200
+
+;------------------------------------;
+; Tile data for crystallic creatures ;
+;------------------------------------;
+
+;------------------------------------;
+; Graphics for the walking animation ;
+;------------------------------------;
+
+Gfx_CrystalCreatureWalk:
+    incbin  "graphics/cryscrea/walk1.bin"
+    incbin  "graphics/cryscrea/walk2.bin"
+    incbin  "graphics/cryscrea/walk3.bin"
+    incbin  "graphics/cryscrea/walk4.bin"
+    incbin  "graphics/cryscrea/walk5.bin"
+    incbin  "graphics/cryscrea/walk6.bin"
+    incbin  "graphics/cryscrea/walk7.bin"
+    incbin  "graphics/cryscrea/walk8.bin"
+    incbin  "graphics/cryscrea/walk9.bin"
+    incbin  "graphics/cryscrea/walk10.bin"
+    incbin  "graphics/cryscrea/walk11.bin"
+    incbin  "graphics/cryscrea/walk12.bin"
+    incbin  "graphics/cryscrea/walk13.bin"
+    incbin  "graphics/cryscrea/walk14.bin"
+    incbin  "graphics/cryscrea/walk15.bin"
+    incbin  "graphics/cryscrea/walk16.bin"
+
+;------------------------------------------------;
+; Graphics for the falling pieces when it breaks ;
+;------------------------------------------------;
+
+Gfx_CrystalCreaturePieces:
+    incbin  "graphics/cryscrea/piece1.bin"
+    incbin  "graphics/cryscrea/piece2.bin"
+    incbin  "graphics/cryscrea/piece3.bin"
+    incbin  "graphics/cryscrea/piece4.bin"
+
+;----------------------------------------------------------------------------

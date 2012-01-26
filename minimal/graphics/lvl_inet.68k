@@ -1,0 +1,490 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------------------------------------------------------;
+; This file contains the graphics data for the Internet-themed level ;
+;--------------------------------------------------------------------;
+
+;----------------------------------------------------------------------------
+
+;---------------;
+; 8x8 tile data ;
+;---------------;
+
+Gfx_LevelInternet:
+    incbin "graphics/lvl_inet/gfx.bin"
+    even
+
+;--------------------------------------;
+; Pattern used for the star background ;
+;--------------------------------------;
+
+Gfx_LevelInternet_BGPattern:
+    incbin "graphics/lvl_inet/starpat.bin"
+
+;-------------------;
+; Platform graphics ;
+;-------------------;
+
+    cnop    0, 4*8*$20
+Gfx_LevelInternet_Platform:
+    incbin "graphics/lvl_inet/platform.bin"
+
+;----------------;
+; Other graphics ;
+;----------------;
+
+    cnop    0, 256
+Gfx_LevelInternet_Binary:           incbin "graphics/lvl_inet/binary.bin"
+    cnop    0, 4096
+Gfx_LevelInternet_Display:          incbin "graphics/lvl_inet/display.bin"
+    cnop    0, 512
+Gfx_LevelInternet_Prism:            incbin "graphics/lvl_inet/prism.bin"
+    cnop    0, 1024
+Gfx_LevelInternet_Square:           incbin "graphics/lvl_inet/square.bin"
+
+;----------------------------------------------------------------------------
+
+;-----------------;
+; 32x32 tile data ;
+;-----------------;
+
+Tiles_LevelInternet:
+
+;--------------------------------------------;
+; To make my life easier and save text space ;
+;--------------------------------------------;
+
+@Begin equ Tiles_LevelInternet
+
+    rsset VRAM_Level
+    rs.b 16
+@T2 rs.b (16*3)+4
+@T3 rs.b 16+5
+@Bin rs.b 4
+@Disp4 rs.b 8
+@Disp3 rs.b 8
+@Disp2 rs.b 8
+@Disp1 rs.b 8
+@Pr rs.b 7
+@Bl rs.b 0
+
+;-----------;
+; Tile list ;
+;-----------;
+
+    dc.w    @Tile00-@Begin, @Tile00-@Begin
+    dc.w    @Tile01-@Begin, @Tile01-@Begin
+    dc.w    @Tile02-@Begin, @Tile02-@Begin
+    dc.w    @Tile03-@Begin, @Tile03-@Begin
+    dc.w    @Tile04-@Begin, @Tile04-@Begin
+    dc.w    @Tile05-@Begin, @Tile05-@Begin
+    dc.w    @Tile06-@Begin, @Tile06-@Begin
+    dc.w    @Tile07-@Begin, @Tile07-@Begin
+    dc.w    @Tile08-@Begin, @Tile08-@Begin
+    dc.w    @Tile09-@Begin, @Tile09-@Begin
+    dc.w    @Tile0A-@Begin, @Tile0A-@Begin
+    dc.w    @Tile0B-@Begin, @Tile0B-@Begin
+    dc.w    @Tile0C-@Begin, @Tile0C-@Begin
+    dc.w    @Tile0D-@Begin, @Tile0D-@Begin
+    dc.w    @Tile0E-@Begin, @Tile0E-@Begin
+    dc.w    @Tile0F-@Begin, @Tile0F-@Begin
+
+    dc.w    @Tile10-@Begin, @Tile10-@Begin
+    dc.w    @Tile11-@Begin, @Tile11-@Begin
+    dc.w    @Tile12-@Begin, @Tile12-@Begin
+    dc.w    @Tile13-@Begin, @Tile13-@Begin
+    dc.w    @Tile14-@Begin, @Tile14-@Begin
+    dc.w    @Tile15-@Begin, @Tile15-@Begin
+    dc.w    @Tile16-@Begin, @Tile16-@Begin
+    dc.w    @Tile17-@Begin, @Tile17-@Begin
+    dc.w    @Tile18-@Begin, @Tile18-@Begin
+    dc.w    @Tile19-@Begin, @Tile19-@Begin
+    dc.w    @Tile1A-@Begin, @Tile1A-@Begin
+    dc.w    @Tile1B-@Begin, @Tile1B-@Begin
+    dc.w    @Tile1C-@Begin, @Tile1C-@Begin
+    dc.w    @Tile1D-@Begin, @Tile1D-@Begin
+    dc.w    @Tile1E-@Begin, @Tile1E-@Begin
+    dc.w    @Tile1F-@Begin, @Tile1F-@Begin
+
+    dc.w    @Tile20-@Begin, @Tile20-@Begin
+    dc.w    @Tile21-@Begin, @Tile21-@Begin
+    dc.w    @Tile22-@Begin, @Tile22-@Begin
+    dc.w    @Tile23-@Begin, @Tile23-@Begin
+
+;----------------------;
+; Tile $00: empty tile ;
+;----------------------;
+
+@Tile00:
+    dcb.w   4*4, $8000
+
+;-------------------------;
+; @Tile $01: virtual floor ;
+;-------------------------;
+
+@Tile01:
+    dc.w    @T2+$A000,@T2+$A001,@T2+$A000,@T2+$A001
+    dc.w    @T2+$A000,@T2+$A001,@T2+$A000,@T2+$A001
+    dc.w    @Bin+$A000,@Bin+$A001,@Bin+$A000,@Bin+$A001
+    dc.w    @Bin+$A002,@Bin+$A002,@Bin+$A003,@Bin+$A003
+
+;---------------------------------;
+; @Tile $02: right arrow, color #1 ;
+;---------------------------------;
+
+@Tile02:
+    dc.w    @T2+$A002,@T2+$A003,@T2+$A004,@T2+$A005
+    dc.w    $8000,@T2+$A006,@T2+$A007,@T2+$A008
+    dc.w    $8000,@T2+$B006,@T2+$B007,@T2+$B008
+    dc.w    @T2+$B002,@T2+$B003,@T2+$B004,@T2+$B005
+
+;---------------------------------;
+; @Tile $03: right arrow, color #2 ;
+;---------------------------------;
+
+@Tile03:
+    dc.w    @T2+$A009,@T2+$A00A,@T2+$A00B,@T2+$A00C
+    dc.w    $8000,@T2+$A00D,@T2+$A00E,@T2+$A00F
+    dc.w    $8000,@T2+$B00D,@T2+$B00E,@T2+$B00F
+    dc.w    @T2+$B009,@T2+$B00A,@T2+$B00B,@T2+$B00C
+
+;--------------------------------;
+; @Tile $04: four coloured blocks ;
+;--------------------------------;
+
+@Tile04:
+    dc.w    @Bl+$A000,@Bl+$A001,@Bl+$A004,@Bl+$A005
+    dc.w    @Bl+$A002,@Bl+$A003,@Bl+$A006,@Bl+$A007
+    dc.w    @Bl+$A008,@Bl+$A009,@Bl+$A000,@Bl+$A001
+    dc.w    @Bl+$A00A,@Bl+$A00B,@Bl+$A002,@Bl+$A003
+
+;----------------------;
+; @Tile $05: speed lane ;
+;----------------------;
+
+@Tile05:
+    dc.w    $8000,$8000,$8000,$8000
+    dc.w    @T2+$C000,@T2+$C001,@T2+$C000,@T2+$C001
+    dc.w    @T2+$C000,@T2+$C001,@T2+$C000,@T2+$C001
+    dc.w    $8000,$8000,$8000,$8000
+
+;-------------------;
+; @Tile $06: big "M" ;
+;-------------------;
+
+@Tile06:
+    dc.w    $8000,@T2+$A010,$8000,@T2+$A010
+    dc.w    $8000,@T2+$A011,$8000,@T2+$A011
+    dc.w    @T2+$A010,@T2+$A012,@T2+$A010,@T2+$A012
+    dc.w    @T2+$A011,@T2+$A012,@T2+$A011,@T2+$A012
+
+;-------------------;
+; @Tile $07: big "D" ;
+;-------------------;
+
+@Tile07:
+    dc.w    @T2+$A013,@T2+$A014,@T2+$A015,$8000
+    dc.w    @T2+$A013,@T2+$A013,@T2+$A013,@T2+$A016
+    dc.w    @T2+$A013,@T2+$A013,@T2+$A013,@T2+$A017
+    dc.w    @T2+$A013,@T2+$A013,@T2+$A013,@T2+$A013
+
+;---------------------------------;
+; @Tile $08: display, character #1 ;
+;---------------------------------;
+
+@Tile08:
+    dc.w    @T3+$C000,@T3+$C001,@T3+$C000,@T3+$C001
+    dc.w    @Disp1+$C000,@Disp1+$C001,@Disp1+$C002,@Disp1+$C003
+    dc.w    @Disp1+$C004,@Disp1+$C005,@Disp1+$C006,@Disp1+$C007
+    dc.w    @T3+$C002,@T3+$C003,@T3+$C002,@T3+$C003
+
+;---------------------------------;
+; @Tile $09: display, character #2 ;
+;---------------------------------;
+
+@Tile09:
+    dc.w    @T3+$C000,@T3+$C001,@T3+$C000,@T3+$C001
+    dc.w    @Disp2+$C000,@Disp2+$C001,@Disp2+$C002,@Disp2+$C003
+    dc.w    @Disp2+$C004,@Disp2+$C005,@Disp2+$C006,@Disp2+$C007
+    dc.w    @T3+$C002,@T3+$C003,@T3+$C002,@T3+$C003
+
+;---------------------------------;
+; @Tile $0A: display, character #3 ;
+;---------------------------------;
+
+@Tile0A:
+    dc.w    @T3+$C000,@T3+$C001,@T3+$C000,@T3+$C001
+    dc.w    @Disp3+$C000,@Disp3+$C001,@Disp3+$C002,@Disp3+$C003
+    dc.w    @Disp3+$C004,@Disp3+$C005,@Disp3+$C006,@Disp3+$C007
+    dc.w    @T3+$C002,@T3+$C003,@T3+$C002,@T3+$C003
+
+;---------------------------------;
+; @Tile $0B: display, character #4 ;
+;---------------------------------;
+
+@Tile0B:
+    dc.w    @T3+$C000,@T3+$C001,@T3+$C000,@T3+$C001
+    dc.w    @Disp4+$C000,@Disp4+$C001,@Disp4+$C002,@Disp4+$C003
+    dc.w    @Disp4+$C004,@Disp4+$C005,@Disp4+$C006,@Disp4+$C007
+    dc.w    @T3+$C002,@T3+$C003,@T3+$C002,@T3+$C003
+
+;---------------------------------;
+; @Tile $0C: display (left border) ;
+;---------------------------------;
+
+@Tile0C:
+    dc.w    @T3+$C005,@T3+$C006,@T3+$C00D,@T3+$C001
+    dc.w    @T3+$C007,@T3+$C008,@T3+$C004,@T3+$C004
+    dc.w    @T3+$C009,@T3+$C00A,@T3+$C004,@T3+$C004
+    dc.w    @T3+$C00B,@T3+$C00C,@T3+$C00E,@T3+$C003
+
+;----------------------------------;
+; @Tile $0D: display (right border) ;
+;----------------------------------;
+
+@Tile0D:
+    dc.w    @T3+$C000,@T3+$C00F,@T3+$C806,@T3+$C805
+    dc.w    @T3+$C004,@T3+$C004,@T3+$C808,@T3+$C807
+    dc.w    @T3+$C004,@T3+$C004,@T3+$C80A,@T3+$C809
+    dc.w    @T3+$C002,@T3+$C010,@T3+$C80C,@T3+$C80B
+
+;--------------------------;
+; @Tile $0E: display (pole) ;
+;--------------------------;
+
+@Tile0E:
+    dc.w    $8000,@T3+$C011,@T3+$C811,$8000
+    dc.w    $8000,@T3+$C011,@T3+$C811,$8000
+    dc.w    $8000,@T3+$C011,@T3+$C811,$8000
+    dc.w    $8000,@T3+$C012,@T3+$C812,$8000
+
+;---------------------;
+; @Tile $0F: prism top ;
+;---------------------;
+
+@Tile0F:
+    dc.w    @Pr+$C000,@Pr+$C001,@Pr+$C002,@Pr+$C003
+    dc.w    @Pr+$C004,@Pr+$C005,@Pr+$D805,@Pr+$C006
+    dc.w    @Pr+$C004,@Pr+$C005,@Pr+$D805,@Pr+$C006
+    dc.w    @Pr+$C004,@Pr+$C005,@Pr+$D805,@Pr+$C006
+
+;----------------------;
+; @Tile $10: prism body ;
+;----------------------;
+
+@Tile10:
+    dc.w    @Pr+$C004,@Pr+$C005,@Pr+$D805,@Pr+$C006
+    dc.w    @Pr+$C004,@Pr+$C005,@Pr+$D805,@Pr+$C006
+    dc.w    @Pr+$C004,@Pr+$C005,@Pr+$D805,@Pr+$C006
+    dc.w    @Pr+$C004,@Pr+$C005,@Pr+$D805,@Pr+$C006
+
+;-----------------------------;
+; @Tile $11: thin binary floor ;
+;-----------------------------;
+
+@Tile11:
+    dc.w    @Bin+$A000,@Bin+$A001,@Bin+$A000,@Bin+$A001
+    dc.w    @Bin+$A002,@Bin+$A002,@Bin+$A003,@Bin+$A003
+    dcb.w   2*4, $8000
+
+;---------------------------------------------;
+; @Tile $12: "WARNING: FLAMEWAR AHEAD!" (left) ;
+;---------------------------------------------;
+
+@Tile12:
+    dc.w    @T2+$A018,@T2+$A019,@T2+$A01A,@T2+$A01B
+    dc.w    $8000,$8000,$8000,$8000
+    dc.w    @T2+$A01C,@T2+$A01D,@T2+$A019,@T2+$B018
+    dc.w    $8000,@T2+$A019,@T2+$A01E,@T2+$A01F
+
+;----------------------------------------------;
+; @Tile $13: "WARNING: FLAMEWAR AHEAD!" (right) ;
+;----------------------------------------------;
+
+@Tile13:
+    dc.w    @T2+$A020,@T2+$A01B,@T2+$A021,@T2+$A022
+    dc.w    $8000,$8000,$8000,$8000
+    dc.w    @T2+$A01F,@T2+$A018,@T2+$A019,@T2+$A01A
+    dc.w    @T2+$A019,@T2+$A023,@T2+$A024,$8000
+
+;----------------------;
+; @Tile $14: B in "BAN" ;
+;----------------------;
+
+@Tile14:
+    dc.w    @T2+$A025,@T2+$A026,@T2+$A027,@T2+$A028
+    dc.w    @T2+$A025,@T2+$A029,@T2+$A02A,@T2+$A02B
+    dc.w    @T2+$A025,$8000,@T2+$A02C,@T2+$A82C
+    dc.w    @T2+$A026,@T2+$A026,@T2+$A026,$8000
+
+;----------------------;
+; @Tile $15: A in "BAN" ;
+;----------------------;
+
+@Tile15:
+    dc.w    @T2+$A828,@T2+$A827,@T2+$A02D,$8000
+    dc.w    @T2+$A025,$8000,@T2+$A02C,@T2+$A82C
+    dc.w    @T2+$A025,@T2+$A026,@T2+$A027,@T2+$A82C
+    dc.w    @T2+$A026,$8000,@T2+$A82B,@T2+$A02B
+
+;----------------------;
+; @Tile $16: N in "BAN" ;
+;----------------------;
+
+@Tile16:
+    dc.w    @T2+$A025,@T2+$A028,@T2+$A02C,@T2+$A82C
+    dc.w    @T2+$A025,@T2+$A025,@T2+$A02A,@T2+$A82C
+    dc.w    @T2+$A025,@T2+$A82B,@T2+$A025,@T2+$A82C
+    dc.w    @T2+$A026,$8000,@T2+$A82B,@T2+$A02B
+
+;-----------------------------;
+; @Tile $17: broken speed lane ;
+;-----------------------------;
+
+@Tile17:
+    dc.w    @T2+$C02E,$8000,@T2+$C02E,$8000
+    dc.w    @T2+$C02E,@T2+$C02E,@T2+$C000,@T2+$C02E
+    dc.w    @T2+$C000,@T2+$C001,@T2+$C02E,@T2+$C001
+    dc.w    $8000,$8000,@T2+$C02E,$8000
+
+;--------------------------------;
+; @Tile $18: broken virtual floor ;
+;--------------------------------;
+
+@Tile18:
+    dc.w    @T2+$A000,@T2+$A02E,@T2+$A02E,@T2+$A001
+    dc.w    @T2+$A02E,@T2+$A001,@T2+$B02E,@T2+$A02E
+    dc.w    @Bin+$A000,@T2+$A02E,@Bin+$A000,@T2+$A02E
+    dc.w    @T2+$B02E,@Bin+$A002,@T2+$A02E,@Bin+$A003
+
+;------------------------;
+; @Tile $19: broken prism ;
+;------------------------;
+
+@Tile19:
+    dc.w    @T3+$C013,@Pr+$C005,$8000,@T3+$C013
+    dc.w    @Pr+$C004,@T3+$C013,@Pr+$D805,@T3+$D013
+    dc.w    $8000,@T3+$D013,@T3+$C013,@Pr+$C006
+    dc.w    @T3+$C013,@Pr+$C005,$8000,@T3+$C013
+
+;--------------------------;
+; @Tile $1A: broken big "M" ;
+;--------------------------;
+
+@Tile1A:
+    dc.w    $8000,@T2+$A010,$8000,@T2+$A010
+    dc.w    $8000,@T2+$A02F,$8000,@T2+$A02F
+    dc.w    @T2+$A010,@T2+$A02F,@T2+$A010,@T2+$B02F
+    dc.w    @T2+$A02F,@T2+$B02F,@T2+$A02F,@T2+$A02F
+
+;--------------------------;
+; @Tile $1B: broken big "D" ;
+;--------------------------;
+
+@Tile1B:
+    dc.w    @T2+$A030,@T2+$A014,@T2+$A030,$8000
+    dc.w    @T2+$A013,@T2+$A030,@T2+$A013,@T2+$A030
+    dc.w    @T2+$A030,@T2+$A030,@T2+$A030,@T2+$A017
+    dc.w    @T2+$A030,@T2+$A030,@T2+$A013,@T2+$A030
+
+;---------------------------------------;
+; @Tile $1C: four broken coloured blocks ;
+;---------------------------------------;
+
+@Tile1C:
+    dc.w    @Bl+$A000,@T2+$A02E,@Bl+$A004,@T2+$B02E
+    dc.w    @T2+$A02E,@T2+$B02E,@T2+$B02E,@Bl+$A007
+    dc.w    @T2+$B02E,@Bl+$A009,@T2+$B02E,@T2+$A02E
+    dc.w    @T2+$A02E,@T2+$B02E,@Bl+$A002,@T2+$B02E
+
+;----------------------------------------;
+; @Tile $1D: broken right arrow, color #1 ;
+;----------------------------------------;
+
+@Tile1D:
+    dc.w    @T2+$A031,@T2+$A031,@T2+$A004,@T2+$A005
+    dc.w    $8000,@T2+$A006,@T2+$A031,@T2+$A008
+    dc.w    $8000,@T2+$A031,@T2+$B007,@T2+$A031
+    dc.w    @T2+$B002,@T2+$A031,@T2+$A031,@T2+$B005
+
+;----------------------------------------;
+; @Tile $1E: broken right arrow, color #2 ;
+;----------------------------------------;
+
+@Tile1E:
+    dc.w    @T2+$A032,@T2+$A032,@T2+$A00B,@T2+$A00C
+    dc.w    $8000,@T2+$A00D,@T2+$A032,@T2+$A00F
+    dc.w    $8000,@T2+$A032,@T2+$B00E,@T2+$A032
+    dc.w    @T2+$B009,@T2+$A032,@T2+$A032,@T2+$B00C
+
+;---------------------------------;
+; @Tile $1F: broken display (pole) ;
+;---------------------------------;
+
+@Tile1F:
+    dc.w    $8000,@T3+$C013,@T3+$C811,$8000
+    dc.w    $8000,$8000,@T3+$C013,$8000
+    dc.w    $8000,@T3+$C013,@T3+$C013,$8000
+    dc.w    $8000,@T3+$C012,@T3+$C013,$8000
+
+;---------------------------------;
+; @Tile $20: broken display (main) ;
+;---------------------------------;
+
+@Tile20:
+    dc.w    @T3+$C013,@T3+$C013,@T3+$D013,@T3+$D013
+    dc.w    @T3+$C014,@T3+$D014,@T3+$D014,@T3+$C014
+    dc.w    @T3+$C014,@T3+$D014,@T3+$D014,@T3+$C014
+    dc.w    @T3+$C013,@T3+$D013,@T3+$C013,@T3+$D013
+
+;----------------------;
+; @Tile $21: H in "HAX" ;
+;----------------------;
+
+@Tile21:
+    dc.w    @T2+$A033,$8000,@T2+$A033,$8000
+    dc.w    @T2+$A033,@T2+$A033,@T2+$A033,$8000
+    dc.w    @T2+$A033,$8000,@T2+$A033,$8000
+    dc.w    @T2+$A033,$8000,@T2+$A033,$8000
+
+;----------------------;
+; @Tile $22: A in "HAX" ;
+;----------------------;
+
+@Tile22:
+    dc.w    $8000,@T2+$A033,$8000,$8000
+    dc.w    @T2+$A033,$8000,@T2+$A033,$8000
+    dc.w    @T2+$A033,@T2+$A033,@T2+$A033,$8000
+    dc.w    @T2+$A033,$8000,@T2+$A033,$8000
+
+;----------------------;
+; @Tile $23: X in "HAX" ;
+;----------------------;
+
+@Tile23:
+    dc.w    @T2+$A033,$8000,@T2+$A033,$8000
+    dc.w    $8000,@T2+$A033,$8000,$8000
+    dc.w    @T2+$A033,$8000,@T2+$A033,$8000
+    dc.w    @T2+$A033,$8000,@T2+$A033,$8000
+
+;----------------------------------------------------------------------------

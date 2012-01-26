@@ -1,0 +1,87 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------------;
+; DrawMenuBG                                     ;
+;                                                ;
+; Draws the menu background                      ;
+;------------------------------------------------;
+; BREAKS: leaves registers ready for Menu to use ;
+;------------------------------------------------;
+
+DrawMenuBG:
+
+;------------------------;
+; Loop through all tiles ;
+;------------------------;
+
+    move.l  #(VRAM_MenuBG<<16)|(VRAM_MenuBG+1), d0
+    move.l  #((VRAM_MenuBG+2)<<16)|(VRAM_MenuBG+3), d1
+    move.l  #$60000002, (a4)
+    moveq   #32-1, d2
+@Loop:
+
+;-----------;
+; First row ;
+;-----------;
+
+    moveq   #4-1, d3
+@ILoop1:
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    move.l  d0, (a5)
+    dbf     d3, @ILoop1
+
+;------------;
+; Second row ;
+;------------;
+
+    moveq   #4-1, d3
+@ILoop2:
+    move.l  d1, (a5)
+    move.l  d1, (a5)
+    move.l  d1, (a5)
+    move.l  d1, (a5)
+    move.l  d1, (a5)
+    move.l  d1, (a5)
+    move.l  d1, (a5)
+    move.l  d1, (a5)
+    dbf     d3, @ILoop2
+
+;----------------;
+; Next two rows! ;
+;----------------;
+
+    dbf     d2, @Loop
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

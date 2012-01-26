@@ -1,0 +1,212 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------------;
+; InitLevel                               ;
+;                                         ;
+; Initializes the current level           ;
+; Loads graphics and sets up other things ;
+;-----------------------------------------;
+; BREAKS: all                             ;
+;-----------------------------------------;
+
+InitLevel:
+
+;--------------------------;
+; Get level header address ;
+;--------------------------;
+
+    moveq   #0, d0
+    move.b  (RAM_Level), d0
+    add.w   d0, d0
+    add.w   d0, d0
+    lea     (LevelHeaders), a0
+    move.l  (a0,d0.w), a0
+
+;--------------;
+; Get map data ;
+;--------------;
+
+    move.l  (a0)+, (RAM_LayoutAddr)
+    move.l  (a0)+, (RAM_CollAddr)
+    move.l  (a0)+, (RAM_ItemAddr)
+
+;---------------------------------------------;
+; Get player's initial coordinate (if needed) ;
+;---------------------------------------------;
+
+    tst.w   (RAM_CheckPoint)
+    bge.s   @CheckPoint
+
+    moveq   #0, d0
+    moveq   #0, d1
+    move.w  (a0)+, d0
+    move.w  (a0)+, d1
+    lsl.w   #5, d0
+    lsl.w   #5, d1
+    add.w   #16, d0
+    add.w   #31, d1
+    swap    d0
+    swap    d1
+    move.l  d0, (RAM_Player+Player_X)
+    move.l  d1, (RAM_Player+Player_Y)
+    bra.s   @NoCheckPoint
+
+@CheckPoint:
+    moveq   #0, d0
+    move.w  (RAM_StartX), (RAM_Player+Player_X)
+    move.w  d0, (RAM_Player+Player_X+2)
+    move.w  (RAM_StartY), (RAM_Player+Player_Y)
+    move.w  d0, (RAM_Player+Player_Y+2)
+    addq.l  #4, a0
+
+@NoCheckPoint:
+
+;-------------------------------------------;
+; Get level size and process it accordingly ;
+;-------------------------------------------;
+
+    move.w  (a0)+, d0
+    move.w  d0, (RAM_LevelSize)
+
+    move.w  d0, d1
+    lsl.w   #5, d0
+    sub.w   #320, d0
+    move.w  d0, (RAM_MaxScroll)
+
+;-----------------------------------;
+; Calculate location of object list ;
+;-----------------------------------;
+
+    move.w  d1, d0
+    addq.w  #1, d1
+    andi.l  #$FFFE, d1
+    add.l   #RAM_ObjectMap, d1
+    move.l  d1, (RAM_ObjectList)
+    move.l  d1, (RAM_LastObject)
+
+;---------------------------------------;
+; Clear object map (no objects created) ;
+;---------------------------------------;
+
+    lea     (RAM_ObjectMap), a1
+    subq.w  #1, d0
+    moveq   #-1, d1
+@ClearObjectMap:
+    move.b  d1, (a1)+
+    dbf     d0, @ClearObjectMap
+
+;--------------------------;
+; Load 8x8 tiles into VRAM ;
+;--------------------------;
+
+    move.l  a0, a2
+    move.l  (a2)+, a0
+    move.w  (a0), d7
+    move.l  (RAM_ObjectList), a1
+    move.l  a1, d6
+    movem.l d0-d5, -(sp)
+    bsr     Decompress
+    movem.l (sp)+, d0-d5
+    move.l  a2, a0
+
+    VarSrcLenDMA VRAM_Level*$20
+
+    movem.l d0-a6, -(sp)
+    bsr     FlushVDPBuffer
+    movem.l (sp)+, d0-a6
+
+;--------------------------------;
+; Get pointer to 32x32 tile data ;
+;--------------------------------;
+
+    move.l  (a0)+, (RAM_TileAddr)
+
+;----------------------------------;
+; Load palette into palette buffer ;
+;----------------------------------;
+
+    move.l  (a0)+, a1
+    lea     (RAM_PalBuffer+($10*2)), a2
+    moveq   #3-1, d0
+@LoadPalette:
+    move.l  (a1)+, (a2)+
+    move.l  (a1)+, (a2)+
+    move.l  (a1)+, (a2)+
+    move.l  (a1)+, (a2)+
+    move.l  (a1)+, (a2)+
+    move.l  (a1)+, (a2)+
+    move.l  (a1)+, (a2)+
+    move.l  (a1)+, (a2)+
+    dbf     d0, @LoadPalette
+
+;---------------------------------------------;
+; Call level-specific initialization function ;
+;---------------------------------------------;
+
+    move.l  (a0)+, a1
+    jsr     (a1)
+
+;-----------------------------------------------;
+; Get address of level-specific update function ;
+;-----------------------------------------------;
+
+    move.l  (a0)+, (RAM_UpdateFunc)
+
+;------------------------------------------------------;
+; Set scroll to prevent objects from dying at creation ;
+;------------------------------------------------------;
+
+    move.w  (RAM_Player+Player_X), d0
+    sub.w   #160, d0
+
+    bge.s   @NotTooLeft
+    moveq   #0, d0
+@NotTooLeft:
+
+    move.w  (RAM_MaxScroll), d1
+    cmp.w   d1, d0
+    ble.s   @NotTooRight
+    move.w  d1, d0
+@NotTooRight:
+
+    move.w  d0, (RAM_Scroll)
+
+;---------------------------------------------------;
+; Process level beginning (draw and create objects) ;
+;---------------------------------------------------;
+
+    lsr.w   #5, d0
+    subq.w  #3, d0
+    moveq   #16-1, d1
+@ProcessBeginning:
+    bsr     ProcessLevelColumn
+    addq.w  #1, d0
+    dbf     d1, @ProcessBeginning
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

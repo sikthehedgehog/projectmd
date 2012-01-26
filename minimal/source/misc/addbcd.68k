@@ -1,0 +1,91 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;------------------------------;
+; AddBCD                       ;
+;                              ;
+; Adds two 32-bit BCD integers ;
+;------------------------------;
+; INPUT                        ;
+;   d0.l ... First operand     ;
+;   d1.l ... Second operand    ;
+;------------------------------;
+; OUTPUT                       ;
+;   d0.l ... Result            ;
+;------------------------------;
+; BREAKS: d6, d7               ;
+;------------------------------;
+
+AddBCD:
+    movem.l d2-d5, -(sp)
+
+;---------------------;
+; Split first operand ;
+;---------------------;
+
+    move.b  d0, d6
+    lsr.l   #8, d0
+    move.b  d0, d4
+    lsr.l   #8, d0
+    move.b  d0, d2
+    lsr.l   #8, d0
+
+;----------------------;
+; Split second operand ;
+;----------------------;
+
+    move.b  d1, d7
+    lsr.l   #8, d1
+    move.b  d1, d5
+    lsr.l   #8, d1
+    move.b  d1, d3
+    lsr.l   #8, d1
+
+;--------------;
+; Add numbers! ;
+;--------------;
+
+    and.b   #$00, ccr
+    abcd.b  d7, d6
+    abcd.b  d5, d4
+    abcd.b  d3, d2
+    abcd.b  d1, d0
+
+;-----------------;
+; Get result back ;
+;-----------------;
+
+    lsl.l   #8, d0
+    move.b  d2, d0
+    lsl.l   #8, d0
+    move.b  d4, d0
+    lsl.l   #8, d0
+    move.b  d6, d0
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    movem.l (sp)+, d2-d5
+    rts
+
+;----------------------------------------------------------------------------

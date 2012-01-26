@@ -1,0 +1,67 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------;
+; Tile data for menu screens ;
+;----------------------------;
+
+;-----------------------;
+; Graphics for the text ;
+;-----------------------;
+
+Gfx_MenuFont:
+    dcb.l   8, $00000000
+    incbin  "graphics/menu/font.bin"
+Gfx_MenuFont_Size equ *-Gfx_MenuFont
+
+;-------;
+; Arrow ;
+;-------;
+
+Gfx_MenuArrow:
+    incbin  "graphics/menu/arrow.bin"
+
+;-----------------------------;
+; Graphics for the background ;
+;-----------------------------;
+
+Gfx_MenuBG:
+    incbin  "graphics/menu/bkground.bin"
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------------;
+; Table to convert from ASCII to the menu font ;
+; THIS TABLE IS BASED ON $20, NOT $00          ;
+;----------------------------------------------;
+
+ASCII2Menu:
+    dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000     ; $20..$27
+    dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000     ; $28..$2F
+    dc.w    $001E,$0012,$0034,$0036,$0038,$0026,$000E,$003A     ; $30..$37
+    dc.w    $003E,$003C,$0000,$0000,$0000,$0000,$0000,$0000     ; $38..$3F
+    dc.w    $0000,$0002,$0004,$0006,$0008,$000A,$000C,$000E     ; $40..$47
+    dc.w    $0010,$0012,$0014,$0016,$0018,$001A,$001C,$001E     ; $48..$4F
+    dc.w    $0020,$0022,$0024,$0026,$0028,$002A,$002C,$002E     ; $50..$57
+    dc.w    $0030,$0032,$0034,$0000,$0000,$0000,$0000,$0000     ; $58..$5F
+
+;----------------------------------------------------------------------------

@@ -1,0 +1,64 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;---------------------------;
+; Tile data for HUD numbers ;
+;---------------------------;
+
+Gfx_HUDNumbers:
+    incbin  "graphics/hud/numbers.bin"
+
+;------------------------------------;
+; Tile data for the energy indicator ;
+;------------------------------------;
+
+Gfx_HUDEnergy:
+    incbin  "graphics/hud/energy.bin"
+
+;------------------------------------;
+; Cross used for the lives indicator ;
+;------------------------------------;
+
+Gfx_HUDLivesCross:
+    incbin  "graphics/hud/cross.bin"
+
+;--------------------------------------------------;
+; Border to prevent the HUD from looking like shit ;
+;--------------------------------------------------;
+
+Gfx_HUDBorder:
+    incbin  "graphics/hud/border.bin"
+
+;--------------------------;
+; Tile data for pause menu ;
+;--------------------------;
+
+Gfx_PauseContinue:
+   incbin   "graphics/hud/pcont.bin"
+Gfx_PauseRestart:
+   incbin   "graphics/hud/prest.bin"
+Gfx_PauseExit:
+   incbin   "graphics/hud/pexit.bin"
+Gfx_PauseBG:
+   incbin   "graphics/hud/pausebg.bin"
+
+;----------------------------------------------------------------------------

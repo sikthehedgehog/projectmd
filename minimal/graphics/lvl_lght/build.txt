@@ -1,0 +1,24 @@
+palette ??? 020 040 060 666 888 AAA 04E 00E 00A 008 080 80E E08 60C C06
+setmask
+
+openout graphics/lvl_lght/platform.bin
+openin concept/lvl_lght/platform.bmp
+sprite 0 0 4 2
+closein
+closeout
+
+openout graphics/lvl_lght/gfx.tmp
+
+openin concept/lvl_lght/_tilemap_pal2.bmp
+scroll 0 0 16 2
+scroll 0 2 4 1
+closein
+
+palette ??? 2AA 4CC 6EE 0AE 08E 06C 04A E00 C00 ECC CAA A88 00E 004 006
+setmask
+
+openin concept/lvl_lght/_tilemap_pal3.bmp
+scroll 0 0 12 1
+closein
+
+closeout

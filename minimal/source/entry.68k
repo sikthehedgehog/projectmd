@@ -1,0 +1,204 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------------------;
+; Program entry point            ;
+; System initialization and such ;
+;--------------------------------;
+
+EntryPoint:
+
+;-----------------------------------;
+; Disable interrupts (just in case) ;
+;-----------------------------------;
+
+    move.w  #$2700, sr
+
+;------------;
+; TMSS stuff ;
+;------------;
+
+    move.b  ($A10001), d0
+    andi.b  #$0F, d0
+    beq.s   @NoTMSS
+    move.l  #'SEGA', ($A14000)
+@NoTMSS:
+
+;----------------------------------------------------------------------------
+
+;------------------------;
+; Initialize joypad port ;
+;------------------------;
+
+    move.b  #$40, ($A10009)
+    move.b  #$40, ($A10003)
+    move.w  #0, (RAM_JoypadPress)
+
+;----------------------------------------------------------------------------
+
+;--------------------------------;
+; Initialize Echo (sound engine) ;
+;--------------------------------;
+
+    lea     (EchoList), a0
+    bsr     Echo_Init
+
+;-------------------------------;
+; Reset sound playing variables ;
+;-------------------------------;
+
+    move.w  #0, (RAM_BGMToPlay)
+
+;----------------------------------------------------------------------------
+
+;------------------------------------------;
+; Set up VDP registers into a stable state ;
+; (well, just some...)                     ;
+;------------------------------------------;
+
+    lea     ($C00004), a0
+    lea     ($C00000), a1
+
+    move.w  (a0), d0        ; Dummy read to clear VDP's write status
+                            ; (remember, the VDP isn't reset when the user
+                            ; presses the Reset button!)
+
+    move.w  #$8004, (a0)    ; No IRQ4
+    move.w  #$8114, (a0)    ; No display, no IRQ6, DMA OK, V28
+    move.w  #$8700, (a0)    ; Background color: palette 0, index 0
+    move.w  #$8C81, (a0)    ; H40, no S/H, no double-res, no interlace
+    move.w  #$8F02, (a0)    ; Autoincrement per write: 2 bytes
+    move.w  #$9100, (a0)    ; Hide window plane
+    move.w  #$9200, (a0)    ; Hide window plane
+
+;------------------------------------------------------------------------;
+; Set background color to black, to ensure that the screen appears clear ;
+; until we have something to show                                        ;
+;------------------------------------------------------------------------;
+
+    moveq   #0, d0
+    move.l  #$C0000000, (a0)
+    move.w  d0, (a1)
+
+;-----------------------------------------------------;
+; We use tile #0 as the "empty tile", so clear it out ;
+;-----------------------------------------------------;
+
+    move.l  #$40000000, (a0)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+    move.l  d0, (a1)
+
+;--------------------------;
+; Clear VDP command buffer ;
+;--------------------------;
+
+    move.l  #RAM_VDPBuffer, (RAM_VDPBufPos)
+
+;----------------------------------------------------------------------------
+
+;--------------------------------------------------------------;
+; Initialize the random number generator                       ;
+; This won't work on emulators but it'll work on real hardware ;
+;--------------------------------------------------------------;
+
+    move.w  ($C00008), d0
+    lea     ($FF0000), a0
+    moveq   #64-1, d1
+@InitRand:
+    add.w   (a0), d0
+    add.w   #$400, a0
+    dbf     d1, @InitRand
+    move.w  d0, (RAM_Random)
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------------------------;
+; Determine speed used for the global animation counter ;
+; It differs between NTSC and PAL                       ;
+;-------------------------------------------------------;
+
+    move.l  #65536, d1
+    move.w  ($C00004), d0
+    btst.l  #0, d0
+    beq.s   @NotPAL
+    move.l  #78643, d1
+@NotPAL:
+    move.l  d1, (RAM_GlobalAnimSpd)
+
+;----------------------------------------------------------------------------
+
+;---------------;
+; Reset options ;
+;---------------;
+
+    move.b  #$00, (RAM_MusicTest)
+    move.b  #$00, (RAM_SoundTest)
+
+;--------------------------;
+; Set up initial game mode ;
+;--------------------------;
+
+    move.b  #GameMode_Intro, (RAM_GameMode)
+
+;---------------------------------;
+; Switch into the next game mode! ;
+;---------------------------------;
+
+SwitchMode:
+    move.b  (RAM_GameMode), d0
+    andi.w  #$FF, d0
+    add.w   d0, d0
+    add.w   d0, d0
+    lea     (@ModeList), a0
+    move.l  (a0,d0.w), a0
+    jmp     (a0)
+
+;---------------------------------------;
+; Pointers to each mode's main function ;
+;---------------------------------------;
+
+@ModeList:
+    dc.l    Intro           ; Game intro
+    dc.l    TitleScreen     ; Title screen
+    dc.l    LevelSelect     ; Level select
+    dc.l    Options         ; Options menu
+    dc.l    InGameInit      ; In-game mode initialization
+    dc.l    InGame          ; In-game mode
+    dc.l    ScoreTally      ; Score tally
+
+;----------------------------------------------------------------------------
+
+;-------------;
+; Z80 program ;
+;-------------;
+
+Z80Program: incbin "sound/prog-z80.bin"
+Z80ProgramSize equ *-Z80Program
+    even
+
+;----------------------------------------------------------------------------

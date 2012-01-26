@@ -1,0 +1,80 @@
+openout graphics/lvl_inet/gfx.tmp
+
+palette ??? EEE EAA C44 A00 800 600 ??? ??? ??? ??? ??? ??? ??? ??? ???
+setmask
+
+openin concept/lvl_inet/_background.bmp
+scroll 0 0 16 1
+closein
+
+palette ??? ECA AEA CCA 00E 08E 00C 0C0 0E0 0EE ??? ??? ??? ??? ??? ???
+setmask
+
+openin concept/lvl_inet/_tilemap_pal2.bmp
+scroll 0 0 16 3
+scroll 0 3 4 1
+closein
+
+palette ??? ??? ??? ??? 00E 00C 00A 006 004 002 EEE AAA 888 ??? ??? ???
+setmask
+
+openin concept/lvl_inet/_tilemap_pal3.bmp
+scroll 0 0 16 1
+scroll 0 1 5 1
+closein
+
+closeout
+
+palette ??? ECA AEA CCA 00E 08E 00C 0C0 0E0 0EE ??? ??? ??? ??? ??? ???
+setmask
+
+openout graphics/lvl_inet/binary.bin
+openin concept/lvl_inet/fx_binary.bmp
+scroll 0 0 4 1
+scroll 0 1 4 1
+closein
+closeout
+
+openout graphics/lvl_inet/square.bin
+openin concept/lvl_inet/fx_square.bmp
+scroll 0 0 12 1
+scroll 0 1 12 1
+closein
+closeout
+
+openout graphics/lvl_inet/platform.bin
+openin concept/lvl_inet/platform.bmp
+sprite 0 0 4 2
+closein
+closeout
+
+palette ??? ??? ??? ??? 00E 00C 00A 006 004 002 EEE AAA 888 ??? ??? ???
+setmask
+
+openout graphics/lvl_inet/prism.bin
+openin concept/lvl_inet/fx_prism.bmp
+scroll 0 0 7 1
+scroll 0 1 7 1
+closein
+closeout
+
+
+palette ??? ??? ??? ??? 00E 00C 008 006 004 002 ??? ??? ??? ??? ??? ???
+setmask
+
+openout graphics/lvl_inet/display.bin
+openin concept/lvl_inet/fx_display.bmp
+scroll 0 0 4 2
+scroll 4 0 4 2
+scroll 8 0 4 2
+scroll 12 0 4 2
+scroll 0 3 4 2
+scroll 4 3 4 2
+scroll 8 3 4 2
+scroll 12 3 4 2
+scroll 0 6 4 2
+scroll 4 6 4 2
+scroll 8 6 4 2
+scroll 12 6 4 2
+closein
+closeout

@@ -1,0 +1,104 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;---------------------------------;
+; WriteMenuString                 ;
+;                                 ;
+; Writes a string in menu screens ;
+;---------------------------------;
+; INPUT                           ;
+;   d0.w ... X coordinate         ;
+;   d1.w ... Y coordinate         ;
+;   a0.l ... String pointer       ;
+;---------------------------------;
+; BREAKS: d7, a4, a5, a6          ;
+;---------------------------------;
+
+WriteMenuString:
+    movem.l d0-d1, -(sp)
+
+;--------------------------------------;
+; Some addresses we'll access commonly ;
+;--------------------------------------;
+
+    lea     (ASCII2Menu), a5
+    lea     ($C00000), a6
+
+;----------------------------------------------------;
+; Calculate address of first line and send it to VDP ;
+;----------------------------------------------------;
+
+    lsl.w   #6, d1
+    add.w   d1, d0
+    add.w   d0, d0
+    and.l   #$FFFF, d0
+    swap    d0
+    or.l    #$40000003, d0
+    move.l  d0, 4(a6)
+
+;----------------------------;
+; Write first line of string ;
+;----------------------------;
+
+    move.l  a0, a4
+@Loop1:
+    moveq   #0, d7
+    move.b  (a4)+, d7
+    beq.s   @End1
+    sub.w   #$20, d7
+    add.w   d7, d7
+    move.w  (a5,d7.w), (a6)
+    bra.s   @Loop1
+@End1:
+
+;-------------------------------------;
+; Set up VDP to write the second line ;
+;-------------------------------------;
+
+    add.l   #($40*2)<<16, d0
+    move.l  d0, 4(a6)
+
+;-----------------------------;
+; Write second line of string ;
+;-----------------------------;
+
+    move.l  a0, a4
+@Loop2:
+    moveq   #0, d7
+    move.b  (a4)+, d7
+    beq.s   @End2
+    sub.w   #$20, d7
+    add.w   d7, d7
+    move.w  (a5,d7.w), d7
+    addq.w  #1, d7
+    move.w  d7, (a6)
+    bra.s   @Loop2
+@End2:
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    movem.l (sp)+, d0-d1
+    rts
+
+;----------------------------------------------------------------------------

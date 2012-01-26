@@ -1,0 +1,96 @@
+palette ??? EEE 0A0 080 8AE 68E 000 0EE EA6 E60 08E 00E 00A ??? ??? ???
+setmask
+
+openout graphics/player/idle1.bin openin concept/player/idle1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/idle2.bin openin concept/player/idle2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/idle3.bin openin concept/player/idle3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/idle4.bin openin concept/player/idle4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/idle5.bin openin concept/player/idle5.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/wait1.bin openin concept/player/wait1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/wait2.bin openin concept/player/wait2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/wait3.bin openin concept/player/wait3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/wait4.bin openin concept/player/wait4.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/player/run1.bin openin concept/player/run1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/run2.bin openin concept/player/run2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/run3.bin openin concept/player/run3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/run4.bin openin concept/player/run4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/run5.bin openin concept/player/run5.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/run6.bin openin concept/player/run6.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/run7.bin openin concept/player/run7.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/run8.bin openin concept/player/run8.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/run9.bin openin concept/player/run9.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/run10.bin openin concept/player/run10.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/run11.bin openin concept/player/run11.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/run12.bin openin concept/player/run12.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/player/jump1.bin openin concept/player/jump1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/jump2.bin openin concept/player/jump2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/jump3.bin openin concept/player/jump3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/jump4.bin openin concept/player/jump4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/jump5.bin openin concept/player/jump5.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/jump6.bin openin concept/player/jump6.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/jump7.bin openin concept/player/jump7.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/player/crouch1.bin openin concept/player/crouch1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/crouch2.bin openin concept/player/crouch2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/crouch3.bin openin concept/player/crouch3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/crouch4.bin openin concept/player/crouch4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/crouch5.bin openin concept/player/crouch5.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/crouch6.bin openin concept/player/crouch6.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/crouch7.bin openin concept/player/crouch7.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/player/hurt1.bin openin concept/player/hurt1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/hurt2.bin openin concept/player/hurt2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/hurt3.bin openin concept/player/hurt3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/hurt4.bin openin concept/player/hurt4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/hurt5.bin openin concept/player/hurt5.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/hurt6.bin openin concept/player/hurt6.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/player/death1.bin openin concept/player/death1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/death2.bin openin concept/player/death2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/death3.bin openin concept/player/death3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/death4.bin openin concept/player/death4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/death5.bin openin concept/player/death5.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/death6.bin openin concept/player/death6.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/death7.bin openin concept/player/death7.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/death8.bin openin concept/player/death8.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/player/ongoal1.bin openin concept/player/ongoal1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/ongoal2.bin openin concept/player/ongoal2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/ongoal3.bin openin concept/player/ongoal3.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/player/shock1.bin openin concept/player/shock1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/shock2.bin openin concept/player/shock2.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/player/explode1.bin openin concept/player/explode1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/explode2.bin openin concept/player/explode2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/explode3.bin openin concept/player/explode3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/explode4.bin openin concept/player/explode4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/explode5.bin openin concept/player/explode5.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/explode6.bin openin concept/player/explode6.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/explode7.bin openin concept/player/explode7.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/player/kiss1.bin openin concept/player/kiss1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/kiss2.bin openin concept/player/kiss2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/kiss3.bin openin concept/player/kiss3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/kiss4.bin openin concept/player/kiss4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/kiss5.bin openin concept/player/kiss5.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/kiss6.bin openin concept/player/kiss6.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/kiss7.bin openin concept/player/kiss7.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/kiss8.bin openin concept/player/kiss8.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/kiss9.bin openin concept/player/kiss9.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/kiss10.bin openin concept/player/kiss10.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/player/heart.bin openin concept/player/heart.bmp sprite 0 0 1 1 closein closeout
+
+openout graphics/player/love1.bin openin concept/player/love1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/love2.bin openin concept/player/love2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/love3.bin openin concept/player/love3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/love4.bin openin concept/player/love4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/love5.bin openin concept/player/love5.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/love6.bin openin concept/player/love6.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/love7.bin openin concept/player/love7.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/love8.bin openin concept/player/love8.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/love9.bin openin concept/player/love9.bmp sprite 0 0 4 4 closein closeout
+openout graphics/player/love10.bin openin concept/player/love10.bmp sprite 0 0 4 4 closein closeout

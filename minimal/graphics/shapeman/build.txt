@@ -1,0 +1,28 @@
+palette ??? EEE ??? ??? 8AE 68E 000 0EE EA6 E60 08E 00E 00A 0E0 0A0 060
+setmask
+
+openout graphics/shapeman/walk1.bin openin concept/shapeman/walk1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shapeman/walk2.bin openin concept/shapeman/walk2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shapeman/walk3.bin openin concept/shapeman/walk3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shapeman/walk4.bin openin concept/shapeman/walk4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shapeman/walk5.bin openin concept/shapeman/walk5.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shapeman/walk6.bin openin concept/shapeman/walk6.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shapeman/walk7.bin openin concept/shapeman/walk7.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shapeman/walk8.bin openin concept/shapeman/walk8.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shapeman/walk9.bin openin concept/shapeman/walk9.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shapeman/walk10.bin openin concept/shapeman/walk10.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shapeman/walk11.bin openin concept/shapeman/walk11.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shapeman/walk12.bin openin concept/shapeman/walk12.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shapeman/walk13.bin openin concept/shapeman/walk13.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shapeman/walk14.bin openin concept/shapeman/walk14.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shapeman/walk15.bin openin concept/shapeman/walk15.bmp sprite 0 0 4 4 closein closeout
+openout graphics/shapeman/walk16.bin openin concept/shapeman/walk16.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/shapeman/dead.bin
+openin concept/shapeman/dead.bmp
+sprite 0 0 2 2
+sprite 2 0 2 2
+sprite 0 2 2 2
+sprite 2 2 2 2
+closein
+closeout

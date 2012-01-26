@@ -1,0 +1,204 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------;
+; WriteConsoleTyped                                                       ;
+;                                                                         ;
+; Writes a string in the text mode in the game intro                      ;
+; This is used to write a string at the specified location as if Stephany ;
+; was typing it (so each character appears individually)                  ;
+;-------------------------------------------------------------------------;
+; INPUT:                                                                  ;
+;   d0.w ... X coordinate (column)                                        ;
+;   d1.w ... Y coordinate (row)                                           ;
+;   a0.l ... Pointer to string to write                                   ;
+;-------------------------------------------------------------------------;
+; BREAKS: all                                                             ;
+;-------------------------------------------------------------------------;
+; SIDENOTE: this code SUCKS x_X                                           ;
+;-------------------------------------------------------------------------;
+
+WriteConsoleTyped:
+
+;----------------------------------;
+; Calculate address where to write ;
+;----------------------------------;
+
+    lsl.w   #6, d1
+    add.w   d1, d0
+    add.w   d0, d0
+    andi.l  #$3FFF, d0
+    swap    d0
+    or.l    #$40000003, d0
+    move.l  d0, ($C00004)
+    move.l  d0, a1
+
+;-------------------------------------;
+; Calculate delay between key presses ;
+;-------------------------------------;
+
+    moveq   #6-1, d4
+    move.w  ($C00004), d1
+    btst.l  #0, d1
+    beq.s   @SpeedNTSC
+    moveq   #5-1, d4
+@SpeedNTSC:
+
+;-----------------------------------;
+; Some addresses we'll access often ;
+;-----------------------------------;
+
+    lea     (ASCII2Console), a3
+    lea     ($C00000), a2
+
+;-----------------------------------;
+; Write the string into the tilemap ;
+;-----------------------------------;
+
+@Loop:
+
+;------------------------------------;
+; Get character and put it on screen ;
+;------------------------------------;
+
+    move.b  (a0)+, d7
+    beq     @End
+
+    move.l  a1, d0
+    andi.w  #$FF, d7
+    sub.w   #$20, d7
+    add.w   d7, d7
+    move.l  d0, ($C00004)
+    move.w  (a3,d7.w), (a2)
+
+    swap    d0
+    addq.w  #2, d0
+    swap    d0
+    move.l  d0, a1
+
+;------------------------;
+; Update cursor position ;
+;------------------------;
+
+    add.b   #1, (RAM_ConCursorX)
+
+;--------------------------;
+; Delay until the next key ;
+;--------------------------;
+
+    move.w  d4, d5
+@Delay:
+
+;------------------------;
+; Update cursor blinking ;
+;------------------------;
+
+    move.b  (RAM_ConBlinkTime), d1
+    subq.b  #1, d1
+    bne.s   @NoBlink
+
+    move.b  (RAM_ConBlinkSpd), d1
+    bchg.b  #GameStat_Blink, (RAM_GameStatus+1)
+
+@NoBlink:
+    move.b  d1, (RAM_ConBlinkTime)
+
+;-----------------------;
+; Show cursor if needed ;
+;-----------------------;
+
+    bsr     ClearSprites
+    btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    beq.s   @NoCursor
+
+    moveq   #0, d0
+    move.b  (RAM_ConCursorX), d0
+    add.w   d0, d0
+    add.w   d0, d0
+    add.w   d0, d0
+    add.w   #128, d0
+    move.w  #128+(26*8), d1
+    moveq   #$28, d2
+    moveq   #%0000, d3
+    bsr     AddSprite
+@NoCursor:
+
+;---------------------;
+; Update video output ;
+;---------------------;
+
+    bsr     UpdateSprites
+    bsr     VSync
+    bsr     FlushVDPBuffer
+
+;---------------------------------;
+; Check if the user wants to quit ;
+;---------------------------------;
+
+    movem.l d4-d5/a0-a3, -(sp)
+    bsr     ReadJoypad
+    movem.l (sp)+, d4-d5/a0-a3
+
+    move.b  (RAM_JoypadPress), d1
+    and.b   #$F0, d1
+    bne.s   @Quit
+
+;------------;
+; Next frame ;
+;------------;
+
+    dbf     d5, @Delay
+
+;----------------;
+; Next character ;
+;----------------;
+
+    bra     @Loop
+@End:
+
+;------------------------------------------------------------;
+; Add an extra delay to fake the need to press the Enter key ;
+;------------------------------------------------------------;
+
+    tst.w   d4
+    beq.s   @DontDelay
+
+    move.w  d4, d5
+    add.w   d5, d5
+    add.w   d4, d5
+    moveq   #0, d4
+    subq.l  #1, a0
+    bra     @Delay
+@DontDelay:
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    moveq   #0, d0
+    rts
+
+@Quit:
+    moveq   #1, d0
+    rts
+
+;----------------------------------------------------------------------------

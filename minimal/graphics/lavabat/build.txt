@@ -1,0 +1,13 @@
+palette ??? EEE ??? ??? 8AE 68E 000 0EE EA6 E60 08E 00E 00A 0E0 0A0 060
+setmask
+
+openout graphics/lavabat/fly1.bin openin concept/lavabat/fly1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/lavabat/fly2.bin openin concept/lavabat/fly2.bmp sprite 0 0 4 4 closein closeout
+openout graphics/lavabat/fly3.bin openin concept/lavabat/fly3.bmp sprite 0 0 4 4 closein closeout
+openout graphics/lavabat/fly4.bin openin concept/lavabat/fly4.bmp sprite 0 0 4 4 closein closeout
+openout graphics/lavabat/fly5.bin openin concept/lavabat/fly5.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/lavabat/piece1.bin openin concept/lavabat/piece1.bmp sprite 0 0 2 2 closein closeout
+openout graphics/lavabat/piece2.bin openin concept/lavabat/piece2.bmp sprite 0 0 2 2 closein closeout
+openout graphics/lavabat/piece3.bin openin concept/lavabat/piece3.bmp sprite 0 0 2 2 closein closeout
+openout graphics/lavabat/piece4.bin openin concept/lavabat/piece4.bmp sprite 0 0 2 2 closein closeout

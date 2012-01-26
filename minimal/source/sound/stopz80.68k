@@ -1,0 +1,50 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------;
+; StopZ80                           ;
+;                                   ;
+; Halts the Z80 (bus request)       ;
+; Needed to access Z80 RAM from 68k ;
+;-----------------------------------;
+
+StopZ80 macro
+    move.w  #$100, ($A11100)
+@WaitZ80Stop\@:
+    btst.b  #0, ($A11100)
+    bne.s   @WaitZ80Stop\@
+    endm
+
+;----------------------------------------------------------------------------
+
+;-------------------------------------;
+; StartZ80                            ;
+;                                     ;
+; Resumes Z80 operation               ;
+; Undoes what StopZ80 does, basically ;
+;-------------------------------------;
+
+StartZ80 macro
+    move.w  #$000, ($A11100)
+    endm
+
+;----------------------------------------------------------------------------

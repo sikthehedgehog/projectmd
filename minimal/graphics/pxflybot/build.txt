@@ -1,0 +1,14 @@
+palette ??? EEE ??? ??? 8AE 68E 000 0EE EA6 E60 08E 00E 00A 0E0 0A0 060
+setmask
+
+openout graphics/pxflybot/fly1.bin openin concept/pxflybot/fly1.bmp sprite 0 0 4 4 closein closeout
+openout graphics/pxflybot/fly2.bin openin concept/pxflybot/fly2.bmp sprite 0 0 4 4 closein closeout
+
+openout graphics/pxflybot/dead.bin
+openin concept/pxflybot/dead.bmp
+sprite 0 0 2 2
+sprite 2 0 2 2
+sprite 0 2 2 2
+sprite 2 2 2 2
+closein
+closeout

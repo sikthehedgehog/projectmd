@@ -1,0 +1,754 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;--------------------------------;
+; RunPlayer                      ;
+;                                ;
+; Game logic code for the player ;
+;--------------------------------;
+; BREAKS: all                    ;
+;--------------------------------;
+
+RunPlayer:
+
+;----------------------------;
+; Get address of player data ;
+;----------------------------;
+
+    lea     (RAM_Player), a0
+
+;---------------------------------------------------;
+; Ignore everything when not controlling ourselves! ;
+;---------------------------------------------------;
+
+    move.b  Player_CurrAct(a0), d0
+    move.w  Player_Status(a0), d1
+    btst.l  #PlayerStat_NoCtrl, d1
+    bne     @ActionSet
+
+;-------;
+; Dead? ;
+;-------;
+
+    move.w  Player_Y(a0), d0
+    cmp.w   #224+31, d0
+    blt.s   @DidntFall
+    move.b  #0, Player_Energy(a0)
+@DidntFall:
+
+    tst.b   Player_Energy(a0)
+    bgt.s   @NotDead
+
+    move.w  #0, Player_Invinc(a0)
+
+    move.w  #180, d0
+    move.w  ($C00004), d1
+    btst.l  #0, d1
+    beq.s   @DeathNTSCDelay
+    move.w  #150, d0
+@DeathNTSCDelay:
+
+    moveq   #0, d1
+    move.b  Player_DeathDelay(a0), d1
+    cmp.w   d0, d1
+    bgt.s   @QuitCalled
+    blt.s   @DontQuitYet
+
+    move.l  #7<<16, (RAM_FadeStage)
+    move.l  (RAM_GlobalAnimSpd), d0
+    asr.l   #2, d0
+    move.l  d0, (RAM_FadeSpeed)
+
+    bset.b  #GameStat_FadeOut, (RAM_GameStatus+1)
+    bclr.b  #GameStat_WhiteFade, (RAM_GameStatus+1)
+    bset.b  #IngameStat_Quit, (RAM_IngameStatus+1)
+
+    move.b  (RAM_Lives), d0
+    moveq   #$01, d1
+    and.b   #%00000, ccr
+    sbcd.b  d1, d0
+    move.b  d0, (RAM_Lives)
+
+@DontQuitYet:
+    addq.b  #1, d1
+    move.b  d1, Player_DeathDelay(a0)
+
+@QuitCalled:
+    move.b  #PlayerAct_Die, d0
+    bra     @ActionSet
+@NotDead:
+
+;-------------------------------------;
+; Reduce invincibility time if active ;
+;-------------------------------------;
+
+    move.w  Player_Invinc(a0), d0
+    beq.s   @NotInvincible
+    subq.w  #1, d0
+    move.w  d0, Player_Invinc(a0)
+@NotInvincible:
+
+;---------------------------------------------------------------------------;
+; Set default explosion coordinates (no explosion)                          ;
+; EXCEPTION: if we have the heart power-up, the heart bullet uses this very ;
+; same feature to hurt enemies, so don't interfere with that!               ;
+;---------------------------------------------------------------------------;
+
+    cmp.b   #PlayerPow_Love, Player_Power(a0)
+    beq.s   @DontTouchExplosion
+
+    move.w  #-$8000, d0
+    move.w  d0, Player_ExplLeft(a0)
+    move.w  d0, Player_ExplRight(a0)
+    move.w  d0, Player_ExplTop(a0)
+    move.w  d0, Player_ExplBottom(a0)
+@DontTouchExplosion:
+
+;---------------;
+; Transforming? ;
+;---------------;
+
+    move.b  Player_PowerDelay(a0), d0
+    beq.s   @NotTransforming
+
+;-------------------------;
+; Get address of palettes ;
+;-------------------------;
+
+    lea     (Pal_StephanyPowers), a1
+    lea     (RAM_PalBuffer+$04), a2
+
+;-------------------------------------;
+; Determine colors to use (blinking!) ;
+;-------------------------------------;
+
+    moveq   #0, d1
+    move.b  Player_Power(a0), d1
+    btst.b  #2, (RAM_GlobalAnim+1)
+    bne.s   @Not2ndColor
+    move.b  Player_OldPower(a0), d1
+@Not2ndColor:
+
+;---------------------------------------------------------------------------;
+; Decrease delay and ensure that the final colors are used if delay is over ;
+;---------------------------------------------------------------------------;
+
+    subq.b  #1, d0
+    bne.s   @NotFinalColors
+    move.b  Player_Power(a0), d1
+@NotFinalColors:
+
+;--------------------;
+; Load colors to use ;
+;--------------------;
+
+    add.w   d1, d1
+    add.w   d1, d1
+    move.l  (a1,d1.w), (a2)
+    FixedDMACRAM RAM_PalBuffer+$04, $04, 2*2
+
+;-----------------------------------------;
+; Update delay and don't do anything else ;
+;-----------------------------------------;
+
+    move.b  d0, Player_PowerDelay(a0)
+    move.l  #0, Player_Speed(a0)
+    move.l  #0, Player_Gravity(a0)
+    move.w  Player_Status(a0), d0
+    and.w   #%0001, d0
+    move.w  d0, Player_Status(a0)
+    rts
+@NotTransforming:
+
+;---------------------------------------------------------;
+; Move some common stuff into registers for faster access ;
+;---------------------------------------------------------;
+
+    move.l  Player_X(a0), d7
+    move.l  Player_Y(a0), d6
+    move.l  Player_Speed(a0), d5
+    move.l  Player_Gravity(a0), d4
+    move.w  Player_Status(a0), d3
+
+;-----------------------------------------;
+; Reset combo score if touching the floor ;
+;-----------------------------------------;
+
+    btst.l  #PlayerStat_Ground, d3
+    beq.s   @NoComboReset
+    move.l  #Score_Enemy, (RAM_ComboScore)
+@NoComboReset:
+
+;------------;
+; Exploding? ;
+;------------;
+
+    move.b  Player_Exploding(a0), d0
+    beq     @NotExploding
+
+    subq.b  #1, d0
+    move.b  d0, Player_Exploding(a0)
+    bne     @DetermineAction
+
+    move.l  #7<<16, (RAM_FadeStage)
+    move.l  (RAM_GlobalAnimSpd), (RAM_FadeSpeed)
+    bset.b  #GameStat_WhiteFade, (RAM_GameStatus+1)
+
+    move.b  #SFX_BigExplosion, (RAM_SFXToPlay)
+
+    move.w  Player_X(a0), d0
+    sub.w   #128, d0
+    move.w  d0, Player_ExplLeft(a0)
+    add.w   #255, d0
+    move.w  d0, Player_ExplRight(a0)
+
+    move.w  Player_Y(a0), d0
+    sub.w   #128, d0
+    move.w  d0, Player_ExplTop(a0)
+    add.w   #255, d0
+    move.w  d0, Player_ExplBottom(a0)
+
+    move.b  Player_FlashLen(a0), Player_Flash(a0)
+    move.b  #PlayerPow_None, Player_Power(a0)
+    move.l  #PalVal_StephanyNoPower, (RAM_PalBuffer+$04)
+
+    bra     @DetermineAction
+@NotExploding:
+
+;-------------------------------------------;
+; Stop using the electric shield by default ;
+;-------------------------------------------;
+
+    bclr.l  #PlayerStat_Shock, d3
+
+;---------;
+; Frozen? ;
+;---------;
+
+@CheckFrozen:
+    move.b  Player_Frozen(a0), d0
+    beq.s   @NotFrozen
+    subq.b  #1, d0
+    move.b  d0, Player_Frozen(a0)
+    move.l  Player_X(a0), d0
+    add.l   Player_RideSpeed(a0), d0
+    move.l  d0, Player_X(a0)
+    move.l  Player_Y(a0), d0
+    add.l   Player_RideGrav(a0), d0
+    move.l  d0, Player_Y(a0)
+    move.b  Player_CurrAct(a0), d0
+    bra     @ActionSet
+@NotFrozen:
+
+;-----------------------------;
+; Check if player is swimming ;
+;-----------------------------;
+
+    move.l  d7, d0
+    move.l  d6, d1
+    swap    d0
+    swap    d1
+    sub.w   #15, d1
+    bge.s   @NoSwimVFix
+    moveq   #0, d1
+@NoSwimVFix:
+    and.w   #$FFE0, d0
+    asr.w   #2, d0
+    asr.w   #5, d1
+    add.w   d1, d0
+    move.l  (RAM_CollAddr), a6
+    move.b  (a6,d0.w), d0
+
+    bclr.l  #PlayerStat_Swim, d3
+    btst.l  #3, d0
+    beq     @NotSwimming
+    bset.l  #PlayerStat_Swim, d3
+
+;---------------------------------------------------------------------;
+; Hurt hack (prevents player from insta-dying in Pixelated World when ;
+; getting hurt because she never hits the floor)                      ;
+;---------------------------------------------------------------------;
+
+    cmp.l   #$10000, d4
+    blt.s   @NoHurtHack
+    bclr.l  #PlayerStat_Hurt, d3
+@NoHurtHack:
+
+;-------------------;
+; Swimming in lava? ;
+;-------------------;
+
+    move.b  (RAM_Level), d0
+    cmp.b   #Level_Waterlava, d0
+    bne.s   @DoneSwimming
+    btst.b  #IngameStat_World, (RAM_IngameStatus+1)
+    bne.s   @DoneSwimming
+
+    btst.l  #PlayerStat_Hurt, d3
+    bne.s   @NoLavaFallHack
+    tst.l   d4
+    ble.s   @NoLavaFallHack
+    move.l  Player_AccelGrav(a0), d0
+    sub.l   d0, d4
+    sub.l   d0, d4
+@NoLavaFallHack:
+    asr.l   #1, d5
+
+    move.w  d3, Player_Status(a0)
+    movem.l d6-d7/a6, -(sp)
+    bsr     HurtPlayer
+    move.w  d6, d0
+    movem.l (sp)+, d6-d7/a6
+    tst.w   d0
+    ble.s   @DoneSwimming
+    move.w  Player_Status(a0), d3
+    move.l  Player_Speed(a0), d5
+    move.l  Player_Gravity(a0), d4
+@DoneSwimming:
+@NotSwimming:
+
+;------------------;
+; Get joypad input ;
+;------------------;
+
+    move.w  (RAM_JoypadPress), d0
+    btst.l  #PlayerStat_Hurt, d3
+    beq.s   @AllowInput
+    moveq   #0, d0
+@AllowInput:
+
+;--------------------------------------------;
+; Lame attempt at variable jump height       ;
+; I wonder if people will be OK with this... ;
+;--------------------------------------------;
+
+    tst.l   d4
+    bge.s   @NoJumpLose
+    btst.l  #PlayerStat_Hurt, d3
+    bne.s   @NoJumpLose
+    move.w  d0, d1
+    and.w   #$70, d1
+    bne.s   @NoJumpLose
+    add.l   Player_AccelGrav(a0), d4
+@NoJumpLose:
+
+;--------------;
+; Moving left? ;
+;--------------;
+
+    btst.l  #Joypad_Left, d0
+    beq.s   @NotLeft
+    btst.l  #Joypad_Right, d0
+    bne.s   @NotLeft
+
+    bset.l  #PlayerStat_Dir, d3
+    sub.l   Player_AccelSpd(a0), d5
+    bra.s   @NoFriction
+@NotLeft:
+
+;---------------;
+; Moving right? ;
+;---------------;
+
+    btst.l  #Joypad_Right, d0
+    beq.s   @NotRight
+    btst.l  #Joypad_Left, d0
+    bne.s   @NotRight
+
+    bclr.l  #PlayerStat_Dir, d3
+    add.l   Player_AccelSpd(a0), d5
+    bra.s   @NoFriction
+@NotRight:
+
+;-------------------------------;
+; Not moving, so apply friction ;
+;-------------------------------;
+
+    btst.l  #PlayerStat_Hurt, d3
+    bne.s   @NoFriction
+
+    move.l  Player_AccelSpd(a0), d2
+    tst.l   d5
+    beq.s   @NoFriction
+    blt.s   @FrictionLeft
+
+    sub.l   d2, d5
+    bge.s   @FrictionEnd
+    moveq   #0, d5
+    bra.s   @FrictionEnd
+@FrictionLeft:
+
+    add.l   d2, d5
+    ble.s   @FrictionEnd
+    moveq   #0, d5
+@FrictionEnd:
+@NoFriction:
+
+;----------------------;
+; Don't move too fast! ;
+;----------------------;
+
+    move.l  Player_MaxSpeed(a0), d2
+    cmp.l   d2, d5
+    ble.s   @SpeedNoClampRight
+    move.l  d2, d5
+    bra.s   @SpeedClampEnd
+@SpeedNoClampRight:
+    neg.l   d2
+    cmp.l   d2, d5
+    bge.s   @SpeedClampEnd
+    move.l  d2, d5
+@SpeedClampEnd:
+
+;------------;
+; Crouching? ;
+;------------;
+
+    bclr.l  #PlayerStat_Crouch, d3
+    tst.l   d5
+    bne.s   @NotCrouching
+    btst.l  #Joypad_Down, d0
+    beq.s   @NotCrouching
+    bset.l  #PlayerStat_Crouch, d3
+@NotCrouching:
+
+;--------------------------------------;
+; Riding causes forced on-ground state ;
+;--------------------------------------;
+
+    btst.l  #PlayerStat_Ride, d3
+    beq.s   @NotRiding
+    bset.l  #PlayerStat_Ground, d3
+@NotRiding:
+
+;---------------------------------------------------------------------;
+; Electric shield requires holding down the jump button, not pressing ;
+; So, do that check here instead                                      ;
+;---------------------------------------------------------------------;
+
+    btst.l  #PlayerStat_Crouch, d3
+    beq.s   @NoShock
+    btst.l  #PlayerStat_Ground, d3
+    beq.s   @NoShock
+
+    move.w  d0, d1
+    and.w   #$70, d1
+    beq.s   @NoShock
+    move.b  Player_Power(a0), d1
+    cmp.b   #PlayerPow_Ray, d1
+    bne.s   @NoShock
+    bset.l  #PlayerStat_Shock, d3
+
+    ;btst.b  #GameStat_Blink, (RAM_GameStatus+1)
+    ;bne     @JumpEnd
+    
+    move.w  Player_ShockTime(a0), d2
+    beq.s   @DoShockSound
+    subq.w  #1, d2
+    move.w  d2, Player_ShockTime(a0)
+    bra     @JumpEnd
+    
+@DoShockSound:
+    move.b  #SFX_ShockShield, (RAM_SFXToPlay)
+    move.w  Player_ShockLen(a0), Player_ShockTime(a0)
+    bra     @JumpEnd
+
+;---------------------------------------;
+; Reset shock SFX timer if not shocking ;
+;---------------------------------------;
+
+@NoShock:
+    move.w  #0, Player_ShockTime(a0)
+
+;-------;
+; Jump? ;
+;-------;
+
+    and.w   #$7000, d0
+    beq     @JumpEnd
+
+    move.b  Player_Power(a0), d0
+
+    btst.l  #PlayerStat_Swim, d3
+    bne.s   @DoJump
+    btst.l  #PlayerStat_DJump, d3
+    bne     @JumpEnd
+    cmp.b   #PlayerPow_DJump, d0
+    beq.s   @DoJump
+    btst.l  #PlayerStat_Ground, d3
+    beq     @JumpEnd
+    btst.l  #PlayerStat_Crouch, d3
+    beq.s   @DoJump
+
+    cmp.b   #PlayerPow_Bomb, d0
+    beq.s   @DoExplode
+    cmp.b   #PlayerPow_Love, d0
+    beq.s   @DoKiss
+    bra     @JumpEnd
+
+@DoJump:
+    move.l  Player_JumpForce(a0), d4
+    move.b  #SFX_Jump, (RAM_SFXToPlay)
+    btst.l  #PlayerStat_Swim, d3
+    beq.s   @NoSwimSFX
+    move.b  #SFX_Swim, (RAM_SFXToPlay)
+@NoSwimSFX:
+    btst.l  #PlayerStat_Ground, d3
+    bne     @JumpEnd
+    bset.l  #PlayerStat_DJump, d3
+    bra     @JumpEnd
+
+;----------;
+; Explode? ;
+;----------;
+
+@DoExplode:
+    move.b  Player_ExplTime(a0), Player_Exploding(a0)
+    bra     @JumpEnd
+
+;-------;
+; Kiss? ;
+;-------;
+
+@DoKiss:
+    move.b  Player_KissTime(a0), Player_Frozen(a0)
+    move.b  #PlayerAct_Kiss, Player_CurrAct(a0)
+
+    move.l  (RAM_LastObject), a1
+    move.w  #Obj_HeartBullet, Object_Type(a1)
+    move.w  d3, d0
+    and.w   #1<<PlayerStat_Dir, d3
+    move.w  d3, Object_MapPos(a1)
+    move.l  d7, d0
+    sub.l   #4<<16, d0
+    move.l  d0, Object_X(a1)
+    move.l  d6, d0
+    sub.l   #13<<16, d0
+    move.l  d0, Object_Y(a1)
+    move.l  #18<<16, Object_Misc(a1)
+    adda.w  #Object_Size, a1
+    move.l  a1, (RAM_LastObject)
+
+    bra     @CheckFrozen
+
+;--------------------;
+; Run physics engine ;
+;--------------------;
+
+@JumpEnd:
+    add.l   Player_AccelGrav(a0), d4
+    btst.l  #PlayerStat_Swim, d3
+    beq.s   @NoFallCap
+    cmp.l   #2<<16, d4
+    blt.s   @NoFallCap
+    move.l  #2<<16, d4
+@NoFallCap:
+
+    bsr     EnginePlayer
+    bclr.l  #PlayerStat_Ride, d3
+    move.l  #0, Player_RideSpeed(a0)
+    move.l  #0, Player_RideGrav(a0)
+
+;------------------------------------------;
+; Stop hurt status when touching the floor ;
+;------------------------------------------;
+
+    btst.l  #PlayerStat_Ground, d3
+    beq.s   @DontStopHurt
+    bclr.l  #PlayerStat_Hurt, d3
+    bclr.l  #PlayerStat_DJump, d3
+@DontStopHurt:
+
+;---------------------------------------------------;
+; Play splash SFX when getting into or out of water ;
+;---------------------------------------------------;
+
+    move.w  d3, d0
+    lsr.w   #1, d0
+    eor.w   d3, d0
+    btst.l  #PlayerStat_Swim, d0
+    beq.s   @NoSplashSFX
+    move.b  #SFX_Splash, (RAM_SFXToPlay)
+    bchg.l  #PlayerStat_WasSwim, d3
+@NoSplashSFX:
+
+;---------------------------;
+; Update player data in RAM ;
+;---------------------------;
+
+    move.l  d7, Player_X(a0)
+    move.l  d6, Player_Y(a0)
+    move.l  d5, Player_Speed(a0)
+    move.l  d4, Player_Gravity(a0)
+    move.w  d3, Player_Status(a0)
+
+;--------------------------;
+; Wear off invulnerability ;
+;--------------------------;
+
+    btst.l  #PlayerStat_Hurt, d3
+    bne.s   @FlashAlreadyOff
+    move.b  Player_Flash(a0), d0
+    beq.s   @FlashAlreadyOff
+    subq.b  #1, d0
+    move.b  d0, Player_Flash(a0)
+@FlashAlreadyOff:
+
+;--------------------------;
+; Determine current action ;
+;--------------------------;
+
+@DetermineAction:
+
+    btst.l  #PlayerStat_Shock, d3
+    beq.s   @ActionNotShock
+    move.b  #PlayerAct_Shock, d0
+    bra     @ActionSet
+@ActionNotShock:
+
+    tst.b   Player_Exploding(a0)
+    beq.s   @ActionNotExplode
+    move.b  #PlayerAct_Explode, d0
+    bra.s   @ActionSet
+@ActionNotExplode:
+
+    btst.l  #PlayerStat_Hurt, d3
+    beq.s   @ActionNotHurt
+    move.b  #PlayerAct_Hurt, d0
+    bra.s   @ActionSet
+@ActionNotHurt:
+
+    btst.l  #PlayerStat_Ground, d3
+    bne.s   @ActionNotInAir
+    move.b  #PlayerAct_Fall, d0
+    tst.l   d4
+    bge.s   @ActionSet
+    move.b  #PlayerAct_Jump, d0
+    bra.s   @ActionSet
+@ActionNotInAir:
+
+    cmp.l   #$1000, d5
+    bge.s   @ActionWalk
+    cmp.l   #-$1000, d5
+    bgt.s   @ActionIdle
+@ActionWalk:
+    move.b  #PlayerAct_WalkSlow, d0
+    btst.l  #PlayerStat_Swim, d3
+    bne.s   @ActionSet
+    move.b  #PlayerAct_Walk, d0
+    bra.s   @ActionSet
+
+@ActionIdle:
+    moveq   #PlayerAct_Idle, d0
+    move.b  Player_Power(a0), d7
+    cmp.b   #PlayerPow_Love, d7
+    bne.s   @NoLoveIdle
+    addq.b  #2, d0
+@NoLoveIdle:
+    btst.l  #PlayerStat_Crouch, d3
+    beq.s   @ActionSet
+
+    move.b  #PlayerAct_Crouch2, d0
+    move.b  Player_CurrAct(a0), d1
+    cmp.b   #PlayerAct_Crouch2, d1
+    beq.s   @ActionSet
+    cmp.b   #PlayerAct_Kiss, d1
+    beq.s   @ActionSet
+    cmp.b   #PlayerAct_Shock, d1
+    beq.s   @ActionSet
+
+    moveq   #PlayerAct_Crouch, d0
+
+@ActionSet:
+    move.b  d0, Player_CurrAct(a0)
+
+;----------------------------------------;
+; Check if we're going into a new action ;
+;----------------------------------------;
+
+    move.b  Player_PrevAct(a0), d1
+    cmp.b   d1, d0
+    beq.s   @NoNewAction
+    move.b  d0, Player_PrevAct(a0)
+
+;---------------------------------------------;
+; Set animation used for new action if needed ;
+;---------------------------------------------;
+
+    andi.w  #$FF, d0
+    lea     (PlayerAnimList), a1
+    move.w  (a1,d0.w), d0
+    move.w  d0, Player_AnimNext(a0)
+    move.w  #1, Player_AnimTime(a0)
+@NoNewAction:
+
+;-------------------------------------------------;
+; Check if we need to update the sprite animation ;
+;-------------------------------------------------;
+
+    move.w  Player_AnimTime(a0), d0
+    subq.w  #1, d0
+    bne.s   @NoFrameUpdate
+
+;--------------------------------;
+; Go to the next frame if needed ;
+;--------------------------------;
+
+    move.w  Player_AnimNext(a0), d1
+    lea     (PlayerAnim), a1
+    lea     (a1,d1.w), a1
+    move.w  6(a1), d1
+
+    moveq   #2, d2
+    move.w  ($C00004), d3
+    btst.l  #0, d3
+    beq.s   @NotPALAnim
+    moveq   #4, d2
+@NotPALAnim:
+    move.w  (a1,d2.w), d0
+
+;----------------------;
+; Upload new tile data ;
+;----------------------;
+
+    moveq   #0, d7
+    move.w  (a1), d7
+    lsl.l   #8, d7
+    add.l   d7, d7
+    add.l   #Gfx_Player_Start, d7
+    VarSrcDMA VRAM_Player*$20, $20*16
+
+;-----------------------;
+; Update animation data ;
+;-----------------------;
+
+    move.w  d1, Player_AnimNext(a0)
+@NoFrameUpdate:
+    move.w  d0, Player_AnimTime(a0)
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------

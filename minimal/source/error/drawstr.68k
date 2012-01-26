@@ -1,0 +1,115 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;---------------------------------------------;
+; ErrorDrawString                             ;
+;                                             ;
+; Draws a string in the error screen          ;
+;---------------------------------------------;
+; INPUT                                       ;
+;   d0.w ... X coordinate (in tiles)          ;
+;   d1.w ... Y coordinate (in tiles)          ;
+;   d2.w ... Special flags (used for palette) ;
+;   a2.l ... Pointer to text to write         ;
+;---------------------------------------------;
+; BREAKS: d0, d1, a2, a3                      ;
+;---------------------------------------------;
+
+ErrorDrawString:
+
+;--------------------------;
+; Determine where to write ;
+;--------------------------;
+
+    lsl.w   #6, d1
+    add.w   d1, d0
+    add.w   d0, d0
+    and.l   #$FFFF, d0
+    swap    d0
+    or.l    #$60000003, d0
+    move.l  d0, (a0)
+
+;------------------------------;
+; Get address of look-up table ;
+;------------------------------;
+
+    lea     (@Table), a3
+
+;-----------------------------;
+; Loop through all characters ;
+;-----------------------------;
+
+@Loop:
+
+;-----------------;
+; Fetch character ;
+;-----------------;
+
+    moveq   #0, d0
+    move.b  (a2)+, d0
+
+;----------------;
+; End of string? ;
+;----------------;
+
+    beq.s   @End
+
+;----------------------------;
+; Put character into tilemap ;
+;----------------------------;
+
+    sub.w   #$20, d0
+    add.w   d0, d0
+    move.w  (a3,d0.w), d0
+    or.w    d2, d0
+    move.w  d0, (a1)
+
+;-----------------------;
+; Go for next character ;
+;-----------------------;
+
+    bra.s   @Loop
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+@End:
+    rts
+
+;----------------------------------------------------------------------------
+
+;-----------------------------------------------------;
+; Look-up table to convert from ASCII to the tile IDs ;
+;-----------------------------------------------------;
+
+@Table:
+    dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000     ; $20..$27
+    dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000     ; $28..$2F
+    dc.w    $0001,$0002,$0003,$0004,$0005,$0006,$0007,$0008     ; $30..$37
+    dc.w    $0009,$000A,$0000,$0000,$0000,$0000,$0000,$0000     ; $38..$3F
+    dc.w    $0000,$000B,$000C,$000D,$000E,$000F,$0010,$0011     ; $40..$47
+    dc.w    $0012,$0013,$0014,$0015,$0016,$0017,$0018,$0019     ; $48..$4F
+    dc.w    $001A,$001B,$001C,$001D,$001E,$001F,$0020,$0021     ; $50..$57
+    dc.w    $0022,$0023,$0000,$0000,$0000,$0000,$0000,$0000     ; $58..$5F
+
+;----------------------------------------------------------------------------

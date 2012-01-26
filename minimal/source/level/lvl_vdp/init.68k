@@ -1,0 +1,94 @@
+;----------------------------------------------------------------------------
+; Project MD
+; Copyright 2012 Javier Degirolmo
+;
+; This file is part of Project MD.
+;
+; Project MD is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; Project MD is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Project MD.  If not, see <http://www.gnu.org/licenses/>.
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------------------------------
+
+;----------------------------------------------------;
+; InitLevel_VDP                                      ;
+;                                                    ;
+; Initializes stuff specific to the VDP-themed level ;
+;----------------------------------------------------;
+; BREAKS: d6, d7, a5, a6                             ;
+;----------------------------------------------------;
+
+InitLevel_VDP:
+
+;------------------------------;
+; Load level-specific graphics ;
+;------------------------------;
+
+    FixedDMA Gfx_PixRobotWalk, VRAM_TrollWalk*$20, 16*$20
+    FixedDMA Gfx_PixRobotDead, VRAM_TrollDead*$20, 16*$20
+    FixedDMA Gfx_PixFlyRobotFly, VRAM_DblCircleFly*$20, $10*$20
+    FixedDMA Gfx_PixFlyRobotDead, VRAM_DblCircleDead*$20, $10*$20
+    FixedDMA Gfx_LevelVDP_Platform, VRAM_Platform*$20, 8*$20
+
+;------------------------------------------;
+; Draw a simple texture for the background ;
+;------------------------------------------;
+
+    movem.l d0-d1, -(sp)
+    move.l  #$60000003, ($C00004)
+    lea     ($C00000), a6
+    moveq   #8-1, d6
+@DrawBG:
+
+    move.l  #$60006001+((VRAM_Level<<16)|VRAM_Level), d0
+    move.l  #$60026003+((VRAM_Level<<16)|VRAM_Level), d1
+    moveq   #16-1, d7
+@DrawBGi1:
+    move.l  d0, (a6)
+    move.l  d1, (a6)
+    dbf     d7, @DrawBGi1
+
+    move.l  #$60046005+((VRAM_Level<<16)|VRAM_Level), d0
+    move.l  #$60066007+((VRAM_Level<<16)|VRAM_Level), d1
+    moveq   #16-1, d7
+@DrawBGi2:
+    move.l  d0, (a6)
+    move.l  d1, (a6)
+    dbf     d7, @DrawBGi2
+
+    move.l  #$60086009+((VRAM_Level<<16)|VRAM_Level), d0
+    move.l  #$600A600B+((VRAM_Level<<16)|VRAM_Level), d1
+    moveq   #16-1, d7
+@DrawBGi3:
+    move.l  d0, (a6)
+    move.l  d1, (a6)
+    dbf     d7, @DrawBGi3
+
+    move.l  #$600C600D+((VRAM_Level<<16)|VRAM_Level), d0
+    move.l  #$600E600F+((VRAM_Level<<16)|VRAM_Level), d1
+    moveq   #16-1, d7
+@DrawBGi4:
+    move.l  d0, (a6)
+    move.l  d1, (a6)
+    dbf     d7, @DrawBGi4
+
+    dbf     d6, @DrawBG
+    movem.l (sp)+, d0-d1
+
+;-------------------;
+; End of subroutine ;
+;-------------------;
+
+    rts
+
+;----------------------------------------------------------------------------
