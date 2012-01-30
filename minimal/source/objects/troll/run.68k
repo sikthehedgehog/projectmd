@@ -206,10 +206,11 @@ RunTroll:
     move.b  #SFX_Attack, (RAM_SFXToPlay)
 @NoSFXNeeded:
 
-;----------------------------------------------;
-; If in Frozen Memories, break apart in pieces ;
-; Same with the water world in Waterlava       ;
-;----------------------------------------------;
+;----------------------------------------------------;
+; Break apart in pieces                              ;
+; Rocky creatures break in rocks, not the normal way ;
+; Trolls don't get broken at all                     ;
+;----------------------------------------------------;
 
     move.b  (RAM_Level), d0
     cmp.b   #Level_Internet, d0
@@ -242,6 +243,9 @@ RunTroll:
     add.l   d2, d2
     add.l   d2, d2
     neg.l   d2
+    
+    btst.b  #3, Object_Misc(a0)
+    bne     @BreakRight
 
     move.w  #Obj_FallingPiece, Object_Type(a1)
     move.w  d3, Object_MapPos(a1)
@@ -272,6 +276,48 @@ RunTroll:
     subq.w  #4, d3
     bclr.l  #11, d3
     sub.l   #$10<<16, d0
+    move.w  #Obj_FallingPiece, Object_Type(a1)
+    move.w  d3, Object_MapPos(a1)
+    move.l  d0, Object_X(a1)
+    move.l  d1, Object_Y(a1)
+    move.l  #0, Object_Misc(a1)
+    adda.w  #Object_Size, a1
+
+    move.l  a1, (RAM_LastObject)
+    bra     DeleteObjectPermanent
+    
+@BreakRight:
+    bset.l  #11, d3
+    add.l   #$10<<16, d0
+    move.w  #Obj_FallingPiece, Object_Type(a1)
+    move.w  d3, Object_MapPos(a1)
+    move.l  d0, Object_X(a1)
+    move.l  d1, Object_Y(a1)
+    move.l  d2, Object_Misc(a1)
+    adda.w  #Object_Size, a1
+
+    addq.w  #4, d3
+    bclr.l  #11, d3
+    sub.l   #$10<<16, d0
+    move.w  #Obj_FallingPiece, Object_Type(a1)
+    move.w  d3, Object_MapPos(a1)
+    move.l  d0, Object_X(a1)
+    move.l  d1, Object_Y(a1)
+    move.l  d2, Object_Misc(a1)
+    adda.w  #Object_Size, a1
+
+    addq.w  #8, d3
+    add.l   #$10<<16, d1
+    move.w  #Obj_FallingPiece, Object_Type(a1)
+    move.w  d3, Object_MapPos(a1)
+    move.l  d0, Object_X(a1)
+    move.l  d1, Object_Y(a1)
+    move.l  #0, Object_Misc(a1)
+    adda.w  #Object_Size, a1
+
+    subq.w  #4, d3
+    bset.l  #11, d3
+    add.l   #$10<<16, d0
     move.w  #Obj_FallingPiece, Object_Type(a1)
     move.w  d3, Object_MapPos(a1)
     move.l  d0, Object_X(a1)
