@@ -114,4 +114,11 @@ BGMData_LevelSelect:
 BGMData_GameOver:
 	incbin	"sound/bgms/gameover.esf"
 
+;------------;
+; Bluescreen ;
+;------------;
+	
+BGMData_Bluescreen:
+	incbin	"sound/bgms/bsod.esf"
+
 ;----------------------------------------------------------------------------

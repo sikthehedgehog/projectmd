@@ -212,6 +212,15 @@ ErrorInt:
 
     move.w  #$8154, ($C00004)
 
+;----------------------------------------------------------------------;
+; Be an asshole and make Echo play a creepy sound in the background... ;
+;----------------------------------------------------------------------;
+
+    bsr     Echo_StopBGM
+    bsr     Echo_StopSFX
+    lea     (BGMData_Bluescreen), a0
+    bsr     Echo_PlayBGM
+
 ;------;
 ; Hang ;
 ;------;
